@@ -26,7 +26,6 @@ def update(commit):
 def test():
     try:
         repo = Repo(os.getcwd())
-        # print(type(repo.head.commit))
         inspect(repo)
         inspect(repo.head)
         inspect(repo.head.ref)
