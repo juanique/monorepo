@@ -1,11 +1,14 @@
 import os
 import shutil
 import logging
+import hashlib
+import json
 
 from git import Repo
 from rich import print
 from rich.tree import Tree
 
+CONFIGS_ROOT = os.path.expanduser('~/.config/gg')
 
 def get_branch_name(string):
     return string.split("\n")[0][0:20].lower().replace(" ", "_")
@@ -24,6 +27,9 @@ def traverse(commit, func, skip=False):
 
 
 class InitializationError(Exception):
+    pass
+
+class ConfigNotFoundError(Exception):
     pass
 
 
@@ -61,18 +67,33 @@ class GudCommit:
 
 
 class GitGud:
-    def __init__(self, repo: Repo, config={}, root=None):
+    def __init__(self, repo: Repo, root=None):
         self.repo = repo
-        self.config = config
         self.head = None
         self.commits = {}
         self.merge_conflict_state = None
         self.root = root or self.commit("Initial commit", all=False)
 
     @staticmethod
-    def forWorkingDir(working_dir):
+    def load_state_for_directory(directory):
+        (_, dirname) = os.path.split(directory)
+        hash = hashlib.sha1(bytes(directory)).hexdigest()
+        filename = f"{dirname}_{hash}"
+        config_file = os.path.join(CONFIGS_ROOT, filename)
+        if not os.path.exists(config_file):
+            raise ConfigNotFoundError(f"Not found {config_file}")
+
+        with open(config_file) as f;
+        return json.loads(f.read())
+
+
+
+    @staticmethod
+    def forWorkingDir(working_dir, repo_state=None):
         repo = Repo(working_dir)
         branch = repo.active_branch
+
+        repo_state = GitGud.load_state_for_directory(working_dir)
 
         up_to_date = True
         if branch.commit.hexsha != branch.tracking_branch().commit.hexsha:

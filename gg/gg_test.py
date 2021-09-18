@@ -65,12 +65,19 @@ class TestGitGudWithRemote(TestGitGud):
         append(self.remote_filename, "contents-from-remote")
         self.remote_gg.commit("Initial commit")
         self.repo = Repo.clone_from(self.remote_repo_path, self.local_repo_path)
-        self.gg = GitGud(self.repo)
+        self.gg = GitGud.forWorkingDir(self.local_repo_path)
 
     def test_clone(self):
         local_filename = os.path.join(self.local_repo_path, os.path.basename(self.remote_filename))
         self.assertEqual(["contents-from-remote\n"], get_file_contents(local_filename))
         self.gg.print_status()
+
+    def test_amend_remote_fails(self):
+        filename_1 = self.make_test_filename()
+        append(filename_1, "testing1")
+
+        # with self.assertRaises(Exception) as e:
+        self.gg.amend()
 
 
 class TestGitGudLocalOnly(TestGitGud):
