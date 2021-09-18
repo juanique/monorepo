@@ -1,7 +1,7 @@
 load("@pip_deps//:requirements.bzl", "requirement")
-load("@io_bazel_rules_docker//python:image.bzl", "py_image")
+load("@io_bazel_rules_docker//python3:image.bzl", "py3_image")
 
-py_image(
+py3_image(
     name = "greeter_server_docker",
     srcs = ["greeter_server.py"],
     main = "greeter_server.py",
