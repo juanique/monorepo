@@ -1,0 +1,5 @@
+build --bes_results_url=https://app.buildbuddy.io/invocation/
+build --bes_backend=grpcs://cloud.buildbuddy.io
+build --remote_header=x-buildbuddy-api-key=WIbWV8AieSxh4RlxUiRk
+build --build_metadata=REPO_URL=https://github.com/juanique/monorepo.git
+

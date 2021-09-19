@@ -72,3 +72,4 @@ Thumbs.db
 .bazelversion
 # User-specific .bazelrc
 user.bazelrc
+yarn.lock

@@ -8,7 +8,8 @@ from git import Repo
 from rich import print
 from rich.tree import Tree
 
-CONFIGS_ROOT = os.path.expanduser('~/.config/gg')
+CONFIGS_ROOT = os.path.expanduser("~/.config/gg")
+
 
 def get_branch_name(string):
     return string.split("\n")[0][0:20].lower().replace(" ", "_")
@@ -28,6 +29,7 @@ def traverse(commit, func, skip=False):
 
 class InitializationError(Exception):
     pass
+
 
 class ConfigNotFoundError(Exception):
     pass
@@ -83,10 +85,8 @@ class GitGud:
         if not os.path.exists(config_file):
             raise ConfigNotFoundError(f"Not found {config_file}")
 
-        with open(config_file) as f;
-        return json.loads(f.read())
-
-
+        with open(config_file) as f:
+            return json.loads(f.read())
 
     @staticmethod
     def forWorkingDir(working_dir, repo_state=None):
