@@ -27,7 +27,7 @@ py_grpc_library(
 go_proto_library(
     name = "helloworld_go_proto",
     compilers = ["@io_bazel_rules_go//proto:go_grpc"],
-    importpath = "example/helloworld/examples/grpc/protos",
+    importpath = "examples/grpc/protos",
     proto = ":helloworld_proto",
     visibility = ["//visibility:public"],
 )
@@ -35,6 +35,6 @@ go_proto_library(
 go_library(
     name = "protos",
     embed = [":helloworld_go_proto"],
-    importpath = "example/helloworld/examples/grpc/protos",
+    importpath = "examples/grpc/protos",
     visibility = ["//visibility:public"],
 )

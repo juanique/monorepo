@@ -16,6 +16,6 @@ go_binary(
 go_library(
     name = "go_lib",
     srcs = ["helloworld.go"],
-    importpath = "example/helloworld/examples/go",
+    importpath = "examples/go",
     visibility = ["//visibility:private"],
 )
