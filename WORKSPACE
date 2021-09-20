@@ -1,5 +1,17 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
+# protobufs
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
+
+http_archive(
+    name = "rules_python",
+    sha256 = "934c9ceb552e84577b0faf1e5a2f0450314985b4d8712b2b70717dc679fdc01b",
+    url = "https://github.com/bazelbuild/rules_python/releases/download/0.3.0/rules_python-0.3.0.tar.gz",
+)
+
+# pip dependencies
+load("@rules_python//python:pip.bzl", "pip_install")
+
 # Golang support
 http_archive(
     name = "io_bazel_rules_go",
@@ -20,7 +32,7 @@ http_archive(
 )
 
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
-load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
+load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
 
 go_rules_dependencies()
 
@@ -28,10 +40,26 @@ go_register_toolchains(go_version = "1.17")
 
 gazelle_dependencies()
 
-http_archive(
-    name = "rules_python",
-    sha256 = "934c9ceb552e84577b0faf1e5a2f0450314985b4d8712b2b70717dc679fdc01b",
-    url = "https://github.com/bazelbuild/rules_python/releases/download/0.3.0/rules_python-0.3.0.tar.gz",
+go_repository(
+    name = "org_golang_google_grpc",
+    build_file_proto_mode = "disable",
+    importpath = "google.golang.org/grpc",
+    sum = "h1:J0UbZOIrCAl+fpTOf8YLs4dJo8L/owV4LYVtAXQoPkw=",
+    version = "v1.22.0",
+)
+
+go_repository(
+    name = "org_golang_x_net",
+    importpath = "golang.org/x/net",
+    sum = "h1:oWX7TPOiFAMXLq8o0ikBYfCJVlRHBcsciT5bXOrH628=",
+    version = "v0.0.0-20190311183353-d8887717615a",
+)
+
+go_repository(
+    name = "org_golang_x_text",
+    importpath = "golang.org/x/text",
+    sum = "h1:g61tztE5qeGQ89tm6NTjjM9VPIm088od1l6aSorWRWg=",
+    version = "v0.3.0",
 )
 
 http_archive(
@@ -50,22 +78,6 @@ rules_proto_dependencies()
 
 rules_proto_toolchains()
 
-# protobufs
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
-
-git_repository(
-    name = "com_google_protobuf",
-    remote = "https://github.com/protocolbuffers/protobuf",
-    tag = "v3.10.0",
-)
-
-load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
-
-protobuf_deps()
-
-# Load non-bazel git dependencies
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
-
 new_git_repository(
     name = "rich",
     branch = "master",
@@ -78,9 +90,6 @@ py_library(
   """,
     remote = "https://github.com/willmcgugan/rich.git",
 )
-
-# pip dependencies
-load("@rules_python//python:pip.bzl", "pip_install")
 
 pip_install(
     name = "pip_deps",
@@ -143,3 +152,33 @@ load(
 )
 
 _py_image_repos()
+
+# mypy integration
+mypy_integration_version = "0.2.0"  # Latest @ 26th June 2021
+
+http_archive(
+    name = "mypy_integration",
+    sha256 = "621df076709dc72809add1f5fe187b213fee5f9b92e39eb33851ab13487bd67d",
+    strip_prefix = "bazel-mypy-integration-{version}".format(version = mypy_integration_version),
+    urls = [
+        "https://github.com/thundergolfer/bazel-mypy-integration/archive/refs/tags/{version}.tar.gz".format(version = mypy_integration_version),
+    ],
+)
+
+load(
+    "@mypy_integration//repositories:repositories.bzl",
+    mypy_integration_repositories = "repositories",
+)
+
+mypy_integration_repositories()
+
+load("@mypy_integration//:config.bzl", "mypy_configuration")
+
+# Optionally pass a MyPy config file, otherwise pass no argument.
+mypy_configuration("//workspace:mypy.ini")
+
+load("@mypy_integration//repositories:deps.bzl", mypy_integration_deps = "deps")
+
+mypy_integration_deps(
+    mypy_requirements_file = "//workspace:mypy_version.txt",
+)

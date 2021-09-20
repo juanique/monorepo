@@ -1,9 +1,13 @@
 load("@pip_deps//:requirements.bzl", "requirement")
 load("@subpar//:subpar.bzl", "par_binary")
+load("@mypy_integration//:mypy.bzl", "mypy_test")
 
 py_library(
     name = "gg",
-    srcs = ["gg.py"],
+    srcs = [
+        "__init__.py",
+        "gg.py",
+    ],
     deps = [
         requirement("rich"),
         requirement("GitPython"),
@@ -22,7 +26,6 @@ par_binary(
     ],
 )
 
-
 py_test(
     name = "gg_test",
     srcs = ["gg_test.py"],
@@ -37,6 +40,17 @@ py_binary(
     srcs = ["gg_example.py"],
     deps = [
         ":gg",
+        requirement("GitPython"),
+    ],
+)
+
+mypy_test(
+    name = "mypy",
+    deps = [
+        ":gg",
+        ":gg_cli",
+        ":gg_example",
+        ":gg_test",
         requirement("GitPython"),
     ],
 )
