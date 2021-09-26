@@ -17,6 +17,4 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build and Test
-      run: bazelisk test //... --build_metadata=ROLE=CI --bes_backend=grpcs://cloud.buildbuddy.io --bes_results_url=https://app.buildbuddy.io/invocation/
-      env:
-        USER: "ci_github_${{ github.event_name }}"
+      run: USER="ci_github_${{ github.event_name }}" bazelisk test //... --build_metadata=ROLE=CI --bes_backend=grpcs://cloud.buildbuddy.io --bes_results_url=https://app.buildbuddy.io/invocation/
