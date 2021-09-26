@@ -19,4 +19,4 @@ jobs:
     - name: Build and Test
       run: bazelisk test //... --build_metadata=ROLE=CI --bes_backend=grpcs://cloud.buildbuddy.io --bes_results_url=https://app.buildbuddy.io/invocation/
       env:
-        USER: "GitHub Action CI - ${{ github.event_name }}"
+        USER: "ci_github_${{ github.event_name }}"
