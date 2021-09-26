@@ -1,0 +1,20 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  ci-job:
+    runs-on: ubuntu-latest
+    container:
+      image: juanzolotoochin/monorepo-ci:latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build and Test
+      run: bazelisk test //... --build_metadata=ROLE=CI --bes_backend=grpcs://cloud.buildbuddy.io --bes_results_url=https://app.buildbuddy.io/invocation/
