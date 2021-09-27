@@ -24,5 +24,15 @@ jobs:
       working-directory: /workdir/monorepo
     - name: Build and Test
       working-directory: /workdir/monorepo
-      run: bazelisk test //... --build_metadata=ROLE=CI --bes_backend=grpcs://cloud.buildbuddy.io --bes_results_url=https://app.buildbuddy.io/invocation/ --build_metadata=USER=ci_github_${{ github.event_name }} --disk_cache=/workdir/monorepo/bazel-cache
+      run: >
+        bazelisk
+        --output_base=/workdir/bazel-output-base
+        --install_base=/workdir/bazel-install-base
+        test //...
+        --build_metadata=ROLE=CI
+        --bes_backend=grpcs://cloud.buildbuddy.io
+        --bes_results_url=https://app.buildbuddy.io/invocation/
+        --build_metadata=USER=ci_github_${{ github.event_name }}
+        --disk_cache=/workdir/bazel-cache
+        --repository_cache=/workdir/bazel-repository-cache
 
