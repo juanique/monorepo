@@ -15,7 +15,6 @@ jobs:
       image: juanzolotoochin/monorepo-ci:latest
 
     steps:
-    # - uses: actions/checkout@v2
     - name: Checkout
       working-directory: /workdir/monorepo
       run: git pull origin ${{ github.head_ref}}
