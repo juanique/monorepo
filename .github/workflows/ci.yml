@@ -17,7 +17,7 @@ jobs:
     steps:
     # - uses: actions/checkout@v2
     - name: Checkout
-      working-directory: /workdir
+      working-directory: /workdir/monorepo
       run: git checkout ${{ github.head_ref}}
     - name: Build and Test
       working-directory: /workdir/monorepo
