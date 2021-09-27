@@ -15,6 +15,10 @@ jobs:
       image: juanzolotoochin/monorepo-ci:latest
 
     steps:
-    - uses: actions/checkout@v2
+    # - uses: actions/checkout@v2
+    - name: Checkout
+      working-directory: /workdir
+      run: git checkout ${{ github.head_ref}}
     - name: Build and Test
-      run: USER="ci_github_${{ github.event_name }}" bazelisk test //... --build_metadata=ROLE=CI --bes_backend=grpcs://cloud.buildbuddy.io --bes_results_url=https://app.buildbuddy.io/invocation/
+      working-directory: /workdir/monorepo
+      run: USER=bazelisk test //... --build_metadata=ROLE=CI --bes_backend=grpcs://cloud.buildbuddy.io --bes_results_url=https://app.buildbuddy.io/invocation/ --build_metadata=USER=ci_github_${{ github.event_name }}

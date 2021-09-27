@@ -6,3 +6,8 @@ RUN apt-get update && apt-get install -y build-essential python3-distutils pytho
 # Pre-install bazel 4.2.1 to avoid bazelisk downloading & installing bazel on every
 # CI run, at least for CI runs on the BuildBuddy repo itself.
 RUN bazelisk version
+
+WORKDIR /workdir
+run git clone https://github.com/juanique/monorepo.git
+WORKDIR /workdir/monorepo
+RUN bazelisk build ...
