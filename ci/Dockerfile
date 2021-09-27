@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y build-essential python3-distutils pytho
 RUN bazelisk version
 
 WORKDIR /workdir
-run git clone https://github.com/juanique/monorepo.git
+RUN git clone https://github.com/juanique/monorepo.git
 WORKDIR /workdir/monorepo
-RUN bazelisk build ...
+RUN bazelisk clean
+RUN bazelisk build ... --disk_cache=./bazel-cache

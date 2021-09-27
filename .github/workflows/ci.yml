@@ -21,5 +21,5 @@ jobs:
       run: git pull origin ${{ github.head_ref}}
     - name: Build and Test
       working-directory: /workdir/monorepo
-      run: bazelisk test //... --build_metadata=ROLE=CI --bes_backend=grpcs://cloud.buildbuddy.io --bes_results_url=https://app.buildbuddy.io/invocation/ --build_metadata=USER=ci_github_${{ github.event_name }}
+      run: bazelisk test //... --build_metadata=ROLE=CI --bes_backend=grpcs://cloud.buildbuddy.io --bes_results_url=https://app.buildbuddy.io/invocation/ --build_metadata=USER=ci_github_${{ github.event_name }} --disk_cache=/workdir/bazel-cache
 
