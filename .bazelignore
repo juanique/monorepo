@@ -5,3 +5,4 @@ bazel-gg
 bazel-monorepo
 bazel-out
 bazel-testlogs
+bazel-cache
