@@ -30,6 +30,7 @@ jobs:
       working-directory: /workdir/monorepo
       run: >
         bazelisk
+        --output_user_root=/workdir/bazel-output-user-root
         --output_base=/workdir/bazel-output-base
         --install_base=/workdir/bazel-install-base
         test //...
