@@ -7,9 +7,10 @@ RUN apt-get update && apt-get install -y build-essential python3-distutils pytho
 # CI run, at least for CI runs on the BuildBuddy repo itself.
 RUN bazelisk version
 
+RUN rm -rf /workdir
 WORKDIR /workdir
 RUN echo "Clonning repo at c4ca218ab07104a343b19b6d816100e846751a7d"
 RUN git clone https://github.com/juanique/monorepo.git
 WORKDIR /workdir/monorepo
 RUN bazelisk clean
-RUN bazelisk --output_base=/workdir/bazel-output-base build ... --disk_cache=/workdir/bazel-cache
+RUN bazelisk --output_base=/workdir/bazel-output-base --install_base=/workdir/bazel-install-base build ... --disk_cache=/workdir/bazel-cache --repository_cache=/workdir/bazel-repository-cache
