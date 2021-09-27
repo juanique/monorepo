@@ -12,4 +12,4 @@ RUN echo "Clonning repo at c4ca218ab07104a343b19b6d816100e846751a7d"
 RUN git clone https://github.com/juanique/monorepo.git
 WORKDIR /workdir/monorepo
 RUN bazelisk clean
-RUN bazelisk build ... --disk_cache=./bazel-cache
+RUN bazelisk --output_base=/workdir/bazel-output-base build ... --disk_cache=/workdir/bazel-cache
