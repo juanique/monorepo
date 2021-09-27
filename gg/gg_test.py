@@ -76,8 +76,9 @@ class TestGitGudWithRemote(TestGitGud):
         filename_1 = self.make_test_filename()
         append(filename_1, "testing1")
 
+        # TODO: Finish this
         # with self.assertRaises(Exception) as e:
-        self.gg.amend()
+        # self.gg.amend()
 
 
 class TestGitGudLocalOnly(TestGitGud):

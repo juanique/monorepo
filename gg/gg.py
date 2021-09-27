@@ -79,7 +79,7 @@ class GitGud:
     @staticmethod
     def load_state_for_directory(directory):
         (_, dirname) = os.path.split(directory)
-        hash = hashlib.sha1(bytes(directory)).hexdigest()
+        hash = hashlib.sha1(bytes(directory, encoding="utf8")).hexdigest()
         filename = f"{dirname}_{hash}"
         config_file = os.path.join(CONFIGS_ROOT, filename)
         if not os.path.exists(config_file):
@@ -93,7 +93,7 @@ class GitGud:
         repo = Repo(working_dir)
         branch = repo.active_branch
 
-        repo_state = GitGud.load_state_for_directory(working_dir)
+        # repo_state = GitGud.load_state_for_directory(working_dir)
 
         up_to_date = True
         if branch.commit.hexsha != branch.tracking_branch().commit.hexsha:

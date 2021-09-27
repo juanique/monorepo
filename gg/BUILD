@@ -1,6 +1,5 @@
 load("@pip_deps//:requirements.bzl", "requirement")
 load("@subpar//:subpar.bzl", "par_binary")
-load("@mypy_integration//:mypy.bzl", "mypy_test")
 
 py_library(
     name = "gg",
@@ -16,7 +15,10 @@ py_library(
 
 par_binary(
     name = "gg_cli",
-    srcs = ["gg_cli.py"],
+    srcs = [
+        "__init__.py",
+        "gg_cli.py",
+    ],
     imports = [""],
     deps = [
         ":gg",
@@ -44,13 +46,14 @@ py_binary(
     ],
 )
 
-mypy_test(
-    name = "mypy",
-    deps = [
-        ":gg",
-        ":gg_cli",
-        ":gg_example",
-        ":gg_test",
-        requirement("GitPython"),
-    ],
-)
+# TODO: enable pytest once we can make it work properly.
+# mypy_test(
+# name = "mypy",
+# deps = [
+# ":gg",
+# ":gg_cli",
+# ":gg_example",
+# ":gg_test",
+# requirement("GitPython"),
+# ],
+# )
