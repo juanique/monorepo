@@ -2,7 +2,7 @@ import os
 import shutil
 import unittest
 from git import Repo
-from gg import GitGud, GudCommit
+from salsa.gg.gg import GitGud, GudCommit
 
 REPO_DIR_NAME = "repo_dir"
 
