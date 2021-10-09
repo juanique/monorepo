@@ -1,31 +1,15 @@
-from typing import Dict, Optional
+from typing import Dict, List, Optional, Callable, Any
 
 import os
 import logging
 import hashlib
 import json
 
-from git import Repo
+from git import Repo, GitCommandError
 from rich import print
 from rich.tree import Tree
 
 CONFIGS_ROOT = os.path.expanduser("~/.config/gg")
-
-
-def get_branch_name(string):
-    return string.split("\n")[0][0:20].lower().replace(" ", "_")
-
-
-def get_oneliner(string):
-    return string.split("\n")[0][0:40]
-
-
-def traverse(commit, func, skip=False):
-    if not skip:
-        func(commit)
-
-    for c in commit.children:
-        traverse(c, func)
 
 
 class InitializationError(Exception):
@@ -36,15 +20,17 @@ class ConfigNotFoundError(Exception):
     pass
 
 
-class MergeConflictState:
-    def __init__(self, current, incoming, files):
-        self.current = current
-        self.incoming = incoming
-        self.files = files
-
-
 class GudCommit:
-    def __init__(self, id, hash, description="", remote=False):
+    id: str
+    hash: str
+    description: str
+    parent: Optional["GudCommit"]
+    needs_evolve: bool
+    remote: bool
+    children: List["GudCommit"]
+    old_hash: Optional[str]
+
+    def __init__(self, id: str, hash: str, description: str = "", remote: bool = False):
         self.id = id
         self.hash = hash
         self.description = description
@@ -53,28 +39,57 @@ class GudCommit:
         self.remote = remote
         self.children = []
 
-    def add_child(self, commit):
+    def add_child(self, commit: "GudCommit") -> None:
         self.children.append(commit)
         commit.parent = self
 
-    def get_oneliner(self):
+    def get_oneliner(self) -> str:
         return get_oneliner(self.description)
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         if type(other) != type(self):
             return False
         return self.id == other.id
 
-    def __neq__(self, other):
+    def __neq__(self, other: Any) -> bool:
         return self.id != other.id
+
+
+class MergeConflictState:
+    current: GudCommit
+    incoming: GudCommit
+    files: List[str]
+
+    def __init__(self, current: GudCommit, incoming: GudCommit, files: List[str]):
+        self.current = current
+        self.incoming = incoming
+        self.files = files
+
+
+def get_branch_name(string: str) -> str:
+    return string.split("\n")[0][0:20].lower().replace(" ", "_")
+
+
+def get_oneliner(string: str) -> str:
+    return string.split("\n")[0][0:40]
+
+
+def traverse(commit: GudCommit, func: Callable[[GudCommit], None], skip: bool = False) -> None:
+    if not skip:
+        func(commit)
+
+    for c in commit.children:
+        traverse(c, func)
 
 
 class GitGud:
     repo: Repo
     head: Optional[GudCommit]
     commits: Dict[str, GudCommit]
+    merge_conflict_state: Optional[MergeConflictState]
+    root: GudCommit
 
-    def __init__(self, repo: Repo, root=None):
+    def __init__(self, repo: Repo, root: Optional[GudCommit] = None):
         self.repo = repo
         self.head = None
         self.commits = {}
@@ -82,7 +97,7 @@ class GitGud:
         self.root = root or self.commit("Initial commit", all=False)
 
     @staticmethod
-    def load_state_for_directory(directory):
+    def load_state_for_directory(directory: str) -> Dict:
         (_, dirname) = os.path.split(directory)
         hash = hashlib.sha1(bytes(directory, encoding="utf8")).hexdigest()
         filename = f"{dirname}_{hash}"
@@ -94,7 +109,7 @@ class GitGud:
             return json.loads(f.read())
 
     @staticmethod
-    def forWorkingDir(working_dir, repo_state=None):
+    def forWorkingDir(working_dir: str) -> "GitGud":
         repo = Repo(working_dir)
         branch = repo.active_branch
 
@@ -117,12 +132,12 @@ class GitGud:
         )
         return GitGud(repo=repo, root=root)
 
-    def serialize(self):
+    def serialize(self) -> Dict:
         return {
             "working_dir": self.repo.working_dir,
         }
 
-    def add_changes_to_index(self):
+    def add_changes_to_index(self) -> None:
         index = self.repo.index
         for (path, stage), entry in index.entries.items():
             logging.info(f"file in index: path: {path}, stage: {stage}, entry: {entry}")
@@ -135,7 +150,7 @@ class GitGud:
             logging.info("Adding untracked file: %s", untracked)
             index.add(untracked)
 
-    def commit(self, commit_msg, all=True):
+    def commit(self, commit_msg: str, all: bool = True) -> GudCommit:
         logging.info("Creating new commit: %s", get_oneliner(commit_msg))
         branch_name = get_branch_name(commit_msg)
 
@@ -157,22 +172,30 @@ class GitGud:
         self.commits[gud_commit.id] = gud_commit
         return gud_commit
 
-    def amend(self):
+    def amend(self) -> None:
+        if not self.head:
+            return
+
         self.add_changes_to_index()
         self.repo.git.commit("--amend", "--no-edit")
 
         new_hash = self.repo.head.commit.hexsha
-        (self.head.old_hash, self.head.hash) = (self.head.hash, new_hash)
+        self.head.old_hash, self.head.hash = self.head.hash, new_hash
 
-        def f(c):
+        def f(c: GudCommit) -> None:
             c.needs_evolve = True
 
         traverse(self.head, f, skip=True)
 
-    def merge_conflict_begin(self, current, incoming, files):
+    def merge_conflict_begin(
+        self, current: GudCommit, incoming: GudCommit, files: List[str]
+    ) -> None:
         self.merge_conflict_state = MergeConflictState(current, incoming, files)
 
-    def evolve(self):
+    def evolve(self) -> None:
+        if not self.head:
+            return
+
         if not self.head.children:
             print("No children to evolve.")
             return
@@ -187,7 +210,7 @@ class GitGud:
         child = self.head.children[0]
         try:
             self.repo.git.rebase("--onto", self.head.hash, self.head.old_hash, child.id)
-        except Exception as e:
+        except GitCommandError as e:
             lines = e.stdout.split("\n")
             files = []
             for l in lines:
@@ -202,11 +225,13 @@ class GitGud:
 
         self.update(child.id)
 
-    def update(self, commit_id):
+    def update(self, commit_id: str) -> None:
         self.repo.git.checkout(commit_id)
         self.head = self.commits[commit_id]
 
-    def rebase_continue(self):
+    def rebase_continue(self) -> None:
+        if not self.merge_conflict_state:
+            raise ValueError("No rebase in progress")
         for file in self.merge_conflict_state.files:
             self.repo.git.add(file)
 
@@ -216,7 +241,7 @@ class GitGud:
             self.update(self.merge_conflict_state.incoming.id)
             self.merge_conflict_state = None
 
-    def print_status(self):
+    def print_status(self) -> None:
         if self.merge_conflict_state:
             print(f"[bold red]Rebase in progress[/bold red]: stopped due to merge conflict.")
         print("")
@@ -236,7 +261,7 @@ class GitGud:
             print("To abort run:")
             print(" [bold]gg rebase --abort[/bold]")
 
-    def get_tree(self, commit: GudCommit = None, tree: Tree = None):
+    def get_tree(self, commit: GudCommit = None, tree: Tree = None) -> Tree:
         commit = commit or self.root
         color = "green" if commit == self.head else "magenta"
 
@@ -251,7 +276,7 @@ class GitGud:
                 conflict_type = "current"
             if commit.id == self.merge_conflict_state.incoming.id:
                 conflict_type = "incoming"
-            if self.in_merge_conflict and conflict_type:
+            if self.merge_conflict_state and conflict_type:
                 conflict = f" [bold red]({conflict_type})[/bold red]"
 
         remote = ""
