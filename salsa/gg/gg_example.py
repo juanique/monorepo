@@ -1,7 +1,7 @@
 import os
 import shutil
 from git import Repo
-from salsa.gg.gg import GitGud, GudCommit
+from gg.gg import GitGud, GudCommit
 
 REPO_DIR = "/tmp/repo_dir"
 

@@ -1,5 +1,6 @@
+from typing import Dict, Optional
+
 import os
-import shutil
 import logging
 import hashlib
 import json
@@ -69,6 +70,10 @@ class GudCommit:
 
 
 class GitGud:
+    repo: Repo
+    head: Optional[GudCommit]
+    commits: Dict[str, GudCommit]
+
     def __init__(self, repo: Repo, root=None):
         self.repo = repo
         self.head = None
