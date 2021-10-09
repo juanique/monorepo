@@ -6,25 +6,24 @@ import os
 from rich import inspect, print
 
 
-
 @click.group()
-def cli():
+def cli() -> None:
     pass
 
 
 @click.command()
-def init():
+def init() -> None:
     click.echo("gg init called")
 
 
 @click.command()
 @click.argument("commit")
-def update(commit):
+def update(commit: str) -> None:
     click.echo(f"gg update {commit} called")
 
 
 @click.command()
-def test():
+def test() -> None:
     try:
         repo = Repo(os.getcwd())
         inspect(repo)
@@ -40,7 +39,7 @@ def test():
         handle_failure(e)
 
 
-def handle_failure(e):
+def handle_failure(e: Exception) -> None:
     print(f"[bold red]{e}[/bold red]")
 
 

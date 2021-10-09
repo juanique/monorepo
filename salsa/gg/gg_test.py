@@ -1,5 +1,6 @@
 import os
 import shutil
+from typing import List
 import unittest
 from git import Repo
 from salsa.gg.gg import GitGud, GudCommit
@@ -7,31 +8,31 @@ from salsa.gg.gg import GitGud, GudCommit
 REPO_DIR_NAME = "repo_dir"
 
 
-def append(filename, contents):
+def append(filename: str, contents: str) -> None:
     with open(filename, "a") as file:
         file.write(contents)
         file.write("\n")
 
 
-def get_file_contents(filename):
+def get_file_contents(filename: str) -> List[str]:
     with open(filename) as file:
         return file.readlines()
 
 
-def set_file_contents(filename, contents):
+def set_file_contents(filename: str, contents: str) -> None:
     with open(filename, "w") as file:
         file.write(contents)
         file.write("\n")
 
 
-def make_directory(dirname):
+def make_directory(dirname: str) -> None:
     if os.path.isdir(dirname):
         shutil.rmtree(dirname)
     os.makedirs(dirname)
 
 
 class TestGitGud(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         remote_root = os.path.join(self.get_test_root(), "remote")
         local_root = os.path.join(self.get_test_root(), "local")
 
@@ -48,17 +49,17 @@ class TestGitGud(unittest.TestCase):
         self.remote_repo.git.config("user.name", "test_user")
         self.remote_gg = GitGud(self.remote_repo)
 
-    def make_test_filename(self, root=None):
+    def make_test_filename(self, root: str = None) -> str:
         root = root or self.local_repo_path
         self.last_index += 1
         return os.path.join(root, f"file{self.last_index}.txt")
 
-    def get_test_root(self):
+    def get_test_root(self) -> str:
         return os.path.join("/tmp", "gg_tests", self._testMethodName)
 
 
 class TestGitGudWithRemote(TestGitGud):
-    def setUp(self):
+    def setUp(self) -> None:
         super().setUp()
 
         self.remote_filename = self.make_test_filename(self.remote_repo_path)
@@ -67,12 +68,12 @@ class TestGitGudWithRemote(TestGitGud):
         self.repo = Repo.clone_from(self.remote_repo_path, self.local_repo_path)
         self.gg = GitGud.forWorkingDir(self.local_repo_path)
 
-    def test_clone(self):
+    def test_clone(self) -> None:
         local_filename = os.path.join(self.local_repo_path, os.path.basename(self.remote_filename))
         self.assertEqual(["contents-from-remote\n"], get_file_contents(local_filename))
         self.gg.print_status()
 
-    def test_amend_remote_fails(self):
+    def test_amend_remote_fails(self) -> None:
         filename_1 = self.make_test_filename()
         append(filename_1, "testing1")
 
@@ -82,7 +83,7 @@ class TestGitGudWithRemote(TestGitGud):
 
 
 class TestGitGudLocalOnly(TestGitGud):
-    def setUp(self):
+    def setUp(self) -> None:
         super().setUp()
 
         make_directory(self.local_repo_path)
@@ -91,7 +92,7 @@ class TestGitGudLocalOnly(TestGitGud):
         self.repo.git.config("user.name", "test_user")
         self.gg = GitGud(self.repo)
 
-    def test_commit(self):
+    def test_commit(self) -> None:
         filename_1 = self.make_test_filename()
         filename_2 = self.make_test_filename()
         append(filename_1, "testing1")
@@ -109,7 +110,7 @@ class TestGitGudLocalOnly(TestGitGud):
         self.assertEqual("My first commit", self.gg.root.children[0].description)
         self.assertEqual("My second commit", self.gg.root.children[0].children[0].description)
 
-    def test_update(self):
+    def test_update(self) -> None:
         filename = self.make_test_filename()
 
         append(filename, "testing1")
@@ -125,7 +126,7 @@ class TestGitGudLocalOnly(TestGitGud):
         self.gg.update(c2.id)
         self.assertEqual(["testing1\n", "testing2\n"], get_file_contents(filename))
 
-    def test_amend_evolve_single_line(self):
+    def test_amend_evolve_single_line(self) -> None:
         filename = self.make_test_filename()
 
         append(filename, "testing1")
@@ -155,7 +156,7 @@ class TestGitGudLocalOnly(TestGitGud):
         set_file_contents(filename, "testing1\ntesting2\ntesting3")
         self.gg.rebase_continue()
 
-        self.assertEqual(c2.id, self.gg.head.id)
+        self.assertEqual(c2.id, self.gg.head and self.gg.head.id)
         self.assertFalse(c2.needs_evolve)
 
 

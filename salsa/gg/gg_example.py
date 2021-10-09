@@ -6,13 +6,13 @@ from gg.gg import GitGud, GudCommit
 REPO_DIR = "/tmp/repo_dir"
 
 
-def append(filename, contents):
+def append(filename: str, contents: str) -> None:
     with open(os.path.join(REPO_DIR, filename), "a") as file:
         file.write(contents)
         file.write("\n")
 
 
-def set_file_contents(filename, contents):
+def set_file_contents(filename: str, contents: str) -> None:
     with open(os.path.join(REPO_DIR, filename), "w") as file:
         file.write(contents)
         file.write("\n")
