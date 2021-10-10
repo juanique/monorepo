@@ -1,9 +1,10 @@
-# from gg import GitGud
-from gg import GitGud
-from git import Repo
-import click
 import os
+
+from git import Repo
 from rich import inspect, print
+import click
+
+from salsa.gg.gg import GitGud
 
 
 @click.group()
@@ -24,6 +25,8 @@ def update(commit: str) -> None:
 
 @click.command()
 def test() -> None:
+    """Just a test command for development."""
+
     try:
         repo = Repo(os.getcwd())
         inspect(repo)
@@ -35,7 +38,7 @@ def test() -> None:
         inspect(repo.active_branch.commit)
         gg = GitGud.forWorkingDir(os.getcwd())
         gg.print_status()
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-except
         handle_failure(e)
 
 

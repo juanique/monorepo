@@ -47,7 +47,7 @@ class GudCommit:
         return get_oneliner(self.description)
 
     def __eq__(self, other: Any) -> bool:
-        if type(other) != type(self):
+        if not isinstance(other, GudCommit):
             return False
         return self.id == other.id
 
@@ -98,6 +98,8 @@ class GitGud:
 
     @staticmethod
     def load_state_for_directory(directory: str) -> Dict:
+        """Load GitGud repo state from the given directory."""
+
         (_, dirname) = os.path.split(directory)
         hash = hashlib.sha1(bytes(directory, encoding="utf8")).hexdigest()
         filename = f"{dirname}_{hash}"
@@ -105,11 +107,13 @@ class GitGud:
         if not os.path.exists(config_file):
             raise ConfigNotFoundError(f"Not found {config_file}")
 
-        with open(config_file) as f:
+        with open(config_file, encoding="utf-8") as f:
             return json.loads(f.read())
 
     @staticmethod
     def forWorkingDir(working_dir: str) -> "GitGud":
+        """Initialize a new GitGud instance from the given directory."""
+
         repo = Repo(working_dir)
         branch = repo.active_branch
 
@@ -138,9 +142,11 @@ class GitGud:
         }
 
     def add_changes_to_index(self) -> None:
+        """Equivalent of git add ."""
+
         index = self.repo.index
         for (path, stage), entry in index.entries.items():
-            logging.info(f"file in index: path: {path}, stage: {stage}, entry: {entry}")
+            logging.info("file in index: path: %s, stage: %s, entry: %s", path, stage, entry)
 
         for item in self.repo.index.diff(None):
             logging.info("Adding modified file: %s", item.a_path)
@@ -151,6 +157,8 @@ class GitGud:
             index.add(untracked)
 
     def commit(self, commit_msg: str, all: bool = True) -> GudCommit:
+        """Create a new commit that includes all local changes."""
+
         logging.info("Creating new commit: %s", get_oneliner(commit_msg))
         branch_name = get_branch_name(commit_msg)
 
@@ -173,6 +181,11 @@ class GitGud:
         return gud_commit
 
     def amend(self) -> None:
+        """Amend the commit with current changes, updates hash.
+
+        All descendants of this commit are marked as needing evolve.
+        """
+
         if not self.head:
             return
 
@@ -193,6 +206,8 @@ class GitGud:
         self.merge_conflict_state = MergeConflictState(current, incoming, files)
 
     def evolve(self) -> None:
+        """Propagate changes of amended commit onto all descendants."""
+
         if not self.head:
             return
 
@@ -206,6 +221,7 @@ class GitGud:
 
         if len(self.head.children) > 1:
             print("TODO - Not supported for multiple children")
+            return
 
         child = self.head.children[0]
         try:
@@ -218,7 +234,7 @@ class GitGud:
                     files.append(l.split(" ")[-1])
 
             if not files:
-                raise Exception("Unknown error: %s" % e.stdout)
+                raise Exception(f"Unknown error: {e.stdout}") from e
 
             self.merge_conflict_begin(self.head, child, files)
             return
@@ -230,6 +246,8 @@ class GitGud:
         self.head = self.commits[commit_id]
 
     def rebase_continue(self) -> None:
+        """Accept the current changes and continue rebase."""
+
         if not self.merge_conflict_state:
             raise ValueError("No rebase in progress")
         for file in self.merge_conflict_state.files:
@@ -242,8 +260,10 @@ class GitGud:
             self.merge_conflict_state = None
 
     def print_status(self) -> None:
+        """Print the state of the local branches."""
+
         if self.merge_conflict_state:
-            print(f"[bold red]Rebase in progress[/bold red]: stopped due to merge conflict.")
+            print("[bold red]Rebase in progress[/bold red]: stopped due to merge conflict.")
         print("")
         tree = self.get_tree()
         print(tree)
@@ -262,6 +282,8 @@ class GitGud:
             print(" [bold]gg rebase --abort[/bold]")
 
     def get_tree(self, commit: GudCommit = None, tree: Tree = None) -> Tree:
+        """Return a tree representation of the local gitgud state for printing."""
+
         commit = commit or self.root
         color = "green" if commit == self.head else "magenta"
 
@@ -283,7 +305,9 @@ class GitGud:
         if commit.remote:
             remote = " [bold yellow](Remote Head)[/bold yellow]"
 
-        line = f"[bold {color}]{commit.hash}[/bold {color}]{needs_evolve}{conflict}{remote}: {commit.get_oneliner()}"
+        line = f"[bold {color}]{commit.hash}[/bold {color}]"
+        line += f"{needs_evolve}{conflict}{remote}: {commit.get_oneliner()}"
+
         if not tree:
             branch = Tree(line)
         else:
