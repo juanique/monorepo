@@ -1,0 +1,5 @@
+[BASIC]
+docstring-min-length=10
+
+[MESSAGES CONTROL]
+disable=missing-module-docstring,redefined-builtin,missing-class-docstring,invalid-name,too-many-instance-attributes,too-few-public-methods,fixme

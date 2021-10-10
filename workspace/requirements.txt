@@ -2,3 +2,7 @@ rich
 GitPython
 grpcio
 click
+pytest
+pytest-black
+pytest-pylint
+

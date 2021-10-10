@@ -3,24 +3,24 @@ import shutil
 from typing import List
 import unittest
 from git import Repo
-from salsa.gg.gg import GitGud, GudCommit
+from salsa.gg.gg import GitGud
 
 REPO_DIR_NAME = "repo_dir"
 
 
 def append(filename: str, contents: str) -> None:
-    with open(filename, "a") as file:
+    with open(filename, "a", encoding="utf-8") as file:
         file.write(contents)
         file.write("\n")
 
 
 def get_file_contents(filename: str) -> List[str]:
-    with open(filename) as file:
+    with open(filename, encoding="utf-8") as file:
         return file.readlines()
 
 
 def set_file_contents(filename: str, contents: str) -> None:
-    with open(filename, "w") as file:
+    with open(filename, "w", encoding="utf-8") as file:
         file.write(contents)
         file.write("\n")
 
@@ -93,6 +93,11 @@ class TestGitGudLocalOnly(TestGitGud):
         self.gg = GitGud(self.repo)
 
     def test_commit(self) -> None:
+        """Commits can be created on top of each other.
+
+        $ gg commit -m"Commit message"
+        """
+
         filename_1 = self.make_test_filename()
         filename_2 = self.make_test_filename()
         append(filename_1, "testing1")
@@ -111,6 +116,11 @@ class TestGitGudLocalOnly(TestGitGud):
         self.assertEqual("My second commit", self.gg.root.children[0].children[0].description)
 
     def test_update(self) -> None:
+        """Can jump back and forth between commits.
+
+        $ gg update commit_name
+        """
+
         filename = self.make_test_filename()
 
         append(filename, "testing1")
@@ -127,6 +137,15 @@ class TestGitGudLocalOnly(TestGitGud):
         self.assertEqual(["testing1\n", "testing2\n"], get_file_contents(filename))
 
     def test_amend_evolve_single_line(self) -> None:
+        """Can update old commits and propagate changes on a linear chain.
+
+        $ gg update <old-commit>
+        ... change files
+        $ gg amend
+        ... conflict!
+        ... resolve conflict
+        $ gg rebase --continue
+        """
         filename = self.make_test_filename()
 
         append(filename, "testing1")
