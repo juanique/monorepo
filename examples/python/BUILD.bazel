@@ -1,0 +1,14 @@
+load("@pip_deps//:requirements.bzl", "requirement")
+
+py_binary(
+    name = "version",
+    srcs = ["version.py"],
+)
+
+py_binary(
+    name = "tree",
+    srcs = ["tree.py"],
+    deps = [
+        requirement("rich"),
+    ],
+)

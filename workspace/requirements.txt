@@ -1,8 +1,7 @@
-rich
+rich==10.12.0
 GitPython
 grpcio
 click
 pytest
-pytest-black
-pytest-pylint
-
+pydantic==1.8.2
+pytest-pylint==0.18.0

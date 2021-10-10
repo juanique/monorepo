@@ -1,8 +1,10 @@
 import os
 import shutil
-from typing import List
 import unittest
+from typing import List
+
 from git import Repo
+
 from salsa.gg.gg import GitGud
 
 REPO_DIR_NAME = "repo_dir"
