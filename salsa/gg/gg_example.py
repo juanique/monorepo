@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     os.mkdir(REPO_DIR)
     repo = Repo.init(REPO_DIR)
-    gg = GitGud(repo)
+    gg = GitGud.for_clean_repo(repo)
 
     append("file1.txt", "testing1")
     c1 = gg.commit("My first commit")

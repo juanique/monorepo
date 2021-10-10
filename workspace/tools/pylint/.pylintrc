@@ -1,3 +1,6 @@
+[MASTER]
+extension-pkg-whitelist=pydantic
+
 [BASIC]
 docstring-min-length=10
 

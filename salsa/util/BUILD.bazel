@@ -1,0 +1,14 @@
+load("//:bazel/python.bzl", "py_library", "py_test")
+
+package(default_visibility = ["//salsa:__subpackages__"])
+
+py_library(
+    name = "subsets",
+    srcs = ["subsets.py"],
+)
+
+py_test(
+    name = "subsets_test",
+    srcs = ["subsets_test.py"],
+    deps = [":subsets"],
+)
