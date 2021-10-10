@@ -12,8 +12,8 @@ RUN bazelisk version
 
 RUN rm -rf /workdir
 WORKDIR /workdir
-RUN echo "Cloning repo at c4ca218ab07104a343b19b6d816100e846751a7d"
 RUN git clone https://github.com/juanique/monorepo.git
 WORKDIR /workdir/monorepo
+RUN git reset --hard 47aac21aac15610f62681f31012095294eb49c1b
 RUN bazelisk clean
 RUN bazelisk --output_user_root=/workdir/bazel-output-user-root --output_base=/workdir/bazel-output-base --install_base=/workdir/bazel-install-base build ... --disk_cache=/workdir/bazel-cache --repository_cache=/workdir/bazel-repository-cache --build_metadata=USER=docker_cache_build
