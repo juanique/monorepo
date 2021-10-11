@@ -1,11 +1,14 @@
 import os
 import shutil
 import unittest
-from typing import List
+from typing import List, Any
+
+import dataclasses
 
 from git import Repo
 
 from salsa.gg.gg import GitGud
+from salsa.util.subsets import subset_diff
 
 REPO_DIR_NAME = "repo_dir"
 
@@ -49,7 +52,7 @@ class TestGitGud(unittest.TestCase):
         self.remote_repo = Repo.init(self.remote_repo_path)
         self.remote_repo.git.config("user.email", "test@example.com")
         self.remote_repo.git.config("user.name", "test_user")
-        self.remote_gg = GitGud(self.remote_repo)
+        self.remote_gg = GitGud.for_clean_repo(self.remote_repo)
 
     def make_test_filename(self, root: str = None) -> str:
         root = root or self.local_repo_path
@@ -58,6 +61,11 @@ class TestGitGud(unittest.TestCase):
 
     def get_test_root(self) -> str:
         return os.path.join("/tmp", "gg_tests", self._testMethodName)
+
+    def assertSubset(self, val1: Any, val2: Any) -> None:
+        diff = subset_diff(val1, val2)
+        if diff is not None:
+            self.fail(str(dataclasses.asdict(diff)))
 
 
 class TestGitGudWithRemote(TestGitGud):
@@ -92,7 +100,7 @@ class TestGitGudLocalOnly(TestGitGud):
         self.repo = Repo.init(self.local_repo_path)
         self.repo.git.config("user.email", "test@example.com")
         self.repo.git.config("user.name", "test_user")
-        self.gg = GitGud(self.repo)
+        self.gg = GitGud.for_clean_repo(self.repo)
 
     def test_commit(self) -> None:
         """Commits can be created on top of each other.
@@ -112,10 +120,30 @@ class TestGitGudLocalOnly(TestGitGud):
 
         self.gg.commit("My second commit")
 
-        self.assertEqual("initial_commit", self.gg.root.id)
-        self.assertEqual("Initial commit", self.gg.root.description)
-        self.assertEqual("My first commit", self.gg.root.children[0].description)
-        self.assertEqual("My second commit", self.gg.root.children[0].children[0].description)
+        summary = self.gg.get_summary()
+
+        expected = {
+            "commit_tree": {
+                "id": "initial_commit",
+                "is_head": False,
+                "description": "Initial commit",
+                "children": [
+                    {
+                        "id": "my_first_commit",
+                        "is_head": False,
+                        "description": "My first commit",
+                        "children": [
+                            {
+                                "id": "my_second_commit",
+                                "is_head": True,
+                                "description": "My second commit",
+                            }
+                        ],
+                    }
+                ],
+            }
+        }
+        self.assertSubset(expected, summary.dict())
 
     def test_update(self) -> None:
         """Can jump back and forth between commits.
@@ -177,7 +205,7 @@ class TestGitGudLocalOnly(TestGitGud):
         set_file_contents(filename, "testing1\ntesting2\ntesting3")
         self.gg.rebase_continue()
 
-        self.assertEqual(c2.id, self.gg.head and self.gg.head.id)
+        self.assertEqual(c2.id, self.gg.head().id)
         self.assertFalse(c2.needs_evolve)
 
 

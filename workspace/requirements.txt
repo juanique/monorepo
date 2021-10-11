@@ -3,5 +3,5 @@ GitPython
 grpcio
 click
 pytest
-pydantic==1.8.2
 pytest-pylint==0.18.0
+pydantic==1.8.2
