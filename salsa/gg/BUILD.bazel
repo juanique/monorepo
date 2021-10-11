@@ -9,6 +9,7 @@ py_library(
     deps = [
         requirement("rich"),
         requirement("GitPython"),
+        requirement("pydantic"),
     ],
 )
 
@@ -17,6 +18,7 @@ py_test(
     srcs = ["gg_test.py"],
     deps = [
         ":gg",
+        "//salsa/util:subsets",
         requirement("GitPython"),
     ],
 )
