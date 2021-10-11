@@ -24,5 +24,6 @@ RUN apt-get install -y libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqli
 RUN apt-get install -y libffi-dev
 
 ## Newer cache with python 3.10 installed
+RUN git pull --rebase origin master
 RUN git reset --hard 1168d18730331e2b595bb99795dc7f728565dbbc
 RUN bazelisk --output_user_root=/workdir/bazel-output-user-root --output_base=/workdir/bazel-output-base --install_base=/workdir/bazel-install-base build ... --disk_cache=/workdir/bazel-cache --repository_cache=/workdir/bazel-repository-cache --build_metadata=USER=docker_cache_build
