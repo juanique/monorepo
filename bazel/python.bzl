@@ -1,5 +1,4 @@
 load("@pip_deps//:requirements.bzl", "requirement")
-load("@subpar//:subpar.bzl", "par_binary")
 load("@mypy_integration//:mypy.bzl", "mypy_test")
 
 def py_binary(name, **kwargs):
@@ -24,7 +23,8 @@ def py_binary(name, **kwargs):
 
     native.py_binary(name = name, **kwargs)
     mypy_test(name = name + "_mypy", deps = [":" + name])
-    par_binary(name = name + "_par", imports = [""], **kwargs)
+
+    # par_binary(name = name + "_par", imports = [""], **kwargs)
     pylint_test(name = name + "_pylint", **kwargs)
 
 def py_library(name, **kwargs):
@@ -47,7 +47,6 @@ def pylint_test(name, srcs, deps = [], args = [], data = [], **kwargs):
         srcs_version = "PY3",
         deps = deps + [
             requirement("pytest"),
-            requirement("pytest-black"),
             requirement("pytest-pylint"),
         ],
         data = [
