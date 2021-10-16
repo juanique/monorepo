@@ -11,6 +11,8 @@ print(repr(sys.version_info))
 
 class Greeter(helloworld_pb2_grpc.GreeterServicer):
     def SayHello(self, req, context):
+        logging.info("Got request %s", req)
+        print("=> Got request %s", req)
         return helloworld_pb2.HelloReply(message="Hello %s!" % req.name)
 
 

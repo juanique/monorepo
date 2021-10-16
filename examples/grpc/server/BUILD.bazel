@@ -1,11 +1,28 @@
 load("@pip_deps//:requirements.bzl", "requirement")
+load("@io_bazel_rules_docker//lang:image.bzl", "app_layer")
 
 py_binary(
     name = "greeter_server",
     srcs = ["greeter_server.py"],
     deps = [
+        ":greeter_server_lib",
+    ],
+)
+
+py_library(
+    name = "greeter_server_lib",
+    srcs = [],
+    deps = [
         requirement("grpcio"),
         "//examples/grpc/protos:helloworld_py_grpc",
         "//examples/grpc/protos:helloworld_py_proto",
     ],
+)
+
+app_layer(
+    name = "my_py3_image",
+    base = "@ubuntu//image",
+    binary = ":greeter_server",
+    create_empty_workspace_dir = True,
+    entrypoint = ["/usr/bin/python3"],
 )
