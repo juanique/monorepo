@@ -1,0 +1,14 @@
+GIT_ROOT=`git rev-parse --git-dir`
+REPO_ROOT=`realpath $GIT_ROOT | sed 's/....$//'`
+echo "Repo root is $REPO_ROOT"
+BUILD_OUTPUT=/tmp/build_output
+docker run -it \
+    -e USER="$(id -u)" \
+    -u="$(id -u)"  \
+    -v $REPO_ROOT:$REPO_ROOT \
+    -v $BUILD_OUTPUT:$BUILD_OUTPUT \
+    -v $BUILD_OUTPUT/cache:/.cache \
+    -w `pwd` juanzolotoochin/ubuntu-build bazelisk $@
+
+
+
