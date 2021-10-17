@@ -41,8 +41,8 @@ def pylint_test(name, srcs, deps = [], args = [], data = [], **kwargs):
     kwargs["main"] = "pylint_test_wrapper.py"
     native.py_test(
         name = name,
-        srcs = ["//workspace/tools/pylint:pylint_test_wrapper.py"] + srcs,
-        args = ["--pylint-rcfile=$(location //workspace/tools/pylint:.pylintrc)"] + args + ["$(location :%s)" % x for x in srcs],
+        srcs = ["//bazel/workspace/tools/pylint:pylint_test_wrapper.py"] + srcs,
+        args = ["--pylint-rcfile=$(location //bazel/workspace/tools/pylint:.pylintrc)"] + args + ["$(location :%s)" % x for x in srcs],
         python_version = "PY3",
         srcs_version = "PY3",
         deps = deps + [
@@ -50,7 +50,7 @@ def pylint_test(name, srcs, deps = [], args = [], data = [], **kwargs):
             requirement("pytest-pylint"),
         ],
         data = [
-            "//workspace/tools/pylint:.pylintrc",
+            "//bazel/workspace/tools/pylint:.pylintrc",
         ] + data,
         **kwargs
     )

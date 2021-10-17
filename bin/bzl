@@ -15,6 +15,12 @@ if [[ ! -d $CACHE_DIR ]]; then
     chmod 777 -R $BUILD_OUTPUT
 fi
 
+if docker ps -a -f status=exited | grep bazel-build
+then
+    echo "Build container was exited. Removing..."
+    docker rm bazel-build
+fi
+
 if docker ps | grep -q bazel-build
 then
     echo "Build container already running."
