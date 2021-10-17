@@ -7,6 +7,14 @@ BUILD_OUTPUT=/tmp/build_output
 USER_ID=`id -u`
 CURRENT_DIR=`pwd`
 
+CACHE_DIR=$BUILD_OUTPUT/cache
+
+if [[ ! -d $CACHE_DIR ]]; then
+    echo "Creating $CACHE_DIR"
+    mkdir -p $CACHE_DIR
+    chmod 777 -R $BUILD_OUTPUT
+fi
+
 if docker ps | grep -q bazel-build
 then
     echo "Build container already running."
