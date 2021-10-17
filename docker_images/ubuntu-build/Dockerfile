@@ -12,6 +12,7 @@ RUN apt-get install -y libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqli
 RUN apt-get install -y build-essential checkinstall
 RUN apt-get install -y libffi-dev zlib1g-dev
 RUN apt-get install -y python3.10-distutils
+RUN apt-get install -y python3.10-dev
 
 ### Git is used to download golang dependencies
 RUN apt-get install -y git-all

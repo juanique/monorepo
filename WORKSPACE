@@ -188,3 +188,10 @@ mypy_integration_deps(
 )
 
 register_toolchains("//:my_py_toolchain")
+
+container_pull(
+    name = "ubuntu",
+    registry = "docker.io",
+    repository = "juanzolotoochin/ubuntu",
+    tag = "latest",
+)

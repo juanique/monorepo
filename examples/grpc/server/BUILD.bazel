@@ -1,11 +1,26 @@
 load("@pip_deps//:requirements.bzl", "requirement")
+load("//:bazel/docker.bzl", "py_image")
 
 py_binary(
     name = "greeter_server",
     srcs = ["greeter_server.py"],
     deps = [
+        ":greeter_server_lib",
+    ],
+)
+
+py_library(
+    name = "greeter_server_lib",
+    srcs = [],
+    deps = [
         requirement("grpcio"),
         "//examples/grpc/protos:helloworld_py_grpc",
         "//examples/grpc/protos:helloworld_py_proto",
     ],
+)
+
+py_image(
+    name = "greeter_server_docker",
+    binary = ":greeter_server",
+    port = "50051",
 )
