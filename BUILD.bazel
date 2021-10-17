@@ -6,18 +6,18 @@ gazelle(
     name = "gazelle",
 )
 
+
 py_runtime(
-    name = "python3_runtime",
-    files = ["@python_interpreter//:files"],
-    interpreter = "@python_interpreter//:python_bin",
-    python_version = "PY3",
-    visibility = ["//visibility:public"],
+   name="python-3.10.0",
+   python_version="PY3",
+   visibility = ["//visibility:public"],
+   interpreter_path="/usr/bin/python3.10",
 )
 
 py_runtime_pair(
     name = "my_py_runtime_pair",
     py2_runtime = None,
-    py3_runtime = ":python3_runtime",
+    py3_runtime = ":python-3.10.0",
 )
 
 toolchain(
