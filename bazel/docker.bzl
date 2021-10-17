@@ -2,6 +2,8 @@ load("@io_bazel_rules_docker//lang:image.bzl", "app_layer")
 load("@io_bazel_rules_docker//container:container.bzl", "container_image")
 
 def py_image(name, binary, port):
+    """ Basic development docker image for python targets."""
+
     base_image_name = name + "_base_py_image"
 
     container_image(

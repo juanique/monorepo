@@ -190,29 +190,7 @@ mypy_integration_deps(
 register_toolchains("//:my_py_toolchain")
 
 container_pull(
-    name = "alpine_linux_amd64",
-    registry = "index.docker.io",
-    repository = "library/alpine",
-    tag = "3.8",
-)
-
-container_pull(
-    name = "alpine_linux_amd64_python",
-    registry = "index.docker.io",
-    repository = "library/python",
-    tag = "3.10.0-alpine3.14",
-)
-
-container_pull(
-    name = "python-alpine-grpcio",
-    registry = "quay.io",
-    repository = "basisai/python-alpine-grpcio",
-    tag = "latest",
-)
-
-container_pull(
     name = "ubuntu",
-    # registry = "registry.hub.docker.com/library",
     registry = "docker.io",
     repository = "juanzolotoochin/ubuntu",
     tag = "latest",
