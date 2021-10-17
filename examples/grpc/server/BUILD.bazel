@@ -1,5 +1,5 @@
 load("@pip_deps//:requirements.bzl", "requirement")
-load("@io_bazel_rules_docker//lang:image.bzl", "app_layer")
+load("//:bazel/docker.bzl", "py_image")
 
 py_binary(
     name = "greeter_server",
@@ -19,10 +19,8 @@ py_library(
     ],
 )
 
-app_layer(
-    name = "my_py3_image",
-    base = "@ubuntu//image",
+py_image(
+    name = "greeter_server_docker",
     binary = ":greeter_server",
-    create_empty_workspace_dir = True,
-    entrypoint = ["/usr/bin/python3"],
+    port = "50051",
 )
