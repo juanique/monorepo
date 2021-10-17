@@ -1,8 +1,5 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-# protobufs
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
-
 http_archive(
     name = "rules_python",
     sha256 = "954aa89b491be4a083304a2cb838019c8b8c3720a7abb9c4cb81ac7a24230cea",
@@ -94,23 +91,10 @@ rules_proto_dependencies()
 
 rules_proto_toolchains()
 
-new_git_repository(
-    name = "rich",
-    branch = "master",
-    build_file_content = """
-py_library(
-  name = "rich",
-  srcs = glob(["rich/*.py"]),
-  visibility = ["//visibility:public"],
-)
-  """,
-    remote = "https://github.com/willmcgugan/rich.git",
-)
-
 pip_install(
     name = "pip_deps",
-    python_interpreter_target = "@python_interpreter//:python_bin",
-    requirements = "//workspace:requirements.txt",
+    python_interpreter = "python3.10",
+    requirements = "//bazel/workspace:requirements.txt",
 )
 
 # grpc
@@ -195,44 +179,12 @@ mypy_integration_repositories()
 load("@mypy_integration//:config.bzl", "mypy_configuration")
 
 # Optionally pass a MyPy config file, otherwise pass no argument.
-mypy_configuration("//workspace:mypy.ini")
+mypy_configuration("//bazel/workspace:mypy.ini")
 
 load("@mypy_integration//repositories:deps.bzl", mypy_integration_deps = "deps")
 
 mypy_integration_deps(
-    mypy_requirements_file = "//workspace:mypy_version.txt",
-)
-
-# Special logic for building python interpreter with OpenSSL from homebrew.
-# See https://devguide.python.org/setup/#macos-and-os-x
-_py_configure = """
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    ./configure --prefix=$(pwd)/bazel_install --with-openssl=$(brew --prefix openssl)
-else
-    ./configure --prefix=$(pwd)/bazel_install
-fi
-"""
-
-http_archive(
-    name = "python_interpreter",
-    build_file_content = """
-exports_files(["python_bin"])
-filegroup(
-    name = "files",
-    srcs = glob(["bazel_install/**"], exclude = ["**/* *"]),
-    visibility = ["//visibility:public"],
-)
-""",
-    patch_cmds = [
-        "mkdir $(pwd)/bazel_install",
-        _py_configure,
-        "make",
-        "make install",
-        "ln -s bazel_install/bin/python3 python_bin",
-    ],
-    sha256 = "c4e0cbad57c90690cb813fb4663ef670b4d0f587d8171e2c42bd4c9245bd2758",
-    strip_prefix = "Python-3.10.0",
-    urls = ["https://www.python.org/ftp/python/3.10.0/Python-3.10.0.tgz"],
+    mypy_requirements_file = "//bazel/workspace:mypy_version.txt",
 )
 
 register_toolchains("//:my_py_toolchain")
