@@ -12,7 +12,7 @@ jobs:
   ci-job:
     runs-on: ubuntu-latest
     container:
-      image: juanzolotoochin/monorepo-ci:latest
+      image: juanzolotoochin/ubuntu-ci:latest
 
     steps:
     - name: Debug Info
