@@ -7,12 +7,12 @@ BUILD_OUTPUT=/tmp/build_output
 USER_ID=`id -u`
 CURRENT_DIR=`pwd`
 
-CACHE_DIR=$BUILD_OUTPUT/cache
+CACHE_DIR=$HOME/.cache
 
 if [[ ! -d $CACHE_DIR ]]; then
     echo "Creating $CACHE_DIR"
     mkdir -p $CACHE_DIR
-    chmod 777 -R $BUILD_OUTPUT
+    chmod 777 -R $CACHE_DIR
 fi
 
 if docker ps -a -f status=exited | grep bazel-build
@@ -26,6 +26,6 @@ then
     echo "Build container already running."
 else
     echo "Starting build container..."
-    docker run -d --name=bazel-build -e USER=$USER_ID -u=$USER_ID -v $REPO_ROOT:$REPO_ROOT -v $BUILD_OUTPUT:$BUILD_OUTPUT -v $BUILD_OUTPUT/cache:/.cache -w $REPO_ROOT juanzolotoochin/ubuntu-build tail -f /dev/null
+    docker run -d --name=bazel-build -e HOME=$HOME -e USER=$USER_ID -u=$USER_ID -v $REPO_ROOT:$REPO_ROOT -v $BUILD_OUTPUT:$BUILD_OUTPUT -v $CACHE_DIR:/$CACHE_DIR -w $REPO_ROOT juanzolotoochin/ubuntu-build tail -f /dev/null
 fi
-docker exec -it -e USER=$USER_ID -u=$USER_ID  -w $CURRENT_DIR bazel-build bazelisk $@
+docker exec -it -e HOME=$HOME -e USER=$USER_ID -u=$USER_ID  -w $CURRENT_DIR bazel-build bazelisk $@
