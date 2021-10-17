@@ -27,16 +27,3 @@ RUN ln -s /usr/bin/python3.10 /usr/bin/python
 WORKDIR /workdir
 
 ENV USE_BAZEL_VERSION=4.2.1
-# RUN bazelisk version
-# RUN mkdir /.cache
-# RUN chmod 777 /.cache
-
-
-# RUN sudo apt install apt-transport-https curl gnupg
-# RUN curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel.gpg
-# RUN sudo mv bazel.gpg /etc/apt/trusted.gpg.d/
-# RUN echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
-
-# sudo apt update && sudo apt install bazel
-# sudo apt update && sudo apt full-upgrade
-# sudo apt install bazel-4.2.1
