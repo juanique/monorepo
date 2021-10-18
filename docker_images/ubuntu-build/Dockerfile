@@ -20,6 +20,17 @@ RUN ln -s /usr/bin/python3.10 /usr/bin/python
 ## Needed for building grpc services for some reason
 RUN apt-get update && apt-get install -y python3-distutils python3-dev
 
+## Docker is used to build docker targets
+RUN apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+RUN echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+RUN apt-get update
+RUN apt-get install -y docker-ce docker-ce-cli containerd.io
+
+
 WORKDIR /workdir
 
 ENV USE_BAZEL_VERSION=4.2.1
