@@ -3,6 +3,13 @@
 GIT_ROOT=`git rev-parse --git-dir`
 REPO_ROOT=`realpath $GIT_ROOT | sed 's/....$//'`
 echo "Repo root is $REPO_ROOT"
+
+# To use ramdisk (may increase performance), on Ubuntu:
+# - sudo mkdir /mnt/ramdisk
+# - sudo mount -t tmpfs -o rw,size=2G tmpfs /mnt/ramdisk
+# - mkdir /mnt/ramdisk/build_output
+# - update .bazelrc disk_cache and repository_cache flags.
+# BUILD_OUTPUT=/mnt/ramdisk/build_output
 BUILD_OUTPUT=/tmp/build_output
 USER_ID=`id -u`
 CURRENT_DIR=`pwd`
@@ -10,6 +17,7 @@ DOCKER_SOCK=/var/run/docker.sock
 CACHE_DIR=$HOME/.cache
 
 if [[ ! -d $CACHE_DIR ]]; then
+    # Cache dir is used by bazelisk
     echo "Creating $CACHE_DIR"
     mkdir -p $CACHE_DIR
     chmod 777 -R $CACHE_DIR
@@ -30,9 +38,11 @@ else
     --privileged \
     -v $DOCKER_SOCK:$DOCKER_SOCK \
     -v $REPO_ROOT:$REPO_ROOT \
+    -v $CACHE_DIR:$CACHE_DIR \
     -v $BUILD_OUTPUT:$BUILD_OUTPUT \
     -w $REPO_ROOT juanzolotoochin/ubuntu-build tail -f /dev/null
 fi
+
 docker exec -it \
     -e HOME=$HOME \
     -e USER=$USER_ID \
