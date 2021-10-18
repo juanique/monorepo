@@ -14,6 +14,7 @@ py_library(
     srcs = [],
     deps = [
         requirement("grpcio"),
+        requirement("grpcio-reflection"),
         "//examples/grpc/protos:helloworld_py_grpc",
         "//examples/grpc/protos:helloworld_py_proto",
     ],
