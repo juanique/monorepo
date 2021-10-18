@@ -5,3 +5,4 @@ click
 pytest
 pytest-pylint==0.18.0
 pydantic==1.8.2
+grpcio-reflection==1.41.0
