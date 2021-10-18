@@ -6,7 +6,7 @@ echo "Repo root is $REPO_ROOT"
 BUILD_OUTPUT=/tmp/build_output
 USER_ID=`id -u`
 CURRENT_DIR=`pwd`
-
+DOCKER_SOCK=/var/run/docker.sock
 CACHE_DIR=$HOME/.cache
 
 if [[ ! -d $CACHE_DIR ]]; then
@@ -26,6 +26,12 @@ then
     echo "Build container already running."
 else
     echo "Starting build container..."
-    docker run -d --name=bazel-build -e HOME=$HOME -e USER=$USER_ID -u=$USER_ID -v $REPO_ROOT:$REPO_ROOT -v $BUILD_OUTPUT:$BUILD_OUTPUT -v $CACHE_DIR:/$CACHE_DIR -w $REPO_ROOT juanzolotoochin/ubuntu-build tail -f /dev/null
+    docker run -d --name=bazel-build -e HOME=$HOME -e USER=$USER_ID -u=$USER_ID \
+    --privileged \
+    -v $DOCKER_SOCK:$DOCKER_SOCK \
+    -v $REPO_ROOT:$REPO_ROOT \
+    -v $BUILD_OUTPUT:$BUILD_OUTPUT \
+    -v $CACHE_DIR:/$CACHE_DIR \
+    -w $REPO_ROOT juanzolotoochin/ubuntu-build tail -f /dev/null
 fi
 docker exec -it -e HOME=$HOME -e USER=$USER_ID -u=$USER_ID  -w $CURRENT_DIR bazel-build bazelisk $@

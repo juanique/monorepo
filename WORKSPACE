@@ -192,6 +192,6 @@ register_toolchains("//:my_py_toolchain")
 container_pull(
     name = "ubuntu",
     registry = "docker.io",
-    repository = "juanzolotoochin/ubuntu",
+    repository = "juanzolotoochin/ubuntu-base",
     tag = "latest",
 )
