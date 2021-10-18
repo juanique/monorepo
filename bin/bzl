@@ -31,7 +31,15 @@ else
     -v $DOCKER_SOCK:$DOCKER_SOCK \
     -v $REPO_ROOT:$REPO_ROOT \
     -v $BUILD_OUTPUT:$BUILD_OUTPUT \
-    -v $CACHE_DIR:/$CACHE_DIR \
     -w $REPO_ROOT juanzolotoochin/ubuntu-build tail -f /dev/null
 fi
-docker exec -it -e HOME=$HOME -e USER=$USER_ID -u=$USER_ID  -w $CURRENT_DIR bazel-build bazelisk $@
+docker exec -it \
+    -e HOME=$HOME \
+    -e USER=$USER_ID \
+    -u=$USER_ID  \
+    -w $CURRENT_DIR \
+    bazel-build bazelisk \
+    --output_user_root=$BUILD_OUTPUT/bazel-output-user-root \
+    --output_base=$BUILD_OUTPUT/bazel-output-base \
+    --install_base=$BUILD_OUTPUT/bazel-install-base \
+    $@
