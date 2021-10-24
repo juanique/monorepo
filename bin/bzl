@@ -9,6 +9,30 @@ CURRENT_DIR=`pwd`
 DOCKER_SOCK=/var/run/docker.sock
 CACHE_DIR=$HOME/.cache
 
+for i in "$@"; do
+  case $i in
+    -b=*|--build=*)
+      BUILD="${i#*=}"
+      shift # past argument=value
+      ;;
+    -s=*|--shell=*)
+      START_SHELL="${i#*=}"
+      shift # past argument=value
+      ;;
+    *)
+      # unknown option
+      ;;
+  esac
+done
+
+if [ "$BUILD" = "true" ]; then
+    if docker ps -a | grep bazel-build
+    then
+        docker rm -f bazel-build
+    fi
+    docker build -t juanzolotoochin/ubuntu-build ./docker_images/ubuntu-build
+fi
+
 if [[ ! -d $CACHE_DIR ]]; then
     echo "Creating $CACHE_DIR"
     mkdir -p $CACHE_DIR
@@ -28,10 +52,16 @@ else
     echo "Starting build container..."
     docker run -d --name=bazel-build -e HOME=$HOME -e USER=$USER_ID -u=$USER_ID \
     --privileged \
+    -p 127.0.0.1:5678:5678 \
     -v $DOCKER_SOCK:$DOCKER_SOCK \
     -v $REPO_ROOT:$REPO_ROOT \
     -v $BUILD_OUTPUT:$BUILD_OUTPUT \
     -v $CACHE_DIR:/$CACHE_DIR \
     -w $REPO_ROOT juanzolotoochin/ubuntu-build tail -f /dev/null
 fi
-docker exec -it -e HOME=$HOME -e USER=$USER_ID -u=$USER_ID  -w $CURRENT_DIR bazel-build bazelisk $@
+
+if [ "$START_SHELL" = "true" ]; then
+    docker exec -it -e HOME=$HOME -e USER=$USER_ID -u=$USER_ID  -w $CURRENT_DIR bazel-build /bin/bash
+else
+    docker exec -it -e HOME=$HOME -e USER=$USER_ID -u=$USER_ID  -w $CURRENT_DIR bazel-build bazelisk $@
+fi

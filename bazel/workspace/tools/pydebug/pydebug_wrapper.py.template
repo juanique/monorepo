@@ -1,0 +1,12 @@
+import sys
+import unittest
+import importlib
+
+import debugpy
+import {FULL_MODULE}
+
+if __name__ == "__main__":
+    debugpy.listen(('0.0.0.0', 5678))
+    print("Waiting for clients...")
+    debugpy.wait_for_client()
+    unittest.main(module={FULL_MODULE})
