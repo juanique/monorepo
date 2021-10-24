@@ -30,6 +30,14 @@ RUN echo \
 RUN apt-get update
 RUN apt-get install -y docker-ce docker-ce-cli containerd.io
 
+## Install PIP for python 3.10
+RUN apt-get install -y python3.10-venv
+RUN /usr/bin/python3.10 -m ensurepip
+RUN /usr/bin/python3.10 -m pip install debugpy==1.5.1
+
+# Install netstat debug network connections
+RUN apt-get install net-tools
+
 
 WORKDIR /workdir
 

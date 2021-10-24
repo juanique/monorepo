@@ -36,6 +36,7 @@ def py_test(name, **kwargs):
     native.py_test(name = name, **kwargs)
     mypy_test(name = name + "_mypy", deps = [":" + name])
     pylint_test(name = name + "_pylint", **kwargs)
+    py_debug(name = name + "_debug", og_name = name, **kwargs)
 
 def pylint_test(name, srcs, deps = [], args = [], data = [], **kwargs):
     kwargs["main"] = "pylint_test_wrapper.py"
@@ -54,3 +55,47 @@ def pylint_test(name, srcs, deps = [], args = [], data = [], **kwargs):
         ] + data,
         **kwargs
     )
+
+def py_debug(name, og_name, srcs, deps = [], args = [], data = [], **kwargs):
+    wrapper_dep_name = og_name + "_debug_wrapper"
+    wrapper_filename = wrapper_dep_name + ".py"
+
+    py_debug_wrapper(name = wrapper_dep_name, out = wrapper_filename)
+
+    native.py_binary(
+        name = name,
+        srcs = [wrapper_filename] + srcs,
+        main = wrapper_filename,
+        python_version = "PY3",
+        srcs_version = "PY3",
+        deps = deps + [
+            requirement("pytest"),
+            requirement("debugpy"),
+            ":" + wrapper_dep_name,
+        ],
+        **kwargs
+    )
+
+def _py_debug_wrapper_impl(ctx):
+    path = str(ctx.label)
+    full_module = path.replace("//", "").replace("/", ".").replace(":", ".").replace("_debug_wrapper", "")
+
+    ctx.actions.expand_template(
+        template = ctx.file._template,
+        output = ctx.outputs.out,
+        substitutions = {
+            "{FULL_MODULE}": full_module,
+        },
+    )
+    return [PyInfo(transitive_sources = depset([ctx.outputs.out]))]
+
+py_debug_wrapper = rule(
+    implementation = _py_debug_wrapper_impl,
+    attrs = {
+        "_template": attr.label(
+            default = Label("//bazel/workspace/tools/pydebug:pydebug_wrapper.py.template"),
+            allow_single_file = True,
+        ),
+        "out": attr.output(mandatory = True),
+    },
+)

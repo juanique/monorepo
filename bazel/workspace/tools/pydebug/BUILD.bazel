@@ -1,0 +1,4 @@
+exports_files([
+    "pydebug_wrapper.py",
+    "pydebug_wrapper.py.template",
+])
