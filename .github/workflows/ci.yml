@@ -34,6 +34,7 @@ jobs:
         --output_base=/workdir/bazel-output-base
         --install_base=/workdir/bazel-install-base
         test //...
+        --test_env=TESTING_DOCKER_SERVICES_NETWORK=${{ job.container.network }}
         --build_metadata=ROLE=CI
         --bes_backend=grpcs://cloud.buildbuddy.io
         --bes_results_url=https://app.buildbuddy.io/invocation/

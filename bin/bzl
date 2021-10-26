@@ -50,9 +50,14 @@ then
     echo "Build container already running."
 else
     echo "Starting build container..."
-    docker run -d --name=bazel-build -e HOME=$HOME -e USER=$USER_ID -u=$USER_ID \
+    docker run -d \
+    --name=bazel-build \
+    -e HOME=$HOME \
+    -e USER=$USER_ID \
+    -u $(id -u ${USER_ID}):$(id -g ${USER_d}) \
     --privileged \
     -p 127.0.0.1:5678:5678 \
+    --network=br0 \
     -v $DOCKER_SOCK:$DOCKER_SOCK \
     -v $REPO_ROOT:$REPO_ROOT \
     -v $BUILD_OUTPUT:$BUILD_OUTPUT \

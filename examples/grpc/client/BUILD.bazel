@@ -1,11 +1,30 @@
 load("@pip_deps//:requirements.bzl", "requirement")
 
-py_binary(
+py_library(
     name = "greeter_client",
     srcs = ["greeter_client.py"],
     deps = [
         requirement("grpcio"),
         "//examples/grpc/protos:helloworld_py_grpc",
         "//examples/grpc/protos:helloworld_py_proto",
+    ],
+)
+
+py_binary(
+    name = "greeter_client_main",
+    srcs = ["greeter_client_main.py"],
+    deps = [":greeter_client"],
+)
+
+py_test(
+    name = "greeter_client_integration_test",
+    srcs = ["greeter_client_integration_test.py"],
+    data = [
+        "//examples/grpc/server:greeter_server_docker.tar",
+        "//salsa/docker/testing:docker_service",
+    ],
+    deps = [
+        requirement("docker"),
+        ":greeter_client",
     ],
 )
