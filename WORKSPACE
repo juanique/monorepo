@@ -1,3 +1,5 @@
+workspace(name = "monorepo")
+
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
@@ -158,15 +160,14 @@ load(
 _py_image_repos()
 
 # mypy integration
-mypy_integration_version = "0.2.0"  # Latest @ 26th June 2021
+mypy_integration_version = "0.2.1"  # latest @ September 28th 2021
 
 http_archive(
     name = "mypy_integration",
-    sha256 = "621df076709dc72809add1f5fe187b213fee5f9b92e39eb33851ab13487bd67d",
-    strip_prefix = "bazel-mypy-integration-{version}".format(version = mypy_integration_version),
-    urls = [
-        "https://github.com/thundergolfer/bazel-mypy-integration/archive/refs/tags/{version}.tar.gz".format(version = mypy_integration_version),
-    ],
+    sha256 = "e9701c43bdf4082b1719d91954b7838c85021e086a26e1b7c8adbe6fbff3c7ef",
+    url = "https://github.com/thundergolfer/bazel-mypy-integration/releases/download/{version}/bazel_mypy_integration-{version}.tar.gz".format(
+        version = mypy_integration_version,
+    ),
 )
 
 load(

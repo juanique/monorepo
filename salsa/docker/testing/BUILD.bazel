@@ -1,0 +1,16 @@
+load("//:bazel/python.bzl", "py_library")
+load("@pip_deps//:requirements.bzl", "requirement")
+
+package(default_visibility = [
+    "//examples:__subpackages__",
+    "//salsa:__subpackages__",
+])
+
+py_library(
+    name = "docker_service",
+    srcs = ["docker_service.py"],
+    deps = [
+        requirement("docker"),
+        "@bazel_tools//tools/python/runfiles",
+    ],
+)

@@ -35,8 +35,9 @@ RUN apt-get install -y python3.10-venv
 RUN /usr/bin/python3.10 -m ensurepip
 RUN /usr/bin/python3.10 -m pip install debugpy==1.5.1
 
-# Install netstat debug network connections
-RUN apt-get install net-tools
+# Install netstat and ping to debug network connections
+RUN apt-get install -y net-tools iputils-ping
+
 
 
 WORKDIR /workdir

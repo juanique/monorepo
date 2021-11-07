@@ -1,5 +1,8 @@
 load("@pip_deps//:requirements.bzl", "requirement")
 load("//:bazel/docker.bzl", "py_image")
+load("@io_bazel_rules_docker//container:container.bzl", "container_push")
+
+package(default_visibility = ["//examples:__subpackages__"])
 
 py_binary(
     name = "greeter_server",
@@ -24,4 +27,13 @@ py_image(
     name = "greeter_server_docker",
     binary = ":greeter_server",
     port = "50051",
+)
+
+container_push(
+    name = "greeter_server_docker_tag",
+    format = "Docker",
+    image = ":greeter_server_docker",
+    registry = "localhost:5000",
+    repository = "monorepo/greeter_server",
+    tag = "latest",
 )
