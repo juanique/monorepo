@@ -1,4 +1,5 @@
 load("@pip_deps//:requirements.bzl", "requirement")
+load("//:bazel/python.bzl", "pytest_test")
 
 py_binary(
     name = "version",
@@ -11,4 +12,9 @@ py_binary(
     deps = [
         requirement("rich"),
     ],
+)
+
+pytest_test(
+    name = "test_pytest",
+    srcs = ["test_pytest.py"],
 )
