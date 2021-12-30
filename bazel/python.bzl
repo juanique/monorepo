@@ -99,3 +99,21 @@ py_debug_wrapper = rule(
         "out": attr.output(mandatory = True),
     },
 )
+
+def pytest_test(name, srcs, deps = [], args = [], **kwargs):
+    native.py_test(
+        name = name,
+        srcs = [
+            "//bazel/workspace/tools/pytest:pytest_wrapper.py",
+        ] + srcs,
+        main = "//bazel/workspace/tools/pytest:pytest_wrapper.py",
+        args = [
+            "--capture=no",
+        ] + args + ["$(location :%s)" % x for x in srcs],
+        python_version = "PY3",
+        srcs_version = "PY3",
+        deps = deps + [
+            requirement("pytest"),
+        ],
+        **kwargs
+    )
