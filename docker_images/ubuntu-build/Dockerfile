@@ -38,6 +38,10 @@ RUN /usr/bin/python3.10 -m pip install debugpy==1.5.1
 # Install netstat and ping to debug network connections
 RUN apt-get install -y net-tools iputils-ping
 
+# Required for postgres clients.
+RUN apt-get update
+RUN apt-get install -y postgresql postgresql-contrib
+
 
 
 WORKDIR /workdir

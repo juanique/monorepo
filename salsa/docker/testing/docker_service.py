@@ -25,7 +25,7 @@ class DockerService:
         self.network = network
         self.stopping = False
 
-    def start(self) -> None:
+    def start(self, wait_until_ready: bool = True) -> None:
         """Stop or restart the docker container running the service."""
 
         self.stop()
@@ -43,9 +43,14 @@ class DockerService:
             detach=True,
         )
 
+        if wait_until_ready:
+            self.wait_until_ready()
+
+    def host(self) -> str:
+        return "localhost" if self.network in ["host", "bridge"] else self.container_name
+
     def hostport(self) -> str:
-        host = "localhost" if self.network in ["host", "bridge"] else self.container_name
-        return f"{host}:{self.port}"
+        return f"{self.host()}:{self.port}"
 
     def stop(self) -> None:
         """Stop the docker container running the service."""
@@ -56,3 +61,6 @@ class DockerService:
             container.remove(force=True)
         except docker.errors.NotFound:
             pass
+
+    def wait_until_ready(self) -> None:
+        """Services can override this method to wait until they are ready."""

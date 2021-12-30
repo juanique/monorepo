@@ -1,0 +1,33 @@
+load("@pip_deps//:requirements.bzl", "requirement")
+load("@io_bazel_rules_docker//container:container.bzl", "container_image")
+
+container_image(
+    name = "postgres_image",
+    base = "@postgres//image",
+    env = {
+        "POSTGRES_USER": "postgres",
+        "POSTGRES_PASSWORD": "postgres",
+        "POSTGRES_DB": "postgres",
+    },
+)
+
+py_library(
+    name = "postgres_service",
+    srcs = ["postgres_service.py"],
+    data = [
+        ":postgres_image.tar",
+    ],
+    deps = [
+        requirement("psycopg2"),
+        "//salsa/docker/testing:docker_service",
+    ],
+)
+
+py_test(
+    name = "postgres_image_test",
+    srcs = ["postgres_image_test.py"],
+    deps = [
+        ":postgres_service",
+        requirement("docker"),
+    ],
+)

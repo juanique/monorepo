@@ -196,3 +196,10 @@ container_pull(
     repository = "juanzolotoochin/ubuntu-base",
     tag = "latest",
 )
+
+container_pull(
+    name = "postgres",
+    registry = "docker.io",
+    repository = "postgres",
+    tag = "11.3-alpine",
+)

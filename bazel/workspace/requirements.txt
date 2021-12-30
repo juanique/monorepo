@@ -8,3 +8,4 @@ pydantic==1.8.2
 grpcio-reflection==1.41.0
 debugpy==1.5.1
 docker==5.0.3
+psycopg2==2.9.3
