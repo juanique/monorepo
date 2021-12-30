@@ -19,6 +19,7 @@ jobs:
       run: |
         echo "USER=$USER"
         echo "HOME=$HOME"
+        echo "Git Version=`git --version`"
     - name: Checkout
       run: |
         git config user.name mrGitHub
