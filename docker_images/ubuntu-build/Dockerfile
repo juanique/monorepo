@@ -40,7 +40,7 @@ RUN apt-get install -y net-tools iputils-ping
 
 # Required for postgres clients.
 RUN apt-get update
-RUN apt-get install -y postgresql postgresql-contrib
+RUN apt-get install -y postgresql postgresql-contrib libpq-dev
 
 
 
