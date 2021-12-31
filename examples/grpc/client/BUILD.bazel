@@ -21,9 +21,9 @@ py_test(
     srcs = ["greeter_client_integration_test.py"],
     data = [
         "//examples/grpc/server:greeter_server_docker.tar",
-        "//salsa/docker/testing:docker_service",
     ],
     deps = [
+        "//salsa/docker/testing:docker_service",
         requirement("docker"),
         ":greeter_client",
     ],

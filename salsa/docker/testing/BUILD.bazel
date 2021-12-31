@@ -2,6 +2,7 @@ load("//:bazel/python.bzl", "py_library")
 load("@pip_deps//:requirements.bzl", "requirement")
 
 package(default_visibility = [
+    "//engprod:__subpackages__",
     "//examples:__subpackages__",
     "//salsa:__subpackages__",
 ])

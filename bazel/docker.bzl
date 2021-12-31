@@ -15,7 +15,7 @@ def py_image(name, binary, port):
     app_layer(
         name = name,
         base = ":" + base_image_name,
-        binary = ":greeter_server",
+        binary = binary,
         create_empty_workspace_dir = True,
         entrypoint = ["/usr/bin/python3.10"],
     )
