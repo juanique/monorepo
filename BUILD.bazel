@@ -6,12 +6,11 @@ gazelle(
     name = "gazelle",
 )
 
-
 py_runtime(
-   name="python-3.10.0",
-   python_version="PY3",
-   visibility = ["//visibility:public"],
-   interpreter_path="/usr/bin/python3.10",
+    name = "python-3.10.0",
+    interpreter_path = "/usr/bin/python3.10",
+    python_version = "PY3",
+    visibility = ["//visibility:public"],
 )
 
 py_runtime_pair(
@@ -24,4 +23,16 @@ toolchain(
     name = "my_py_toolchain",
     toolchain = ":my_py_runtime_pair",
     toolchain_type = "@bazel_tools//tools/python:toolchain_type",
+)
+
+platform(
+    name = "docker_image_platform",
+    constraint_values = [
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:linux",
+    ],
+    exec_properties = {
+        "OSFamily": "Linux",
+        "container-image": "docker://docker.io/juanzolotoochin/ubuntu-build:latest",
+    },
 )
