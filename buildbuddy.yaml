@@ -7,5 +7,5 @@ actions:
       pull_request:
         branches:
           - "master"
-     bazel_commands:
+    bazel_commands:
       - "test //... --build_metadata=ROLE=CI --bes_backend=grpcs://remote.buildbuddy.io --bes_results_url=https://app.buildbuddy.io/invocation/" --remote_cache=grpcs://remote.buildbuddy.io
