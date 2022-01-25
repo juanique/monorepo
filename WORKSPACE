@@ -160,15 +160,13 @@ load(
 _py_image_repos()
 
 # mypy integration
-mypy_integration_version = "0.2.1"  # latest @ September 28th 2021
-
 http_archive(
     name = "mypy_integration",
-    sha256 = "e9701c43bdf4082b1719d91954b7838c85021e086a26e1b7c8adbe6fbff3c7ef",
-    url = "https://github.com/thundergolfer/bazel-mypy-integration/releases/download/{version}/bazel_mypy_integration-{version}.tar.gz".format(
-        version = mypy_integration_version,
-    ),
+    sha256 = "fc42524d636b138a1940780deb680cdbf318cda84b14b4b3e3ba3b715e2480cf",
+    strip_prefix = "bazel-mypy-integration-0.3.0",
+    url = "https://github.com/thundergolfer/bazel-mypy-integration/archive/refs/tags/0.3.0.tar.gz",
 )
+
 
 load(
     "@mypy_integration//repositories:repositories.bzl",

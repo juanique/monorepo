@@ -1,4 +1,12 @@
-FROM juanzolotoochin/ubuntu-base
+FROM ubuntu:20.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y software-properties-common gcc && \
+    add-apt-repository -y ppa:deadsnakes/ppa
+
+RUN apt-get update && apt-get install -y python3.10 python3.10-distutils python3.10-dev
+
 
 ### Python build dependencies
 ### TODO(juanique): Check if we need this.
@@ -33,6 +41,7 @@ RUN apt-get install -y docker-ce docker-ce-cli containerd.io
 ## Install PIP for python 3.10
 RUN apt-get install -y python3.10-venv
 RUN /usr/bin/python3.10 -m ensurepip
+RUN /usr/bin/python3.10 -m pip install --upgrade pip
 RUN /usr/bin/python3.10 -m pip install debugpy==1.5.1
 
 # Install netstat and ping to debug network connections
@@ -41,6 +50,10 @@ RUN apt-get install -y net-tools iputils-ping
 # Required for postgres clients.
 RUN apt-get update
 RUN apt-get install -y postgresql postgresql-contrib libpq-dev
+
+RUN apt-get update
+RUN apt-get install -y openjdk-11-jdk --fix-missing
+
 
 
 
