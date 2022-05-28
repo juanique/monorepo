@@ -65,23 +65,22 @@ go_repository(
 
 http_archive(
     name = "rules_proto",
-    sha256 = "66bfdf8782796239d3875d37e7de19b1d94301e8972b3cbd2446b332429b4df1",
-    strip_prefix = "rules_proto-4.0.0",
+    sha256 = "e017528fd1c91c5a33f15493e3a398181a9e821a804eb7ff5acdd1d2d6c2b18d",
+    strip_prefix = "rules_proto-4.0.0-3.20.0",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_proto/archive/refs/tags/4.0.0.tar.gz",
-        "https://github.com/bazelbuild/rules_proto/archive/refs/tags/4.0.0.tar.gz",
+        "https://github.com/bazelbuild/rules_proto/archive/refs/tags/4.0.0-3.20.0.tar.gz",
     ],
 )
 
 http_archive(
     name = "com_google_protobuf",
-    sha256 = "d0f5f605d0d656007ce6c8b5a82df3037e1d8fe8b121ed42e536f569dec16113",
-    strip_prefix = "protobuf-3.14.0",
+    strip_prefix = "protobuf-3.20.1",
     urls = [
-        "https://mirror.bazel.build/github.com/protocolbuffers/protobuf/archive/v3.14.0.tar.gz",
-        "https://github.com/protocolbuffers/protobuf/archive/v3.14.0.tar.gz",
+        "https://mirror.bazel.build/github.com/protocolbuffers/protobuf/archive/v3.20.1.tar.gz",
+        "https://github.com/protocolbuffers/protobuf/archive/v3.20.1.tar.gz",
     ],
 )
+
 
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 
@@ -100,9 +99,9 @@ pip_install(
 )
 
 # grpc
-_grpc_version = "1.41.0"
+_grpc_version = "1.45.0"
 
-_grpc_sha256 = "827b33199857246cc3af99a23f8cadf46ce0191bf699e10a1239fa10dc67b495"
+_grpc_sha256 = "b47345c06716cec93605edb4480ecf8b9e08587b9418a144192b1d1b5b387150"
 
 http_archive(
     name = "com_github_grpc_grpc",
@@ -160,15 +159,13 @@ load(
 _py_image_repos()
 
 # mypy integration
-mypy_integration_version = "0.2.1"  # latest @ September 28th 2021
-
 http_archive(
     name = "mypy_integration",
-    sha256 = "e9701c43bdf4082b1719d91954b7838c85021e086a26e1b7c8adbe6fbff3c7ef",
-    url = "https://github.com/thundergolfer/bazel-mypy-integration/releases/download/{version}/bazel_mypy_integration-{version}.tar.gz".format(
-        version = mypy_integration_version,
-    ),
+    sha256 = "fc42524d636b138a1940780deb680cdbf318cda84b14b4b3e3ba3b715e2480cf",
+    strip_prefix = "bazel-mypy-integration-0.3.0",
+    url = "https://github.com/thundergolfer/bazel-mypy-integration/archive/refs/tags/0.3.0.tar.gz",
 )
+
 
 load(
     "@mypy_integration//repositories:repositories.bzl",

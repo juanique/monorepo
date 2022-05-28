@@ -1,8 +1,12 @@
+import logging
+import sys
 import unittest
 import docker
 
 from salsa.docker.testing.docker_service import DockerService
 from examples.grpc.client.greeter_client import GreeterClient
+
+logger = logging.getLogger(__name__)
 
 
 class TestGreeterClient(unittest.TestCase):
@@ -27,4 +31,5 @@ class TestGreeterClient(unittest.TestCase):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     unittest.main()

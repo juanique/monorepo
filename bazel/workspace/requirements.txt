@@ -1,11 +1,11 @@
 rich==10.12.0
 GitPython
-grpcio==1.41.0
+grpcio==1.46.3
 click
 pytest
 pytest-pylint==0.18.0
 pydantic==1.8.2
-grpcio-reflection==1.41.0
+grpcio-reflection==1.46.3
 debugpy==1.5.1
 docker==5.0.3
 psycopg2==2.9.3
