@@ -1,7 +1,7 @@
 import logging
 import os
 import threading
-import time
+from typing import Optional
 
 import docker
 
@@ -29,9 +29,9 @@ class DockerService:
         self.port = port
         self.network = network
         self.stopping = False
-        self.thread = None
+        self.thread: Optional[threading.Thread] = None
 
-    def _thread_func(self):
+    def _thread_func(self) -> None:
         self.stop()
 
         tar_image = runfiles.Create().Rlocation(self.image_tar)
@@ -55,7 +55,8 @@ class DockerService:
 
     def start(self, wait_until_ready: bool = True) -> None:
         """Stop or restart the docker container running the service."""
-        self.thread = threading.Thread(target=self._thread_func, daemon=True).start()
+        self.thread = threading.Thread(target=self._thread_func, daemon=True)
+        self.thread.start()
 
         if wait_until_ready:
             self.wait_until_ready()
