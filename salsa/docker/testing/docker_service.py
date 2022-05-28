@@ -1,10 +1,15 @@
+import logging
 import os
+import threading
+import time
 
 import docker
 
 from bazel_tools.tools.python.runfiles import runfiles
 
 DEFAULT_NETWORK = os.environ.get("TESTING_DOCKER_SERVICES_NETWORK") or "br0"
+
+logger = logging.getLogger(__name__)
 
 
 class DockerService:
@@ -24,10 +29,9 @@ class DockerService:
         self.port = port
         self.network = network
         self.stopping = False
+        self.thread = None
 
-    def start(self, wait_until_ready: bool = True) -> None:
-        """Stop or restart the docker container running the service."""
-
+    def _thread_func(self):
         self.stop()
 
         tar_image = runfiles.Create().Rlocation(self.image_tar)
@@ -35,7 +39,7 @@ class DockerService:
             self.docker_client.images.load(tar_file)[0].tag(self.image_name, "latest")
 
         ports = None if self.network == "host" else {f"{self.port}": f"{self.port}"}
-        self.docker_client.containers.run(
+        container = self.docker_client.containers.run(
             self.image_name,
             name=self.container_name,
             ports=ports,
@@ -43,8 +47,19 @@ class DockerService:
             detach=True,
         )
 
+        for line in container.logs(stream=True):
+            logger.info(line)
+
+        logger.info("Ending deamon for %s", self.container_name)
+
+
+    def start(self, wait_until_ready: bool = True) -> None:
+        """Stop or restart the docker container running the service."""
+        self.thread = threading.Thread(target=self._thread_func, daemon=True).start()
+
         if wait_until_ready:
             self.wait_until_ready()
+
 
     def host(self) -> str:
         return "localhost" if self.network in ["host", "bridge"] else self.container_name
