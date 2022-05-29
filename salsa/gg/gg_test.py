@@ -7,7 +7,7 @@ import dataclasses
 
 from git import Repo
 
-from salsa.gg.gg import GitGud
+from salsa.gg.gg import ConfigNotFoundError, GitGud, InvalidOperationForRemote
 from salsa.util.subsets import subset_diff
 
 REPO_DIR_NAME = "repo_dir"
@@ -75,21 +75,30 @@ class TestGitGudWithRemote(TestGitGud):
         self.remote_filename = self.make_test_filename(self.remote_repo_path)
         append(self.remote_filename, "contents-from-remote")
         self.remote_gg.commit("Initial commit")
-        self.repo = Repo.clone_from(self.remote_repo_path, self.local_repo_path)
-        self.gg = GitGud.forWorkingDir(self.local_repo_path)
+        self.gg = GitGud.clone(self.remote_repo_path, self.local_repo_path)
 
     def test_clone(self) -> None:
         local_filename = os.path.join(self.local_repo_path, os.path.basename(self.remote_filename))
         self.assertEqual(["contents-from-remote\n"], get_file_contents(local_filename))
         self.gg.print_status()
 
+    def test_for_working_directory_not_git_directory(self) -> None:
+        with self.assertRaises(ConfigNotFoundError) as cm:
+            GitGud.for_working_dir("/tmp/i-dont-exist")
+        self.assertEqual("No GitGud state for /tmp/i-dont-exist.", str(cm.exception))
+
+    def test_for_working_directory(self) -> None:
+        gg = GitGud.for_working_dir(self.local_repo_path)
+        state = gg.get_summary()
+        self.assertEqual(state.commit_tree.description, "Initial commit")
+
     def test_amend_remote_fails(self) -> None:
         filename_1 = self.make_test_filename()
         append(filename_1, "testing1")
 
-        # TODO: Finish this
-        # with self.assertRaises(Exception) as e:
-        # self.gg.amend()
+        with self.assertRaises(InvalidOperationForRemote) as cm:
+            self.gg.amend()
+        self.assertIn("Cannot amend remote commits", str(cm.exception))
 
 
 class TestGitGudLocalOnly(TestGitGud):
@@ -207,6 +216,30 @@ class TestGitGudLocalOnly(TestGitGud):
 
         self.assertEqual(c2.id, self.gg.head().id)
         self.assertFalse(c2.needs_evolve)
+
+    def test_dirty_state(self) -> None:
+        """Untracked and modified files should be shown in the dirty state."""
+
+        # Add an untracked file
+        filename = self.make_test_filename()
+        relative_filename = os.path.relpath(filename, self.local_repo_path)
+
+        append(filename, "testing1")
+        dirty_state = self.gg.get_dirty_state()
+        self.assertIn(relative_filename, dirty_state.untracked_files)
+        self.assertEqual([], dirty_state.modified_files)
+
+        # After commmit we should be back in a clean state
+        self.gg.commit("My first commit")
+        dirty_state = self.gg.get_dirty_state()
+        self.assertEqual([], dirty_state.untracked_files)
+        self.assertEqual([], dirty_state.modified_files)
+
+        # Modify a file
+        append(filename, "testing1")
+        dirty_state = self.gg.get_dirty_state()
+        self.assertEqual([], dirty_state.untracked_files)
+        self.assertEqual([relative_filename], dirty_state.modified_files)
 
 
 if __name__ == "__main__":
