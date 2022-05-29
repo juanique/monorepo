@@ -1,8 +1,11 @@
-build --bes_results_url=https://app.buildbuddy.io/invocation/
 build --bes_backend=grpcs://remote.buildbuddy.io
 build --bes_results_url=https://app.buildbuddy.io/invocation/
 build --build_metadata=REPO_URL=https://github.com/juanique/monorepo.git
-build --keep_backend_build_event_connections_alive
+build --keep_backend_build_event_connections_alive=false
+
+# We'll enable this someday and rely on MODULE.bazel
+# build --experimental_enable_bzlmod
+
 
 build:remote --remote_header=x-buildbuddy-api-key=WIbWV8AieSxh4RlxUiRk
 build:remote --remote_cache=grpcs://remote.buildbuddy.io
