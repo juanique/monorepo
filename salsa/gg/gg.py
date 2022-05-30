@@ -21,6 +21,18 @@ class ConfigNotFoundError(Exception):
     pass
 
 
+class InvalidOperationForRemote(Exception):
+    pass
+
+
+class DirtyState(BaseModel):
+    """Exposes data of the diff between current state of the filesystem and
+    locally or remotely commited state."""
+
+    untracked_files: List[str] = []
+    modified_files: List[str] = []
+
+
 class CommitSummary(BaseModel):
     id: str
     hash: str
@@ -53,6 +65,7 @@ class MergeConflictState(BaseModel):
 
 
 class RepoState(BaseModel):
+    repo_dir: str
     head: str
     root: str
     commits: Dict[str, GudCommit] = {}
@@ -60,7 +73,7 @@ class RepoState(BaseModel):
 
 
 def get_branch_name(string: str) -> str:
-    return string.split("\n")[0][0:20].lower().replace(" ", "_")
+    return string.split("\n")[0][0:20].lower().replace(" ", "_").replace(".", "")
 
 
 def get_oneliner(string: str) -> str:
@@ -71,9 +84,9 @@ class GitGud:
     repo: Repo
     state: RepoState
 
-    def __init__(self, repo: Repo, root: GudCommit):
+    def __init__(self, repo: Repo, state: RepoState):
         self.repo = repo
-        self.state = RepoState(root=root.id, head=root.id, commits={root.id: root})
+        self.state = state
 
     def get_summary(self) -> RepoSummary:
         return RepoSummary(commit_tree=self.get_commit_summary(self.state.root))
@@ -90,44 +103,22 @@ class GitGud:
         return summary
 
     @staticmethod
-    def load_state_for_directory(directory: str) -> Dict:
-        """Load GitGud repo state from the given directory."""
-
+    def state_filename(directory: str) -> str:
         (_, dirname) = os.path.split(directory)
         hash = hashlib.sha1(bytes(directory, encoding="utf8")).hexdigest()
         filename = f"{dirname}_{hash}"
-        config_file = os.path.join(CONFIGS_ROOT, filename)
-        if not os.path.exists(config_file):
-            raise ConfigNotFoundError(f"Not found {config_file}")
+        return os.path.join(CONFIGS_ROOT, filename)
 
-        with open(config_file, encoding="utf-8") as f:
-            return json.loads(f.read())
-
-    @staticmethod
-    def for_clean_repo(repo: Repo) -> "GitGud":
-        commit_msg = "Initial commit"
-        commit = repo.index.commit(commit_msg)
-        branch_name = get_branch_name(commit_msg)
-        root = GudCommit(id=branch_name, hash=commit.hexsha, description=commit_msg)
-        return GitGud(repo, root)
+    def save_state(self) -> None:
+        os.makedirs(CONFIGS_ROOT, exist_ok=True)
+        state_filename = GitGud.state_filename(self.state.repo_dir)
+        with open(state_filename, "w", encoding="utf-8") as out_file:
+            json.dump(self.state.dict(), out_file, sort_keys=True, indent=4, ensure_ascii=False)
 
     @staticmethod
-    def forWorkingDir(working_dir: str) -> "GitGud":
-        """Initialize a new GitGud instance from the given directory."""
-
-        repo = Repo(working_dir)
-        branch = repo.active_branch
-
-        # repo_state = GitGud.load_state_for_directory(working_dir)
-
-        up_to_date = True
-        if branch.commit.hexsha != branch.tracking_branch().commit.hexsha:
-            up_to_date = False
-
-        if not up_to_date or repo.is_dirty():
-            raise InitializationError(
-                "Cannnot initialize gg repo on top of local changes, sync to " "remote head first."
-            )
+    def clone(remote_repo_path: str, local_repo_path: str) -> "GitGud":
+        """Clone an external repo into the given path."""
+        repo = Repo.clone_from(remote_repo_path, local_repo_path)
 
         root = GudCommit(
             id=repo.head.ref.name,
@@ -135,7 +126,43 @@ class GitGud:
             description=repo.head.commit.message,
             remote=True,
         )
-        return GitGud(repo=repo, root=root)
+        state = RepoState(
+            repo_dir=local_repo_path, root=root.id, head=root.id, commits={root.id: root}
+        )
+        gg = GitGud(repo, state)
+        gg.save_state()
+        return gg
+
+    @staticmethod
+    def load_state_for_directory(directory: str) -> RepoState:
+        """Load GitGud repo state from the given directory."""
+
+        state_file = GitGud.state_filename(directory)
+        if not os.path.exists(state_file):
+            raise ConfigNotFoundError(f"No GitGud state for {directory}.")
+
+        with open(state_file, encoding="utf-8") as f:
+            obj = json.loads(f.read())
+            return RepoState(**obj)
+
+    @staticmethod
+    def for_clean_repo(repo: Repo) -> "GitGud":
+        commit_msg = "Initial commit"
+        commit = repo.index.commit(commit_msg)
+        branch_name = get_branch_name(commit_msg)
+        root = GudCommit(id=branch_name, hash=commit.hexsha, description=commit_msg)
+        state = RepoState(
+            repo_dir=repo.working_tree_dir, root=root.id, head=root.id, commits={root.id: root}
+        )
+        return GitGud(repo, state)
+
+    @staticmethod
+    def for_working_dir(working_dir: str) -> "GitGud":
+        """Resume a GitGud instance for a previously cloned directory."""
+
+        repo_state = GitGud.load_state_for_directory(working_dir)
+        repo = Repo(working_dir)
+        return GitGud(repo, repo_state)
 
     def traverse(
         self, commit_id: str, func: Callable[[GudCommit], None], skip: bool = False
@@ -190,6 +217,7 @@ class GitGud:
         logging.info("Created commit (%s): %s", gud_commit.id, get_oneliner(commit_msg))
         self.state.commits[gud_commit.id] = gud_commit
 
+        self.save_state()
         return gud_commit
 
     def amend(self) -> None:
@@ -200,6 +228,9 @@ class GitGud:
 
         if not self.head():
             return
+
+        if self.head().remote:
+            raise InvalidOperationForRemote("Cannot amend remote commits.")
 
         self.add_changes_to_index()
         self.repo.git.commit("--amend", "--no-edit")
@@ -261,6 +292,7 @@ class GitGud:
     def update(self, commit_id: str) -> None:
         self.repo.git.checkout(commit_id)
         self.state.head = commit_id
+        self.save_state()
 
     def rebase_continue(self) -> None:
         """Accept the current changes and continue rebase."""
@@ -283,13 +315,26 @@ class GitGud:
 
     def print_status(self) -> None:
         """Print the state of the local branches."""
+        print("")
+        dirty_state = self.get_dirty_state()
+
+        if dirty_state.modified_files:
+            print("Modified files:")
+            for filename in dirty_state.modified_files:
+                print(f" [bold red]{filename}[/bold red]")
+            print("")
+
+        if dirty_state.untracked_files:
+            print("Untracked files:")
+            for filename in dirty_state.untracked_files:
+                print(f" [bold red]{filename}[/bold red]")
+            print("")
 
         if self.state.merge_conflict_state:
             print("[bold red]Rebase in progress[/bold red]: stopped due to merge conflict.")
-        print("")
+            print("")
         tree = self.get_tree()
         print(tree)
-        print("")
         if self.state.merge_conflict_state:
             print("Files with merge conflict:")
 
@@ -302,6 +347,7 @@ class GitGud:
             print("")
             print("To abort run:")
             print(" [bold]gg rebase --abort[/bold]")
+        print("")
 
     def get_tree(self, commit: GudCommit = None, tree: Tree = None) -> Tree:
         """Return a tree representation of the local gitgud state for printing."""
@@ -327,7 +373,7 @@ class GitGud:
         if commit.remote:
             remote = " [bold yellow](Remote Head)[/bold yellow]"
 
-        line = f"[bold {color}]{commit.hash}[/bold {color}]"
+        line = f"[bold {color}]{commit.id}[/bold {color}]"
         line += f"{needs_evolve}{conflict}{remote}: {commit.get_oneliner()}"
 
         if not tree:
@@ -339,3 +385,13 @@ class GitGud:
             self.get_tree(self.get_commit(child_id), branch)
 
         return branch
+
+    def get_dirty_state(self) -> DirtyState:
+        state = DirtyState()
+        for item in self.repo.index.diff(None):
+            state.modified_files.append(item.a_path)
+
+        for untracked in self.repo.untracked_files:
+            state.untracked_files.append(untracked)
+
+        return state
