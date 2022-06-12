@@ -45,6 +45,11 @@ class RepoSummary(BaseModel):
     commit_tree: CommitSummary
 
 
+class Snapshot(BaseModel):
+    hash: str
+    description: str
+
+
 class GudCommit(BaseModel):
     id: str
     hash: str
@@ -52,10 +57,16 @@ class GudCommit(BaseModel):
     needs_evolve: bool = False
     remote: bool = False
     children: List[str] = []
-    old_hash: Optional[str] = None
+    old_hash: Optional[str]
+
+    history_branch: Optional[str]
+    snapshots: List[Snapshot] = []
 
     def get_oneliner(self) -> str:
         return get_oneliner(self.description)
+
+    def get_metadata_for_snapshot(self) -> Snapshot:
+        return Snapshot(hash=self.hash, description=self.description)
 
 
 class MergeConflictState(BaseModel):
@@ -183,8 +194,6 @@ class GitGud:
         """Equivalent of git add ."""
 
         index = self.repo.index
-        for (path, stage), entry in index.entries.items():
-            logging.info("file in index: path: %s, stage: %s, entry: %s", path, stage, entry)
 
         for item in self.repo.index.diff(None):
             logging.info("Adding modified file: %s", item.a_path)
@@ -199,6 +208,7 @@ class GitGud:
 
         logging.info("Creating new commit: %s", get_oneliner(commit_msg))
         branch_name = get_branch_name(commit_msg)
+        history_branch_name = f"history_{branch_name}"
 
         if self.head():
             new_branch = self.repo.create_head(branch_name)
@@ -208,7 +218,13 @@ class GitGud:
             self.add_changes_to_index()
 
         commit = self.repo.index.commit(commit_msg)
-        gud_commit = GudCommit(id=branch_name, hash=commit.hexsha, description=commit_msg)
+        gud_commit = GudCommit(
+            id=branch_name,
+            history_branch=history_branch_name,
+            hash=commit.hexsha,
+            description=commit_msg,
+        )
+        gud_commit.snapshots.append(gud_commit.get_metadata_for_snapshot())
 
         if self.head():
             self.head().children.append(gud_commit.id)
@@ -217,10 +233,44 @@ class GitGud:
         logging.info("Created commit (%s): %s", gud_commit.id, get_oneliner(commit_msg))
         self.state.commits[gud_commit.id] = gud_commit
 
+        logging.info("Creating history branch: %s", history_branch_name)
+        self.repo.create_head(history_branch_name)
+
         self.save_state()
         return gud_commit
 
-    def amend(self) -> None:
+    def restore_snapshot(self, snapshot_hash: str) -> None:
+        for snapshot in self.head().snapshots:
+            if snapshot.hash == snapshot_hash:
+                break
+
+        if not snapshot:
+            raise ValueError("Snapshot not found: %s", snapshot_hash)
+
+        logging.info("Restoring snapshot %s - %s", snapshot.hash, snapshot.description)
+        self.repo.git.checkout(snapshot.hash, ".")
+        self.amend(f"Restore snapshot {snapshot.hash} - {snapshot.description}")
+
+    def snapshot(self, message: str = "") -> None:
+        self.repo.git.checkout(self.head().history_branch)
+        self.repo.git.checkout(self.head().id, ".")
+        self.add_changes_to_index()
+        snapshot_message = f"Snapshot #{len(self.head().snapshots)}"
+        if message:
+            snapshot_message += f": {message}"
+        history_commit = self.repo.index.commit(snapshot_message)
+        new_snapshot = Snapshot(hash=history_commit.hexsha, description=snapshot_message)
+        logging.info(
+            "Taking snapshot for %s: %s - %s",
+            self.head().id,
+            new_snapshot.hash,
+            new_snapshot.description,
+        )
+        self.head().snapshots.append(new_snapshot)
+        self.repo.git.checkout(self.head().id)
+        self.save_state()
+
+    def amend(self, message: str = "") -> None:
         """Amend the commit with current changes, updates hash.
 
         All descendants of this commit are marked as needing evolve.
@@ -232,6 +282,8 @@ class GitGud:
         if self.head().remote:
             raise InvalidOperationForRemote("Cannot amend remote commits.")
 
+        logging.info("Amending commit %s", self.head().id)
+
         self.add_changes_to_index()
         self.repo.git.commit("--amend", "--no-edit")
 
@@ -242,6 +294,7 @@ class GitGud:
             c.needs_evolve = True
 
         self.traverse(self.head().id, f, skip=True)
+        self.snapshot(message)
 
     def merge_conflict_begin(
         self, current: GudCommit, incoming: GudCommit, files: List[str]
@@ -288,6 +341,9 @@ class GitGud:
             return
 
         self.update(child.id)
+        self.head().needs_evolve = False
+        self.head().hash = self.repo.head.commit.hexsha
+        self.snapshot()
 
     def update(self, commit_id: str) -> None:
         self.repo.git.checkout(commit_id)
@@ -369,12 +425,17 @@ class GitGud:
             if self.state.merge_conflict_state and conflict_type:
                 conflict = f" [bold red]({conflict_type})[/bold red]"
 
-        remote = ""
+        name_annotations = ""
         if commit.remote:
-            remote = " [bold yellow](Remote Head)[/bold yellow]"
+            name_annotations = " [bold yellow](Remote Head)[/bold yellow]"
+        if commit == self.head():
+            name_annotations = " [bold yellow](Current)[/bold yellow]"
 
         line = f"[bold {color}]{commit.id}[/bold {color}]"
-        line += f"{needs_evolve}{conflict}{remote}: {commit.get_oneliner()}"
+        line += f"{needs_evolve}{conflict}{name_annotations}: {commit.get_oneliner()}"
+        for snapshot in commit.snapshots:
+            vertical = "│" if commit.children else " "
+            line += f"\n{vertical} [grey37]{snapshot.hash} : {snapshot.description}[/grey37]"
 
         if not tree:
             branch = Tree(line)
