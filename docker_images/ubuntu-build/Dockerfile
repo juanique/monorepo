@@ -45,6 +45,7 @@ RUN apt-get install -y docker-ce docker-ce-cli containerd.io
 RUN apt-get purge -y libpython3.10-minimal libpython3.10-stdlib libpython3.10 libpython3.10-dev python3.10 python3.10-minimal python3.10-dev python3.10-venv
 RUN apt-get install -y python3.10
 RUN apt-get install -y python3.10-venv
+RUN apt-get install -y python3.10-dev
 RUN /usr/bin/python3.10 -m ensurepip
 RUN /usr/bin/python3.10 -m pip install --upgrade pip
 RUN /usr/bin/python3.10 -m pip install debugpy==1.5.1
