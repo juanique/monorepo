@@ -1,0 +1,20 @@
+load("//:bazel/python.bzl", "py_library", "py_test")
+
+package(default_visibility = ["//visibility:public"])
+
+py_library(
+    name = "environ_ctx",
+    srcs = [
+        "environ_ctx.py",
+    ],
+    deps = [
+    ],
+)
+
+py_test(
+    name = "environ_ctx_test",
+    srcs = ["environ_ctx_test.py"],
+    deps = [
+        ":environ_ctx",
+    ],
+)

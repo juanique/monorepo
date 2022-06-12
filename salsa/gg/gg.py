@@ -10,6 +10,8 @@ from pydantic import BaseModel
 from rich import print
 from rich.tree import Tree
 
+from salsa.os.environ_ctx import modified_environ
+
 CONFIGS_ROOT = os.path.expanduser("~/.config/gg")
 
 
@@ -332,7 +334,7 @@ class GitGud:
             files = []
             for l in lines:
                 if "CONFLICT" in l:
-                    files.append(l.split(" ")[-1])
+                    files.append(l.split(" ")[-1].replace("'", ""))
 
             if not files:
                 raise Exception(f"Unknown error: {e.stdout}") from e
@@ -358,10 +360,13 @@ class GitGud:
         for file in self.state.merge_conflict_state.files:
             self.repo.git.add(file)
 
-        self.repo.git.rebase("--continue")
+        with modified_environ(GIT_EDITOR="true"):
+            self.repo.git.rebase("--continue")
+
         if self.state.merge_conflict_state:
             self.get_commit(self.state.merge_conflict_state.incoming).needs_evolve = False
             self.update(self.state.merge_conflict_state.incoming)
+            self.head().hash = self.repo.head.commit.hexsha
             self.state.merge_conflict_state = None
 
     def get_commit(self, id: str) -> GudCommit:

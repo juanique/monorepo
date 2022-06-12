@@ -194,6 +194,7 @@ class TestGitGudLocalOnly(TestGitGud):
         c1 = self.gg.commit("My first commit")
         append(filename, "testing2")
         c2 = self.gg.commit("My second commit")
+        c2_original_hash = c2.hash
 
         self.gg.update(c1.id)
         append(filename, "testing3")
@@ -221,7 +222,7 @@ class TestGitGudLocalOnly(TestGitGud):
         self.assertFalse(c2.needs_evolve)
 
         # Hash of commit two should have changed
-        self.assertNotEqual(c2.hash, self.gg.get_commit(c2.id).hash)
+        self.assertNotEqual(c2_original_hash, self.gg.get_commit(c2.id).hash)
 
     def test_dirty_state(self) -> None:
         """Untracked and modified files should be shown in the dirty state."""
