@@ -14,6 +14,14 @@ py_binary(
     ],
 )
 
+py_binary(
+    name = "github_example",
+    srcs = ["github_example.py"],
+    deps = [
+        requirement("PyGithub"),
+    ],
+)
+
 pytest_test(
     name = "test_pytest",
     srcs = ["test_pytest.py"],

@@ -1,3 +1,4 @@
+import logging
 import os
 import shutil
 import unittest
@@ -106,6 +107,8 @@ class TestGitGudLocalOnly(TestGitGud):
         super().setUp()
 
         make_directory(self.local_repo_path)
+        logging.info("Test repo is in %s", self.local_repo_path)
+
         self.repo = Repo.init(self.local_repo_path)
         self.repo.git.config("user.email", "test@example.com")
         self.repo.git.config("user.name", "test_user")
@@ -191,6 +194,7 @@ class TestGitGudLocalOnly(TestGitGud):
         c1 = self.gg.commit("My first commit")
         append(filename, "testing2")
         c2 = self.gg.commit("My second commit")
+        c2_original_hash = c2.hash
 
         self.gg.update(c1.id)
         append(filename, "testing3")
@@ -207,7 +211,7 @@ class TestGitGudLocalOnly(TestGitGud):
             "testing3\n"
             "=======\n"
             "testing2\n"
-            ">>>>>>> My second commit\n"
+            f">>>>>>> {c2.hash[0:7]} (My second commit)\n"
         )
 
         self.assertEqual(expected, "".join(get_file_contents(filename)))
@@ -216,6 +220,9 @@ class TestGitGudLocalOnly(TestGitGud):
 
         self.assertEqual(c2.id, self.gg.head().id)
         self.assertFalse(c2.needs_evolve)
+
+        # Hash of commit two should have changed
+        self.assertNotEqual(c2_original_hash, self.gg.get_commit(c2.id).hash)
 
     def test_dirty_state(self) -> None:
         """Untracked and modified files should be shown in the dirty state."""
@@ -241,6 +248,60 @@ class TestGitGudLocalOnly(TestGitGud):
         self.assertEqual([], dirty_state.untracked_files)
         self.assertEqual([relative_filename], dirty_state.modified_files)
 
+    def test_amend_snapshot(self) -> None:
+        """Amending commits creates snapshots.
+
+        $ gg commit -m"Commit message"
+        ... change files
+        $ gg amend
+        ... change files
+        $ gg amend
+        $ gg status # shows snapshots
+        $ gg restore <snapshot-hash>
+        """
+
+        filename = self.make_test_filename()
+
+        # First commit is snapshot 0
+        append(filename, "testing1")
+        self.gg.commit("My first commit")
+        self.assertEqual(len(self.gg.head().snapshots), 1)
+
+        # Amend is snapshot 1
+        append(filename, "testing2")
+        self.gg.amend()
+        self.assertEqual(len(self.gg.head().snapshots), 2)
+
+        # Seconda amend is snapshot 2
+        append(filename, "testing3")
+        self.gg.amend()
+        self.assertEqual(len(self.gg.head().snapshots), 3)
+
+        # We restore to snapshot 1
+        self.gg.restore_snapshot(self.gg.head().snapshots[1].hash)
+
+        expected = "testing1\ntesting2\n"
+        self.assertEqual(expected, "".join(get_file_contents(filename)))
+
+        # We restore to snapshot 0
+        self.gg.restore_snapshot(self.gg.head().snapshots[0].hash)
+
+        expected = "testing1\n"
+        self.assertEqual(expected, "".join(get_file_contents(filename)))
+
+        # Each restore creates a new snapshot
+        self.assertEqual(len(self.gg.head().snapshots), 5)
+
+        # We restore to snapshot 2
+        self.gg.restore_snapshot(self.gg.head().snapshots[2].hash)
+
+        expected = "testing1\ntesting2\ntesting3\n"
+        self.assertEqual(expected, "".join(get_file_contents(filename)))
+
+        # Each restore creates a new snapshot
+        self.assertEqual(len(self.gg.head().snapshots), 6)
+
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     unittest.main()

@@ -38,7 +38,7 @@ jobs:
         --test_env=TESTING_DOCKER_SERVICES_NETWORK=${{ job.container.network }}
         --build_metadata=ROLE=CI
         --remote_executor=""
-        --bes_backend=grpcs://cloud.buildbuddy.io
+        --bes_backend=grpcs://remote.buildbuddy.io
         --bes_results_url=https://app.buildbuddy.io/invocation/
         --build_metadata=USER=ci_github_${{ github.event_name }}
         --disk_cache=/workdir/bazel-cache

@@ -15,7 +15,9 @@ RUN apt-get install -y build-essential checkinstall
 RUN apt-get install -y libffi-dev zlib1g-dev
 
 ### Git is used to download golang dependencies
-RUN apt-get install -y git-all
+RUN add-apt-repository ppa:git-core/ppa
+RUN apt update
+RUN apt -y install git
 
 ## Install Bazel
 RUN apt-get -y install wget
@@ -39,7 +41,11 @@ RUN apt-get update
 RUN apt-get install -y docker-ce docker-ce-cli containerd.io
 
 ## Install PIP for python 3.10
+# purge? IDK, but https://askubuntu.com/questions/1402478/problem-with-upgrading-packages-ubuntu-20-04/1402498#1402498
+RUN apt-get purge -y libpython3.10-minimal libpython3.10-stdlib libpython3.10 libpython3.10-dev python3.10 python3.10-minimal python3.10-dev python3.10-venv
+RUN apt-get install -y python3.10
 RUN apt-get install -y python3.10-venv
+RUN apt-get install -y python3.10-dev
 RUN /usr/bin/python3.10 -m ensurepip
 RUN /usr/bin/python3.10 -m pip install --upgrade pip
 RUN /usr/bin/python3.10 -m pip install debugpy==1.5.1

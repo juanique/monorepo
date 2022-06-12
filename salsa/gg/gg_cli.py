@@ -18,10 +18,16 @@ def init() -> None:
 
 
 @click.command()
-@click.argument("commit")
-def update(commit_message: str) -> None:
+def evolve() -> None:
     gg = GitGud.for_working_dir(os.getcwd())
-    gg.update(commit_message)
+    gg.evolve()
+
+
+@click.command()
+@click.argument("commit_id")
+def update(commit_id: str) -> None:
+    gg = GitGud.for_working_dir(os.getcwd())
+    gg.update(commit_id)
 
 
 @click.command()
@@ -29,6 +35,13 @@ def update(commit_message: str) -> None:
 def commit(message: str) -> None:
     gg = GitGud.for_working_dir(os.getcwd())
     gg.commit(message)
+
+
+@click.command()
+@click.option("-m", "--message")
+def amend(message: str = "") -> None:
+    gg = GitGud.for_working_dir(os.getcwd())
+    gg.amend(message)
 
 
 @click.command()
@@ -74,6 +87,8 @@ cli.add_command(test)
 cli.add_command(clone)
 cli.add_command(status)
 cli.add_command(commit)
+cli.add_command(amend)
+cli.add_command(evolve)
 
 if __name__ == "__main__":
     cli()
