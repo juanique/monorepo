@@ -1,10 +1,13 @@
 # coding: utf-8
+"""From https://github.com/laurent-laporte-pro/stackoverflow-q2059482 - MIT LICENSE"""
+
 import contextlib
 import os
+from typing import Iterator
 
 
 @contextlib.contextmanager
-def modified_environ(*remove, **update):
+def modified_environ(*remove: str, **update: str) -> Iterator:
     """
     Temporarily updates the ``os.environ`` dictionary in-place.
     The ``os.environ`` dictionary is updated in-place so that the modification
@@ -14,7 +17,7 @@ def modified_environ(*remove, **update):
     """
     env = os.environ
     update = update or {}
-    remove = remove or []
+    remove = remove or ()
 
     # List of environment variables being updated or removed.
     stomped = (set(update.keys()) | set(remove)) & set(env.keys())
@@ -25,8 +28,10 @@ def modified_environ(*remove, **update):
 
     try:
         env.update(update)
-        [env.pop(k, None) for k in remove]
+        for k in remove:
+            env.pop(k, None)
         yield
     finally:
         env.update(update_after)
-        [env.pop(k) for k in remove_after]
+        for k in remove_after:
+            env.pop(k)

@@ -107,7 +107,7 @@ class TestGitGudLocalOnly(TestGitGud):
         super().setUp()
 
         make_directory(self.local_repo_path)
-        logging.info(f"Test repo is in {self.local_repo_path}")
+        logging.info("Test repo is in %s", self.local_repo_path)
 
         self.repo = Repo.init(self.local_repo_path)
         self.repo.git.config("user.email", "test@example.com")
@@ -280,7 +280,7 @@ class TestGitGudLocalOnly(TestGitGud):
         # We restore to snapshot 1
         self.gg.restore_snapshot(self.gg.head().snapshots[1].hash)
 
-        expected = "testing1\n" "testing2\n"
+        expected = "testing1\ntesting2\n"
         self.assertEqual(expected, "".join(get_file_contents(filename)))
 
         # We restore to snapshot 0
@@ -295,7 +295,7 @@ class TestGitGudLocalOnly(TestGitGud):
         # We restore to snapshot 2
         self.gg.restore_snapshot(self.gg.head().snapshots[2].hash)
 
-        expected = "testing1\n" "testing2\n" "testing3\n"
+        expected = "testing1\ntesting2\ntesting3\n"
         self.assertEqual(expected, "".join(get_file_contents(filename)))
 
         # Each restore creates a new snapshot

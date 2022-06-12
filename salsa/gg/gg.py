@@ -242,18 +242,23 @@ class GitGud:
         return gud_commit
 
     def restore_snapshot(self, snapshot_hash: str) -> None:
+        """Restore the state of the given commit to the specified snapshot."""
+
+        snapshot = None
         for snapshot in self.head().snapshots:
             if snapshot.hash == snapshot_hash:
                 break
 
         if not snapshot:
-            raise ValueError("Snapshot not found: %s", snapshot_hash)
+            raise ValueError(f"Snapshot not found: {snapshot_hash}")
 
         logging.info("Restoring snapshot %s - %s", snapshot.hash, snapshot.description)
         self.repo.git.checkout(snapshot.hash, ".")
         self.amend(f"Restore snapshot {snapshot.hash} - {snapshot.description}")
 
     def snapshot(self, message: str = "") -> None:
+        """Take a snapshot of the current commit state and add it to the history branch."""
+
         self.repo.git.checkout(self.head().history_branch)
         self.repo.git.checkout(self.head().id, ".")
         self.add_changes_to_index()
