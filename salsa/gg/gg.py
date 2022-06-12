@@ -198,7 +198,9 @@ class GitGud:
         index = self.repo.index
 
         for item in self.repo.index.diff(None):
-            logging.info("Adding modified file: %s", item.a_path)
+            if item.change_type == "D":
+                index.remove(item.a_path)
+                continue
             index.add(item.a_path)
 
         for untracked in self.repo.untracked_files:

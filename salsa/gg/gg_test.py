@@ -114,6 +114,15 @@ class TestGitGudLocalOnly(TestGitGud):
         self.repo.git.config("user.name", "test_user")
         self.gg = GitGud.for_clean_repo(self.repo)
 
+    def test_commit_remove_file(self) -> None:
+        """Commits correctly pick up deleted files."""
+        filename_1 = self.make_test_filename()
+        append(filename_1, "testing1")
+        self.gg.commit("My first commit")
+
+        os.remove(filename_1)
+        self.gg.commit("Delete file")
+
     def test_commit(self) -> None:
         """Commits can be created on top of each other.
 
