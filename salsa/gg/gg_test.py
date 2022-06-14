@@ -233,6 +233,59 @@ class TestGitGudLocalOnly(TestGitGud):
         # Hash of commit two should have changed
         self.assertNotEqual(c2_original_hash, self.gg.get_commit(c2.id).hash)
 
+    def test_amend_evolve_single_line_with_conflict_recursive(self) -> None:
+        """Can update old commits and propagate changes on a linear chain
+        recursively with merge conflicts."""
+
+        filename_1 = self.make_test_filename()
+        filename_2 = self.make_test_filename()
+        filename_3 = self.make_test_filename()
+
+        append(filename_1, "testing1")
+        c1 = self.gg.commit("My first commit")
+
+        append(filename_1, "testing1.1")
+        c2 = self.gg.commit("My second commit")
+
+        append(filename_2, "testing1.1.1")
+        c3 = self.gg.commit("My third commit")
+
+        append(filename_3, "testing1.1.1.1")
+        c4 = self.gg.commit("My fourth commit")
+
+        self.gg.update(c1.id)
+        append(filename_1, "more testing1")
+        self.gg.amend()
+
+        self.gg.evolve()
+
+        # Merge conflict
+        expected = (
+            "testing1\n"
+            "<<<<<<< HEAD\n"
+            "more testing1\n"
+            "=======\n"
+            "testing1.1\n"
+            f">>>>>>> {c2.hash[0:7]} (My second commit)\n"
+        )
+
+        self.assertEqual(expected, "".join(get_file_contents(filename_1)))
+        set_file_contents(filename_1, "testing1\nmore testing1\ntesting1.1")
+
+        logging.info("User resolves merge conflict")
+        self.gg.rebase_continue()
+
+        expected = "testing1\nmore testing1\ntesting1.1\n"
+
+        self.gg.update(c2.id)
+        self.assertEqual(expected, "".join(get_file_contents(filename_1)))
+
+        self.gg.update(c3.id)
+        self.assertEqual(expected, "".join(get_file_contents(filename_1)))
+
+        self.gg.update(c4.id)
+        self.assertEqual(expected, "".join(get_file_contents(filename_1)))
+
     def test_dirty_state(self) -> None:
         """Untracked and modified files should be shown in the dirty state."""
 
@@ -309,6 +362,54 @@ class TestGitGudLocalOnly(TestGitGud):
 
         # Each restore creates a new snapshot
         self.assertEqual(len(self.gg.head().snapshots), 6)
+
+    def test_amend_multiple_children(self) -> None:
+        """Can update old commits and propagate changes on multiple children."""
+        filename_1 = self.make_test_filename()
+        filename_2 = self.make_test_filename()
+        filename_3 = self.make_test_filename()
+        filename_4 = self.make_test_filename()
+
+        append(filename_1, "testing1")
+        c1 = self.gg.commit("My first commit")
+
+        append(filename_2, "testing1.1")
+        c2 = self.gg.commit("My second commit")
+
+        self.gg.update(c1.id)
+        append(filename_3, "testing1.2")
+        c3 = self.gg.commit("My third commit")
+
+        append(filename_4, "testing1.2.1")
+        c4 = self.gg.commit("My fourth commit")
+
+        self.gg.update(c1.id)
+        append(filename_1, "stuff to amend")
+
+        self.gg.amend()
+        self.assertTrue(c2.needs_evolve)
+        self.assertTrue(c3.needs_evolve)
+        self.assertTrue(c4.needs_evolve)
+
+        self.gg.evolve()
+
+        self.gg.update(c2.id)
+        expected = "testing1\nstuff to amend\n"
+        self.assertEqual(expected, "".join(get_file_contents(filename_1)))
+        expected = "testing1.1\n"
+        self.assertEqual(expected, "".join(get_file_contents(filename_2)))
+
+        self.gg.update(c3.id)
+        expected = "testing1\nstuff to amend\n"
+        self.assertEqual(expected, "".join(get_file_contents(filename_1)))
+        expected = "testing1.2\n"
+        self.assertEqual(expected, "".join(get_file_contents(filename_3)))
+
+        self.gg.update(c4.id)
+        expected = "testing1\nstuff to amend\n"
+        self.assertEqual(expected, "".join(get_file_contents(filename_1)))
+        expected = "testing1.2.1\n"
+        self.assertEqual(expected, "".join(get_file_contents(filename_4)))
 
 
 if __name__ == "__main__":
