@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Dict, List, Optional, Callable
 
 import os
@@ -60,6 +61,7 @@ class GudCommit(BaseModel):
     remote: bool = False
     children: List[str] = []
     old_hash: Optional[str]
+    parent_hash: Optional[str]
 
     history_branch: Optional[str]
     snapshots: List[Snapshot] = []
@@ -77,12 +79,30 @@ class MergeConflictState(BaseModel):
     files: List[str]
 
 
+class OperationType(str, Enum):
+    EVOLVE = "EVOLVE"
+
+
+class EvolveOperation(BaseModel):
+    base_commit_id: str
+    target_commit_id: str
+
+
+class PendingOperation(BaseModel):
+    type: OperationType
+    evolve_op: EvolveOperation
+
+
 class RepoState(BaseModel):
     repo_dir: str
     head: str
     root: str
     commits: Dict[str, GudCommit] = {}
     merge_conflict_state: Optional[MergeConflictState] = None
+    pending_operations: List[PendingOperation] = []
+
+    class Config:
+        use_enum_values = True
 
 
 def get_branch_name(string: str) -> str:
@@ -210,6 +230,9 @@ class GitGud:
     def commit(self, commit_msg: str, all: bool = True) -> GudCommit:
         """Create a new commit that includes all local changes."""
 
+        if self.state.merge_conflict_state:
+            raise ValueError("Cannot commit during merge conflict.")
+
         logging.info("Creating new commit: %s", get_oneliner(commit_msg))
         branch_name = get_branch_name(commit_msg)
         history_branch_name = f"history_{branch_name}"
@@ -227,6 +250,7 @@ class GitGud:
             history_branch=history_branch_name,
             hash=commit.hexsha,
             description=commit_msg,
+            parent_hash=self.head().hash,
         )
         gud_commit.snapshots.append(gud_commit.get_metadata_for_snapshot())
 
@@ -245,6 +269,9 @@ class GitGud:
 
     def restore_snapshot(self, snapshot_hash: str) -> None:
         """Restore the state of the given commit to the specified snapshot."""
+
+        if self.state.merge_conflict_state:
+            raise ValueError("Cannot restore snapshot during merge conflict.")
 
         snapshot = None
         for snapshot in self.head().snapshots:
@@ -285,6 +312,9 @@ class GitGud:
         All descendants of this commit are marked as needing evolve.
         """
 
+        if self.state.merge_conflict_state:
+            raise ValueError("Cannot amend during merge conflict.")
+
         if not self.head():
             return
 
@@ -318,25 +348,72 @@ class GitGud:
     def root(self) -> GudCommit:
         return self.get_commit(self.state.root)
 
-    def evolve(self) -> None:
+    def execute_pending_operations(self) -> None:
+        """Execute all the operations that were queued in the gg state."""
+
+        count = 0
+        total_ops = len(self.state.pending_operations)
+
+        while self.state.pending_operations:
+            count += 1
+            op = self.state.pending_operations.pop(0)
+            logging.info("Executing op %s of %s: %s", count, total_ops, op)
+            if op.type == OperationType.EVOLVE:
+                self.update(op.evolve_op.base_commit_id)
+                self.evolve(op.evolve_op.target_commit_id)
+                if self.state.merge_conflict_state:
+                    self.save_state()
+                    break
+            self.save_state()
+
+    def enqueue_op(self, operation: PendingOperation) -> None:
+        self.state.pending_operations.append(operation)
+        self.save_state()
+
+    def evolve(self, target_commit_id: Optional[str] = None) -> None:
         """Propagate changes of amended commit onto all descendants."""
 
+        if self.state.merge_conflict_state:
+            raise ValueError("Cannot evolve during merge conflict.")
+
+        child: Optional[GudCommit] = None
         if not self.head().children:
             print("No children to evolve.")
             return
 
-        if not self.get_commit(self.head().children[0]).needs_evolve:
-            print("No need to evolve")
+        if target_commit_id:
+            for child_id in self.head().children:
+                if child_id == target_commit_id:
+                    child = self.get_commit(child_id)
+                    break
+
+            if not child:
+                raise ValueError(f"{target_commit_id} it not a child of {self.head().id}")
+        else:
+            # Recurisvely enqueue evolve operations for all descendants
+            def f(c: GudCommit) -> None:
+                for child_id in c.children:
+                    operation = PendingOperation(
+                        type=OperationType.EVOLVE,
+                        evolve_op=EvolveOperation(base_commit_id=c.id, target_commit_id=child_id),
+                    )
+
+                    self.enqueue_op(operation)
+
+            self.traverse(self.head().id, f)
+            self.execute_pending_operations()
             return
 
-        if len(self.head().children) > 1:
-            print("TODO - Not supported for multiple children")
+        assert child is not None
+        if not child.needs_evolve:
+            logging.info("No need to evolve.")
             return
 
-        child = self.get_commit(self.head().children[0])
         try:
-            self.repo.git.rebase("--onto", self.head().hash, self.head().old_hash, child.id)
+            self.repo.git.rebase("--onto", self.head().hash, child.parent_hash, child.id)
+            child.parent_hash = self.head().hash
         except GitCommandError as e:
+            logging.info("Merge conflict")
             lines = e.stdout.split("\n")
             files = []
             for l in lines:
@@ -355,6 +432,9 @@ class GitGud:
         self.snapshot()
 
     def update(self, commit_id: str) -> None:
+        if self.state.merge_conflict_state:
+            raise ValueError("Cannot update during merge conflict.")
+
         self.repo.git.checkout(commit_id)
         self.state.head = commit_id
         self.save_state()
@@ -367,18 +447,28 @@ class GitGud:
         for file in self.state.merge_conflict_state.files:
             self.repo.git.add(file)
 
+        logging.info("Continue rebase of %s", self.state.merge_conflict_state)
+
         with modified_environ(GIT_EDITOR="true"):
             self.repo.git.rebase("--continue")
 
         if self.state.merge_conflict_state:
-            self.get_commit(self.state.merge_conflict_state.incoming).needs_evolve = False
-            self.update(self.state.merge_conflict_state.incoming)
-            self.head().hash = self.repo.head.commit.hexsha
+            incoming = self.state.merge_conflict_state.incoming
+            current = self.state.merge_conflict_state.current
+
             self.state.merge_conflict_state = None
+            self.get_commit(incoming).needs_evolve = False
+            self.update(incoming)
+            self.head().hash = self.repo.head.commit.hexsha
+            self.head().parent_hash = current
+
+        self.execute_pending_operations()
+        self.save_state()
 
     def get_commit(self, id: str) -> GudCommit:
         if id not in self.state.commits:
-            raise Exception(f"Commit not found: {id}")
+            raise ValueError(f"Commit not found: {id}")
+
         return self.state.commits[id]
 
     def print_status(self) -> None:
@@ -386,7 +476,7 @@ class GitGud:
         print("")
         dirty_state = self.get_dirty_state()
 
-        if dirty_state.modified_files:
+        if dirty_state.modified_files and not self.state.merge_conflict_state:
             print("Modified files:")
             for filename in dirty_state.modified_files:
                 print(f" [bold red]{filename}[/bold red]")
@@ -404,6 +494,7 @@ class GitGud:
         tree = self.get_tree()
         print(tree)
         if self.state.merge_conflict_state:
+            print("")
             print("Files with merge conflict:")
 
             for f in self.state.merge_conflict_state.files:

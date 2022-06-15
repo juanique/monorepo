@@ -21,6 +21,7 @@ def init() -> None:
 def evolve() -> None:
     gg = GitGud.for_working_dir(os.getcwd())
     gg.evolve()
+    gg.print_status()
 
 
 @click.command()
@@ -28,6 +29,7 @@ def evolve() -> None:
 def update(commit_id: str) -> None:
     gg = GitGud.for_working_dir(os.getcwd())
     gg.update(commit_id)
+    gg.print_status()
 
 
 @click.command()
@@ -35,6 +37,16 @@ def update(commit_id: str) -> None:
 def commit(message: str) -> None:
     gg = GitGud.for_working_dir(os.getcwd())
     gg.commit(message)
+    gg.print_status()
+
+
+@click.command()
+@click.option("--continue/--no-continue", "cont_", default=False, is_flag=True)
+def rebase(cont_: bool = False) -> None:
+    gg = GitGud.for_working_dir(os.getcwd())
+    if cont_:
+        gg.rebase_continue()
+    gg.print_status()
 
 
 @click.command()
@@ -42,6 +54,7 @@ def commit(message: str) -> None:
 def amend(message: str = "") -> None:
     gg = GitGud.for_working_dir(os.getcwd())
     gg.amend(message)
+    gg.print_status()
 
 
 @click.command()
@@ -89,6 +102,7 @@ cli.add_command(status)
 cli.add_command(commit)
 cli.add_command(amend)
 cli.add_command(evolve)
+cli.add_command(rebase)
 
 if __name__ == "__main__":
     cli()
