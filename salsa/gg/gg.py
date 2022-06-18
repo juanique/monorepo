@@ -411,7 +411,7 @@ class GitGud:
 
         try:
             self.repo.git.rebase("--onto", self.head().hash, child.parent_hash, child.id)
-            child.parent_hash = self.head().hash
+            self.continue_evolve(target_commit_id, self.head().id)
         except GitCommandError as e:
             logging.info("Merge conflict")
             lines = e.stdout.split("\n")
@@ -424,12 +424,35 @@ class GitGud:
                 raise Exception(f"Unknown error: {e.stdout}") from e
 
             self.merge_conflict_begin(self.head(), child, files)
-            return
 
+    def continue_evolve(self, target_commit_id: str, parent_id: str) -> None:
+        """After changes have been propagated (potentially with conflict
+        resolution), update all commit metadata to match the new state.
+        """
+        child = self.get_commit(target_commit_id)
+        parent = self.get_commit(parent_id)
+
+        parent_history_branch = self.head().history_branch
+        parent_branch = self.head().id
+        child.parent_hash = parent.hash
         self.update(child.id)
         self.head().needs_evolve = False
         self.head().hash = self.repo.head.commit.hexsha
-        self.snapshot()
+
+        # Merge commit histories
+        self.repo.git.checkout(self.head().history_branch)
+        commit_msg = f'"Merge commit {parent_branch}"'
+        try:
+            self.repo.git.merge("--no-ff", "-m", commit_msg, parent_history_branch)
+        except GitCommandError as e:
+            assert "CONFLICT" in e.stdout
+            self.repo.git.checkout(parent_history_branch, ".")
+            self.repo.git.add("-A")
+            self.repo.git.commit("-m", commit_msg)
+
+        self.repo.git.checkout(self.head().id)
+        self.save_state()
+        self.execute_pending_operations()
 
     def update(self, commit_id: str) -> None:
         if self.state.merge_conflict_state:
@@ -452,18 +475,10 @@ class GitGud:
         with modified_environ(GIT_EDITOR="true"):
             self.repo.git.rebase("--continue")
 
-        if self.state.merge_conflict_state:
-            incoming = self.state.merge_conflict_state.incoming
-            current = self.state.merge_conflict_state.current
-
-            self.state.merge_conflict_state = None
-            self.get_commit(incoming).needs_evolve = False
-            self.update(incoming)
-            self.head().hash = self.repo.head.commit.hexsha
-            self.head().parent_hash = current
-
-        self.execute_pending_operations()
-        self.save_state()
+        incoming = self.state.merge_conflict_state.incoming
+        current = self.state.merge_conflict_state.current
+        self.state.merge_conflict_state = None
+        self.continue_evolve(incoming, current)
 
     def get_commit(self, id: str) -> GudCommit:
         if id not in self.state.commits:
