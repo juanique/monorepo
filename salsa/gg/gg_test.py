@@ -46,6 +46,7 @@ class TestGitGud(unittest.TestCase):
         self.last_index = 0
         self.remote_repo_path = os.path.join(remote_root, REPO_DIR_NAME)
         self.local_repo_path = os.path.join(local_root, REPO_DIR_NAME)
+        logging.info("Test root is %s", self.get_test_root())
 
         make_directory(remote_root)
         make_directory(local_root)
@@ -54,7 +55,6 @@ class TestGitGud(unittest.TestCase):
         self.remote_repo = Repo.init(self.remote_repo_path)
         self.remote_repo.git.config("user.email", "test@example.com")
         self.remote_repo.git.config("user.name", "test_user")
-        self.remote_gg = GitGud.for_clean_repo(self.remote_repo)
         self.maxDiff = None
 
     def make_test_filename(self, root: str = None) -> str:
@@ -77,6 +77,7 @@ class TestGitGud(unittest.TestCase):
         expected_log = inspect.cleandoc(expected_log)
         # Clear empty spaces at end of lines
         actual_log = "\n".join([line.strip() for line in git_log.split("\n")])
+        logging.info("Git log is %s", actual_log)
         self.assertEqual(actual_log, expected_log)
 
 
@@ -86,8 +87,12 @@ class TestGitGudWithRemote(TestGitGud):
 
         self.remote_filename = self.make_test_filename(self.remote_repo_path)
         append(self.remote_filename, "contents-from-remote")
-        self.remote_gg.commit("Initial commit")
+        self.remote_repo.git.add("-A")
+        self.remote_repo.git.commit("-a", "-m", "Initial commit")
+
         self.gg = GitGud.clone(self.remote_repo_path, self.local_repo_path)
+        self.gg.repo.git.config("user.email", "test@example.com")
+        self.gg.repo.git.config("user.name", "test_user")
 
     def test_clone(self) -> None:
         local_filename = os.path.join(self.local_repo_path, os.path.basename(self.remote_filename))
@@ -111,6 +116,55 @@ class TestGitGudWithRemote(TestGitGud):
         with self.assertRaises(InvalidOperationForRemote) as cm:
             self.gg.amend()
         self.assertIn("Cannot amend remote commits", str(cm.exception))
+
+    def test_sync_remote(self) -> None:
+        """Remote changes can be pulled locally by calling GitGud::sync().
+
+        We only keep track of a single remote commit with no children. Doing a sync on a remote
+        branch will by definition track a new remote commit with no children, so if the current one
+        is empty, it will be stop being tracked locally."""
+
+        remote_filename = self.make_test_filename(self.remote_repo_path)
+        append(remote_filename, "more-contents-from-remote")
+        self.remote_repo.git.add("-A")
+        self.remote_repo.git.commit("-a", "-m", "Added more content")
+        self.gg.sync()
+
+        local_filename = os.path.join(self.local_repo_path, os.path.basename(remote_filename))
+        self.assertEqual(["more-contents-from-remote\n"], get_file_contents(local_filename))
+        summary = self.gg.get_summary()
+        self.assertEqual(summary.commit_tree.description, "Added more content")
+        self.assertEqual(len(summary.commit_tree.children), 0)
+
+    def test_sync_remote_with_local_changes(self) -> None:
+        """Remote changes can be pulled locally by calling GitGud::sync() when
+        there are local commits present.
+
+        The remote changes will be tracked under a new commmit nested on the most recent
+        remote commit that is currently tracked. Local comits will stay on their corresponding
+        ancestors.
+        """
+
+        remote_filename = self.make_test_filename(self.remote_repo_path)
+        append(remote_filename, "more-contents-from-remote")
+        self.remote_repo.git.add("-A")
+        self.remote_repo.git.commit("-a", "-m", "Added more remote content")
+
+        local_filename = self.make_test_filename(self.local_repo_path)
+        append(local_filename, "locally added content")
+        self.gg.commit("Added local content")
+
+        self.gg.update(self.gg.state.root)
+        self.gg.sync()
+
+        local_filename = os.path.join(self.local_repo_path, os.path.basename(remote_filename))
+        self.assertEqual(["more-contents-from-remote\n"], get_file_contents(local_filename))
+        summary = self.gg.get_summary()
+        self.assertEqual(summary.commit_tree.description, "Initial commit")
+        self.assertEqual(summary.commit_tree.children[0].description, "Added more remote content")
+        self.assertEqual(summary.commit_tree.children[1].description, "Added local content")
+
+        self.gg.print_status()
 
 
 class TestGitGudLocalOnly(TestGitGud):

@@ -100,6 +100,7 @@ class RepoState(BaseModel):
     commits: Dict[str, GudCommit] = {}
     merge_conflict_state: Optional[MergeConflictState] = None
     pending_operations: List[PendingOperation] = []
+    master_branch: str = "master"
 
     class Config:
         use_enum_values = True
@@ -149,16 +150,24 @@ class GitGud:
             json.dump(self.state.dict(), out_file, sort_keys=True, indent=4, ensure_ascii=False)
 
     @staticmethod
+    def get_remote_commit(repo: Repo) -> GudCommit:
+        master_commit_id = f"master@{repo.head.commit.hexsha[0:8]}"
+        new_branch = repo.create_head(master_commit_id)
+        new_branch.checkout()
+
+        return GudCommit(
+            id=master_commit_id,
+            hash=repo.head.commit.hexsha,
+            description=repo.head.commit.message.strip(),
+            remote=True,
+        )
+
+    @staticmethod
     def clone(remote_repo_path: str, local_repo_path: str) -> "GitGud":
         """Clone an external repo into the given path."""
         repo = Repo.clone_from(remote_repo_path, local_repo_path)
+        root = GitGud.get_remote_commit(repo)
 
-        root = GudCommit(
-            id=repo.head.ref.name,
-            hash=repo.head.commit.hexsha,
-            description=repo.head.commit.message,
-            remote=True,
-        )
         state = RepoState(
             repo_dir=local_repo_path, root=root.id, head=root.id, commits={root.id: root}
         )
@@ -196,6 +205,52 @@ class GitGud:
         repo_state = GitGud.load_state_for_directory(working_dir)
         repo = Repo(working_dir)
         return GitGud(repo, repo_state)
+
+    def sync(self) -> None:
+        if self.head().remote:
+            self.pull_remote()
+            return
+        raise ValueError("Not implemented for non-remote commits.")
+
+    def pull_remote(self) -> None:
+        """Pulls the latest commit from remote master and adds it as a child of
+        the most recent remote commit."""
+
+        # Get the newest remote commit
+        newest_remote = None
+        for commit in self.state.commits.values():
+            if commit.remote:
+                if not newest_remote:
+                    newest_remote = commit
+                    continue
+
+                revcount = int(
+                    self.repo.rev_list("--count", f"{newest_remote.hash}..{commit.hash}")
+                )
+                if revcount > 0:
+                    newest_remote = commit
+                    continue
+
+        if not newest_remote:
+            raise ValueError("No remote commits")
+
+        logging.info("Starting of more recent remote commit %s", newest_remote.id)
+
+        self.repo.git.checkout(self.state.master_branch)
+        self.repo.git.pull("--rebase", "origin", self.state.master_branch)
+        pulled_commit = GitGud.get_remote_commit(self.repo)
+
+        if newest_remote.children:
+            newest_remote.children.insert(0, pulled_commit.id)
+        else:
+            # We only keep one remote commit with no children.
+            if self.state.root == newest_remote.id:
+                self.state.root = pulled_commit.id
+
+            self.state.commits.pop(newest_remote.id)
+
+        self.state.commits[pulled_commit.id] = pulled_commit
+        self.update(pulled_commit.id)
 
     def traverse(
         self, commit_id: str, func: Callable[[GudCommit], None], skip: bool = False
@@ -543,11 +598,15 @@ class GitGud:
             if self.state.merge_conflict_state and conflict_type:
                 conflict = f" [bold red]({conflict_type})[/bold red]"
 
-        name_annotations = ""
+        name_tags = []
         if commit.remote:
-            name_annotations = " [bold yellow](Remote Head)[/bold yellow]"
+            name_tags.append("Remote")
         if commit == self.head():
-            name_annotations = " [bold yellow](Current)[/bold yellow]"
+            name_tags.append("Current")
+
+        name_annotations = ""
+        if name_tags:
+            name_annotations = f" [bold yellow]({' '.join(name_tags)})[/bold yellow]"
 
         line = f"[bold {color}]{commit.id}[/bold {color}]"
         line += f"{needs_evolve}{conflict}{name_annotations}: {commit.get_oneliner()}"
