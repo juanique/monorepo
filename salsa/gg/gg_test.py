@@ -9,7 +9,7 @@ import dataclasses
 
 from git import Repo
 
-from salsa.gg.gg import ConfigNotFoundError, GitGud, InvalidOperationForRemote
+from salsa.gg.gg import ConfigNotFoundError, GitGud, GitHubRepoMetadata, InvalidOperationForRemote
 from salsa.util.subsets import subset_diff
 
 REPO_DIR_NAME = "repo_dir"
@@ -36,6 +36,16 @@ def make_directory(dirname: str) -> None:
     if os.path.isdir(dirname):
         shutil.rmtree(dirname)
     os.makedirs(dirname)
+
+
+class TestGithubRepoMetadata(unittest.TestCase):
+    def test_from_github_url_clone(self) -> None:
+        github_repo = GitHubRepoMetadata.from_github_url("https://github.com/juanique/monorepo.git")
+        assert github_repo == GitHubRepoMetadata(owner="juanique", name="monorepo")
+
+    def test_from_github_url_web(self) -> None:
+        github_repo = GitHubRepoMetadata.from_github_url("https://github.com/juanique/monorepo")
+        assert github_repo == GitHubRepoMetadata(owner="juanique", name="monorepo")
 
 
 class TestGitGud(unittest.TestCase):

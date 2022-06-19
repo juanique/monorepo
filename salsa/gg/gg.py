@@ -1,4 +1,5 @@
 from enum import Enum
+import re
 from typing import Dict, List, Optional, Callable
 
 import os
@@ -93,6 +94,28 @@ class PendingOperation(BaseModel):
     evolve_op: EvolveOperation
 
 
+class GitHubRepoMetadata(BaseModel):
+    owner: str
+    name: str
+
+    def get_commit_url(self, commit_hash: str) -> str:
+        return f"{self.url}/commit/{commit_hash}"
+
+    @property
+    def url(self) -> str:
+        return f"https://github.com/{self.owner}/{self.name}"
+
+    @classmethod
+    def from_github_url(cls, url: str) -> "GitHubRepoMetadata":
+        parts = re.findall(r"https://github.com/(.*)/([^\.]*).*", url)
+        owner, name = parts[0]
+        return cls(owner=owner, name=name)
+
+
+class RepoMetadata(BaseModel):
+    github: Optional[GitHubRepoMetadata]
+
+
 class RepoState(BaseModel):
     repo_dir: str
     head: str
@@ -101,6 +124,7 @@ class RepoState(BaseModel):
     merge_conflict_state: Optional[MergeConflictState] = None
     pending_operations: List[PendingOperation] = []
     master_branch: str = "master"
+    repo_metadata: Optional[RepoMetadata]
 
     class Config:
         use_enum_values = True
@@ -168,8 +192,18 @@ class GitGud:
         repo = Repo.clone_from(remote_repo_path, local_repo_path)
         root = GitGud.get_remote_commit(repo)
 
+        repo_metadata = None
+        if "github" in remote_repo_path:
+            repo_metadata = RepoMetadata(
+                github=GitHubRepoMetadata.from_github_url(remote_repo_path)
+            )
+
         state = RepoState(
-            repo_dir=local_repo_path, root=root.id, head=root.id, commits={root.id: root}
+            repo_dir=local_repo_path,
+            root=root.id,
+            head=root.id,
+            commits={root.id: root},
+            repo_metadata=repo_metadata,
         )
         gg = GitGud(repo, state)
         gg.save_state()
@@ -599,8 +633,12 @@ class GitGud:
                 conflict = f" [bold red]({conflict_type})[/bold red]"
 
         name_tags = []
+        url = ""
         if commit.remote:
             name_tags.append("Remote")
+            if self.state.repo_metadata and self.state.repo_metadata.github:
+                url = self.state.repo_metadata.github.get_commit_url(commit.hash[0:5])
+                url = f"[bold]{url}[/bold]"
         if commit == self.head():
             name_tags.append("Current")
 
@@ -609,7 +647,7 @@ class GitGud:
             name_annotations = f" [bold yellow]({' '.join(name_tags)})[/bold yellow]"
 
         line = f"[bold {color}]{commit.id}[/bold {color}]"
-        line += f"{needs_evolve}{conflict}{name_annotations}: {commit.get_oneliner()}"
+        line += f"{needs_evolve}{conflict}{name_annotations} {url}: {commit.get_oneliner()}"
         for snapshot in commit.snapshots:
             vertical = "│" if commit.children else " "
             line += f"\n{vertical} [grey37]{snapshot.hash} : {snapshot.description}[/grey37]"
