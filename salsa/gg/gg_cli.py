@@ -18,6 +18,13 @@ def init() -> None:
 
 
 @click.command()
+def sync() -> None:
+    gg = GitGud.for_working_dir(os.getcwd())
+    gg.sync()
+    gg.print_status()
+
+
+@click.command()
 def evolve() -> None:
     gg = GitGud.for_working_dir(os.getcwd())
     gg.evolve()
