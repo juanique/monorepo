@@ -110,6 +110,7 @@ cli.add_command(commit)
 cli.add_command(amend)
 cli.add_command(evolve)
 cli.add_command(rebase)
+cli.add_command(sync)
 
 if __name__ == "__main__":
     cli()
