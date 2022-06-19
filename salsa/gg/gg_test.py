@@ -1,3 +1,4 @@
+import inspect
 import logging
 import os
 import shutil
@@ -54,6 +55,7 @@ class TestGitGud(unittest.TestCase):
         self.remote_repo.git.config("user.email", "test@example.com")
         self.remote_repo.git.config("user.name", "test_user")
         self.remote_gg = GitGud.for_clean_repo(self.remote_repo)
+        self.maxDiff = None
 
     def make_test_filename(self, root: str = None) -> str:
         root = root or self.local_repo_path
@@ -67,6 +69,15 @@ class TestGitGud(unittest.TestCase):
         diff = subset_diff(val1, val2)
         if diff is not None:
             self.fail(str(dataclasses.asdict(diff)))
+
+    def assertLogEquals(self, repo: Repo, expected_log: str) -> None:
+        git_log = repo.git.log(
+            "--graph", "--pretty=format:%d %s", "--abbrev-commit", "--all", "--no-color"
+        )
+        expected_log = inspect.cleandoc(expected_log)
+        # Clear empty spaces at end of lines
+        actual_log = "\n".join([line.strip() for line in git_log.split("\n")])
+        self.assertEqual(actual_log, expected_log)
 
 
 class TestGitGudWithRemote(TestGitGud):
@@ -285,6 +296,30 @@ class TestGitGudLocalOnly(TestGitGud):
 
         self.gg.update(c4.id)
         self.assertEqual(expected, "".join(get_file_contents(filename_1)))
+
+        expected_log = """
+            *    (history_my_fourth_commit) "Merge commit my_third_commit"
+            |\\
+            | *    (history_my_third_commit) "Merge commit my_second_commit"
+            | |\\
+            | | *    (history_my_second_commit) "Merge commit my_first_commit"
+            | | |\\
+            | | | *  (history_my_first_commit) Snapshot #1
+            * | | |  My fourth commit
+            |/ / /
+            * / /  My third commit
+            |/ /
+            * /  My second commit
+            |/
+            *  My first commit
+            | *  (HEAD -> my_fourth_commit) My fourth commit
+            | *  (my_third_commit) My third commit
+            | *  (my_second_commit) My second commit
+            | *  (my_first_commit) My first commit
+            |/
+            *  (master) Initial commit
+        """
+        self.assertLogEquals(self.gg.repo, expected_log)
 
     def test_dirty_state(self) -> None:
         """Untracked and modified files should be shown in the dirty state."""
