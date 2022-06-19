@@ -1,4 +1,5 @@
 import os
+import sys
 
 from git import Repo
 from rich import inspect, print
@@ -48,11 +49,33 @@ def commit(message: str) -> None:
 
 
 @click.command()
+@click.option("-s", "--source", default="")
+@click.option("-d", "--destination", default="")
 @click.option("--continue/--no-continue", "cont_", default=False, is_flag=True)
-def rebase(cont_: bool = False) -> None:
+def rebase(source: str, destination: str, cont_: bool = False) -> None:
+    """
+    If used with --continue, continues with the current rebase which was
+    interrupted by merge conflicts.
+
+    If used with -s/--source and -d/--destination, changes the parent commit of <source>
+    to be <destination>.
+    """
+    if cont_ and (source or destination):
+        print("Can't use --continue with --source or --destination")
+
     gg = GitGud.for_working_dir(os.getcwd())
+
     if cont_:
-        gg.rebase_continue()
+        if cont_:
+            gg.rebase_continue()
+        gg.print_status()
+        return
+
+    if not source or not destination:
+        print("Both --s/--source and -d/--destination need to be specified")
+        sys.exit(1)
+
+    gg.rebase(source, destination)
     gg.print_status()
 
 
