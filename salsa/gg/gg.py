@@ -63,6 +63,7 @@ class GudCommit(BaseModel):
     children: List[str] = []
     old_hash: Optional[str]
     parent_hash: Optional[str]
+    parent_id: Optional[str]
 
     history_branch: Optional[str]
     snapshots: List[Snapshot] = []
@@ -225,7 +226,7 @@ class GitGud:
     def for_clean_repo(repo: Repo) -> "GitGud":
         commit_msg = "Initial commit"
         commit = repo.index.commit(commit_msg)
-        branch_name = get_branch_name(commit_msg)
+        branch_name = repo.active_branch.name
         root = GudCommit(id=branch_name, hash=commit.hexsha, description=commit_msg)
         state = RepoState(
             repo_dir=repo.working_tree_dir, root=root.id, head=root.id, commits={root.id: root}
@@ -340,6 +341,7 @@ class GitGud:
             hash=commit.hexsha,
             description=commit_msg,
             parent_hash=self.head().hash,
+            parent_id=self.head().id,
         )
         gud_commit.snapshots.append(gud_commit.get_metadata_for_snapshot())
 
@@ -374,17 +376,21 @@ class GitGud:
         self.repo.git.checkout(snapshot.hash, ".")
         self.amend(f"Restore snapshot {snapshot.hash} - {snapshot.description}")
 
-    def snapshot(self, message: str = "") -> None:
+    def snapshot(self, message: str = "", commit: bool = True) -> None:
         """Take a snapshot of the current commit state and add it to the history branch."""
 
-        self.repo.git.checkout(self.head().history_branch)
-        self.repo.git.checkout(self.head().id, ".")
-        self.add_changes_to_index()
         snapshot_message = f"Snapshot #{len(self.head().snapshots)}"
         if message:
             snapshot_message += f": {message}"
-        history_commit = self.repo.index.commit(snapshot_message)
-        new_snapshot = Snapshot(hash=history_commit.hexsha, description=snapshot_message)
+
+        if commit:
+            self.repo.git.checkout(self.head().history_branch)
+            self.repo.git.checkout(self.head().id, ".")
+            self.add_changes_to_index()
+            self.repo.index.commit(snapshot_message)
+
+        hash = self.repo.head.commit.hexsha
+        new_snapshot = Snapshot(hash=hash, description=snapshot_message)
         logging.info(
             "Taking snapshot for %s: %s - %s",
             self.head().id,
@@ -459,6 +465,27 @@ class GitGud:
         self.state.pending_operations.append(operation)
         self.save_state()
 
+    def schedule_recursive_evolve(self, commit: GudCommit, mark_as_needed: bool = False) -> None:
+        """
+        Recurisvely enqueue evolve operations for all descendants.
+        """
+
+        logging.info("Scheduling recursive evolve for %s", commit.id)
+
+        def f(c: GudCommit) -> None:
+            for child_id in c.children:
+                if mark_as_needed:
+                    self.get_commit(child_id).needs_evolve = True
+
+                operation = PendingOperation(
+                    type=OperationType.EVOLVE,
+                    evolve_op=EvolveOperation(base_commit_id=c.id, target_commit_id=child_id),
+                )
+
+                self.enqueue_op(operation)
+
+        self.traverse(commit.id, f)
+
     def evolve(self, target_commit_id: Optional[str] = None) -> None:
         """Propagate changes of amended commit onto all descendants."""
 
@@ -479,17 +506,7 @@ class GitGud:
             if not child:
                 raise ValueError(f"{target_commit_id} it not a child of {self.head().id}")
         else:
-            # Recurisvely enqueue evolve operations for all descendants
-            def f(c: GudCommit) -> None:
-                for child_id in c.children:
-                    operation = PendingOperation(
-                        type=OperationType.EVOLVE,
-                        evolve_op=EvolveOperation(base_commit_id=c.id, target_commit_id=child_id),
-                    )
-
-                    self.enqueue_op(operation)
-
-            self.traverse(self.head().id, f)
+            self.schedule_recursive_evolve(self.head())
             self.execute_pending_operations()
             return
 
@@ -498,23 +515,66 @@ class GitGud:
             logging.info("No need to evolve.")
             return
 
+        logging.info("Envolving %s to %s", self.head().id, child.id)
+
         try:
             self.repo.git.rebase("--onto", self.head().hash, child.parent_hash, child.id)
-            self.continue_evolve(target_commit_id, self.head().id)
+            self.continue_evolve(
+                target_commit_id, self.head().id, f"Evolved changes from {self.head().id}"
+            )
         except GitCommandError as e:
-            logging.info("Merge conflict")
-            lines = e.stdout.split("\n")
-            files = []
-            for l in lines:
-                if "CONFLICT" in l:
-                    files.append(l.split(" ")[-1].replace("'", ""))
+            self.handle_merge_conflict(self.head(), child, e)
 
-            if not files:
-                raise Exception(f"Unknown error: {e.stdout}") from e
+    def handle_merge_conflict(
+        self, current: GudCommit, incoming: GudCommit, error: GitCommandError
+    ) -> None:
+        """Parse the output of the merge conflict error message into the GitGud
+        internal state."""
 
-            self.merge_conflict_begin(self.head(), child, files)
+        logging.info("Merge conflict")
+        lines = error.stdout.split("\n")
+        files = []
+        for l in lines:
+            if "CONFLICT" in l:
+                files.append(l.split(" ")[-1].replace("'", ""))
 
-    def continue_evolve(self, target_commit_id: str, parent_id: str) -> None:
+        if not files:
+            raise Exception(f"Unknown error: {error.stdout}") from error
+
+        self.merge_conflict_begin(current, incoming, files)
+
+    def rebase(self, source_id: str, dest_id: str) -> None:
+        """Change the parent commit of the given source commit to be the
+        destination commit."""
+
+        logging.info("Rebase %s to %s", source_id, dest_id)
+        source_commit = self.get_commit(source_id)
+        dest_commit = self.get_commit(dest_id)
+
+        if source_commit.remote:
+            raise ValueError("Cannot rebase remote commits")
+
+        assert source_commit.parent_id is not None
+
+        try:
+            self.schedule_recursive_evolve(source_commit, mark_as_needed=True)
+            self.repo.git.rebase(
+                "--onto", dest_commit.hash, source_commit.parent_hash, source_commit.id
+            )
+            self.state.commits[source_commit.parent_id].children.remove(source_commit.id)
+            self.state.commits[dest_commit.id].children.append(source_commit.id)
+            self.continue_evolve(
+                source_commit.id,
+                dest_commit.id,
+                f"Rebased from {source_commit.parent_id} to {dest_commit.id}",
+            )
+            self.execute_pending_operations()
+            logging.info("Switching to update %s", source_id)
+            self.update(source_id)
+        except GitCommandError as e:
+            self.handle_merge_conflict(source_commit, dest_commit, e)
+
+    def continue_evolve(self, target_commit_id: str, parent_id: str, commit_msg: str = "") -> None:
         """After changes have been propagated (potentially with conflict
         resolution), update all commit metadata to match the new state.
         """
@@ -524,13 +584,15 @@ class GitGud:
         parent_history_branch = self.head().history_branch
         parent_branch = self.head().id
         child.parent_hash = parent.hash
+        child.parent_id = parent.id
         self.update(child.id)
+        child.hash = self.repo.head.commit.hexsha
         self.head().needs_evolve = False
         self.head().hash = self.repo.head.commit.hexsha
 
         # Merge commit histories
         self.repo.git.checkout(self.head().history_branch)
-        commit_msg = f'"Merge commit {parent_branch}"'
+        commit_msg = commit_msg or f"Merge commit {parent_branch}"
         try:
             self.repo.git.merge("--no-ff", "-m", commit_msg, parent_history_branch)
         except GitCommandError as e:
@@ -540,6 +602,7 @@ class GitGud:
             self.repo.git.commit("-m", commit_msg)
 
         self.repo.git.checkout(self.head().id)
+        self.snapshot(commit_msg, commit=False)
         self.save_state()
         self.execute_pending_operations()
 

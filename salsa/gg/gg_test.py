@@ -90,6 +90,12 @@ class TestGitGud(unittest.TestCase):
         logging.info("Git log is %s", actual_log)
         self.assertEqual(actual_log, expected_log)
 
+    def assertFileContents(self, filename: str, contents: str) -> None:
+        self.assertEqual(contents, "".join(get_file_contents(filename)))
+
+    def assertFileDoesNotExist(self, filename: str) -> None:
+        self.assertFalse(os.path.exists(filename))
+
 
 class TestGitGudWithRemote(TestGitGud):
     def setUp(self) -> None:
@@ -220,7 +226,7 @@ class TestGitGudLocalOnly(TestGitGud):
 
         expected = {
             "commit_tree": {
-                "id": "initial_commit",
+                "id": "master",
                 "is_head": False,
                 "description": "Initial commit",
                 "children": [
@@ -362,11 +368,11 @@ class TestGitGudLocalOnly(TestGitGud):
         self.assertEqual(expected, "".join(get_file_contents(filename_1)))
 
         expected_log = """
-            *    (history_my_fourth_commit) "Merge commit my_third_commit"
+            *    (history_my_fourth_commit) Evolved changes from my_third_commit
             |\\
-            | *    (history_my_third_commit) "Merge commit my_second_commit"
+            | *    (history_my_third_commit) Evolved changes from my_second_commit
             | |\\
-            | | *    (history_my_second_commit) "Merge commit my_first_commit"
+            | | *    (history_my_second_commit) Merge commit my_first_commit
             | | |\\
             | | | *  (history_my_first_commit) Snapshot #1
             * | | |  My fourth commit
@@ -509,6 +515,95 @@ class TestGitGudLocalOnly(TestGitGud):
         self.assertEqual(expected, "".join(get_file_contents(filename_1)))
         expected = "testing1.2.1\n"
         self.assertEqual(expected, "".join(get_file_contents(filename_4)))
+
+    def test_rebase(self) -> None:
+        """
+        We start with:
+
+        master ----- commit1 ---- commit2
+               \
+                 --- commit3
+
+        $ gg rebase -s commit2 -d commit3
+
+        We get:
+
+        master ----- commit1
+               \
+                 --- commit3 ---- commit2
+        """
+
+        filename_1 = self.make_test_filename()
+        append(filename_1, "commit1")
+        self.gg.commit("commit1")
+
+        filename_2 = self.make_test_filename()
+        append(filename_2, "commit2")
+        c2 = self.gg.commit("commit2")
+
+        self.gg.update("master")
+
+        filename_3 = self.make_test_filename()
+        append(filename_3, "commit3")
+        c3 = self.gg.commit("commit3")
+
+        self.gg.print_status()
+        self.gg.rebase(source_id=c2.id, dest_id=c3.id)
+        self.gg.print_status()
+
+        self.assertFileContents(filename_3, "commit3\n")
+        self.assertFileContents(filename_2, "commit2\n")
+        self.assertFileDoesNotExist(filename_1)
+
+    def test_rebase_auto_evolve(self) -> None:
+        """
+        We start with:
+
+        master ----- commit1 ---- commit2 ---- commit4
+               \
+                 --- commit3
+
+        $ gg rebase -s commit2 -d commit3
+
+        We get:
+
+        master ----- commit1
+               \
+                 --- commit3 ---- commit2 ---- commit4
+        """
+
+        filename_1 = self.make_test_filename()
+        append(filename_1, "commit1")
+        self.gg.commit("commit1")
+
+        filename_2 = self.make_test_filename()
+        append(filename_2, "commit2")
+        c2 = self.gg.commit("commit2")
+
+        filename_4 = self.make_test_filename()
+        append(filename_4, "commit4")
+        c4 = self.gg.commit("commit4")
+
+        self.gg.update("master")
+
+        filename_3 = self.make_test_filename()
+        append(filename_3, "commit3")
+        c3 = self.gg.commit("commit3")
+
+        self.gg.print_status()
+        self.gg.rebase(source_id=c2.id, dest_id=c3.id)
+
+        self.assertFileDoesNotExist(filename_1)
+        self.assertFileContents(filename_2, "commit2\n")
+        self.assertFileContents(filename_3, "commit3\n")
+        self.assertFileDoesNotExist(filename_4)
+
+        self.gg.update(c4.id)
+        self.gg.print_status()
+        self.assertFileDoesNotExist(filename_1)
+        self.assertFileContents(filename_2, "commit2\n")
+        self.assertFileContents(filename_3, "commit3\n")
+        self.assertFileContents(filename_4, "commit4\n")
 
 
 if __name__ == "__main__":
