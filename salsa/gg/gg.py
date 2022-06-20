@@ -808,7 +808,7 @@ class GitGud:
             if commit.id == self.state.merge_conflict_state.incoming:
                 conflict_type = "incoming"
             if self.state.merge_conflict_state and conflict_type:
-                conflict = f" [bold red]({conflict_type})[/bold red]"
+                conflict = f" ({conflict_type})"
 
         name_tags = []
         url = ""
@@ -825,7 +825,7 @@ class GitGud:
             name_annotations = f" [bold yellow]({' '.join(name_tags)})[/bold yellow]"
 
         line = f"[bold {color}]{commit.id}[/bold {color}]"
-        line += f"{needs_evolve}{needs_upload}{conflict}{name_annotations} "
+        line += f"[bold red]{needs_evolve}{needs_upload}{conflict}[/bold red]{name_annotations} "
         line += f"{url}: {commit.get_oneliner()}"
         for snapshot in commit.snapshots:
             vertical = "│" if commit.children else " "
