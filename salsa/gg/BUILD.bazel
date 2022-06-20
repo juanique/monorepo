@@ -13,6 +13,7 @@ py_library(
         requirement("rich"),
         requirement("GitPython"),
         requirement("pydantic"),
+        requirement("PyGithub"),
     ],
 )
 

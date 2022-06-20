@@ -14,6 +14,5 @@
 
 ### TODO / Known Issues
 
-- **✗** `gg upload` does not create PRs
 - **✗** `gg snapshot` missing CLI support
 - **✗** `gg sync` does not handle already merged commits
