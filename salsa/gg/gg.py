@@ -185,6 +185,7 @@ class GitGud:
             hash=repo.head.commit.hexsha,
             description=repo.head.commit.message.strip(),
             remote=True,
+            history_branch=master_commit_id,
         )
 
     @staticmethod
@@ -241,13 +242,71 @@ class GitGud:
         repo = Repo(working_dir)
         return GitGud(repo, repo_state)
 
-    def sync(self) -> None:
-        if self.head().remote:
-            self.pull_remote()
-            return
-        raise ValueError("Not implemented for non-remote commits.")
+    def get_oldest_non_remote(self, commit_id: str) -> GudCommit:
+        """Given a commit id, find the oldest ancestor that is not remote."""
 
-    def pull_remote(self) -> None:
+        commit = self.get_commit(commit_id)
+
+        if commit.remote:
+            raise ValueError("Commit is remote")
+
+        if not commit.parent_id:
+            return commit
+
+        parent = self.get_commit(commit.parent_id)
+        while not parent.remote:
+            commit = parent
+            if not commit.parent_id:
+                raise ValueError("Could not find a non remote ancestor.")
+
+            parent = self.get_commit(commit.parent_id)
+
+        return commit
+
+    def sync(self) -> GudCommit:
+        if self.head().remote:
+            return self.pull_remote()
+
+        root = self.get_oldest_non_remote(self.head().id)
+        new_remote_commit = self.pull_remote()
+        self.rebase(source_id=root.id, dest_id=new_remote_commit.id)
+        self.save_state()
+        return new_remote_commit
+
+    def prune_commits(self) -> None:
+        """Clean up irrelevant commits.
+
+        - Nested remote commits with no local changes. We only care about the
+        most recent one
+        - TODO: Already merged commits after sync.
+        """
+        if len(self.state.commits.keys()) == 1:
+            # Always need to have at least one commit
+            return
+
+        to_prune: List[str] = []
+        for commit_id, commit in self.state.commits.items():
+            non_remote_children = list(
+                filter(lambda child_id: not self.get_commit(child_id).remote, commit.children)
+            )
+            if commit.children and commit.remote and not non_remote_children:
+                to_prune.append(commit_id)
+
+        for commit_to_prune in to_prune:
+            for commit_id, commit in self.state.commits.items():
+                if commit.parent_id == commit_to_prune:
+                    commit.parent_id = None
+                    commit.parent_hash = None
+
+            to_prune = self.get_commit(commit_to_prune)
+            if self.state.root == to_prune.id:
+                self.state.root = to_prune.children[0]
+
+            logging.info("Prunning commit %s", commit_to_prune)
+            self.state.commits.pop(commit_to_prune)
+            self.repo.git.branch("-D", to_prune.id)
+
+    def pull_remote(self) -> GudCommit:
         """Pulls the latest commit from remote master and adds it as a child of
         the most recent remote commit."""
 
@@ -275,17 +334,13 @@ class GitGud:
         self.repo.git.pull("--rebase", "origin", self.state.master_branch)
         pulled_commit = GitGud.get_remote_commit(self.repo)
 
-        if newest_remote.children:
-            newest_remote.children.insert(0, pulled_commit.id)
-        else:
-            # We only keep one remote commit with no children.
-            if self.state.root == newest_remote.id:
-                self.state.root = pulled_commit.id
-
-            self.state.commits.pop(newest_remote.id)
-
+        newest_remote.children.insert(0, pulled_commit.id)
         self.state.commits[pulled_commit.id] = pulled_commit
+
+        self.prune_commits()
         self.update(pulled_commit.id)
+        self.save_state()
+        return pulled_commit
 
     def traverse(
         self, commit_id: str, func: Callable[[GudCommit], None], skip: bool = False
@@ -474,15 +529,18 @@ class GitGud:
 
         def f(c: GudCommit) -> None:
             for child_id in c.children:
-                if mark_as_needed:
+                child_commit = self.get_commit(child_id)
+                if mark_as_needed and not child_commit.remote:
+                    child_commit.needs_evolve = True
                     self.get_commit(child_id).needs_evolve = True
 
-                operation = PendingOperation(
-                    type=OperationType.EVOLVE,
-                    evolve_op=EvolveOperation(base_commit_id=c.id, target_commit_id=child_id),
-                )
+                if not child_commit.remote:
+                    operation = PendingOperation(
+                        type=OperationType.EVOLVE,
+                        evolve_op=EvolveOperation(base_commit_id=c.id, target_commit_id=child_id),
+                    )
 
-                self.enqueue_op(operation)
+                    self.enqueue_op(operation)
 
         self.traverse(commit.id, f)
 
@@ -581,8 +639,6 @@ class GitGud:
         child = self.get_commit(target_commit_id)
         parent = self.get_commit(parent_id)
 
-        parent_history_branch = self.head().history_branch
-        parent_branch = self.head().id
         child.parent_hash = parent.hash
         child.parent_id = parent.id
         self.update(child.id)
@@ -591,20 +647,23 @@ class GitGud:
         self.head().hash = self.repo.head.commit.hexsha
 
         # Merge commit histories
-        self.repo.git.checkout(self.head().history_branch)
-        commit_msg = commit_msg or f"Merge commit {parent_branch}"
+        self.repo.git.checkout(child.history_branch)
+        commit_msg = commit_msg or f"Merge commit {parent.id}"
         try:
-            self.repo.git.merge("--no-ff", "-m", commit_msg, parent_history_branch)
+            self.repo.git.merge("--no-ff", "-m", commit_msg, parent.history_branch)
         except GitCommandError as e:
             assert "CONFLICT" in e.stdout
-            self.repo.git.checkout(parent_history_branch, ".")
+            self.repo.git.checkout(child.id, ".")
             self.repo.git.add("-A")
             self.repo.git.commit("-m", commit_msg)
 
-        self.repo.git.checkout(self.head().id)
+        self.repo.git.checkout(child.id)
         self.snapshot(commit_msg, commit=False)
         self.save_state()
+
         self.execute_pending_operations()
+        self.prune_commits()
+        self.save_state()
 
     def update(self, commit_id: str) -> None:
         if self.state.merge_conflict_state:
