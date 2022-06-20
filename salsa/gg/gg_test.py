@@ -43,6 +43,10 @@ class TestGithubRepoMetadata(unittest.TestCase):
         github_repo = GitHubRepoMetadata.from_github_url("https://github.com/juanique/monorepo.git")
         assert github_repo == GitHubRepoMetadata(owner="juanique", name="monorepo")
 
+    def test_from_github_ssh_clone(self) -> None:
+        github_repo = GitHubRepoMetadata.from_github_url("git@github.com:juanique/monorepo.git")
+        assert github_repo == GitHubRepoMetadata(owner="juanique", name="monorepo")
+
     def test_from_github_url_web(self) -> None:
         github_repo = GitHubRepoMetadata.from_github_url("https://github.com/juanique/monorepo")
         assert github_repo == GitHubRepoMetadata(owner="juanique", name="monorepo")
@@ -240,7 +244,9 @@ class TestGitGudWithRemote(TestGitGud):
         # Add another commit and also push it
         append(local_filename, "More local content")
         c2 = self.gg.commit("More local content")
+        self.assertFalse(self.gg.head().uploaded)
         self.gg.upload()
+        self.assertTrue(self.gg.head().uploaded)
 
         self.assertTrue(c1.upstream_branch in self.remote_repo.git.branch())
         self.remote_repo.git.checkout(c1.upstream_branch)
@@ -251,6 +257,33 @@ class TestGitGudWithRemote(TestGitGud):
         self.remote_repo.git.checkout(c2.upstream_branch)
         synced_filename = os.path.join(self.remote_repo_path, os.path.basename(local_filename))
         self.assertFileContents(synced_filename, "locally added content\nMore local content\n")
+
+    def test_upload_rebase(self) -> None:
+        """Rebasing resets uploaded state."""
+
+        local_filename_1 = self.make_test_filename(self.local_repo_path)
+        append(local_filename_1, "commit1")
+        c1 = self.gg.commit("commit1")
+
+        local_filename_2 = self.make_test_filename(self.local_repo_path)
+        append(local_filename_2, "commit2")
+        c2 = self.gg.commit("commit2")
+
+        self.gg.update(c1.id)
+
+        local_filename_3 = self.make_test_filename(self.local_repo_path)
+        append(local_filename_3, "commit3")
+        c3 = self.gg.commit("commit3")
+
+        self.gg.upload(all_commits=True)
+        self.assertTrue(c1.uploaded)
+        self.assertTrue(c2.uploaded)
+        self.assertTrue(c3.uploaded)
+
+        self.gg.rebase(source_id=c2.id, dest_id=c3.id)
+        self.assertTrue(c1.uploaded)
+        self.assertFalse(c2.uploaded)
+        self.assertTrue(c3.uploaded)
 
     def test_upload_all(self) -> None:
         """All local commits can be uploaded to remote with a single command."""
@@ -285,7 +318,9 @@ class TestGitGudWithRemote(TestGitGud):
         append(local_filename, "content2")
         self.gg.amend()
 
+        self.assertFalse(self.gg.head().uploaded)
         self.gg.upload()
+        self.assertTrue(self.gg.head().uploaded)
 
         self.assertTrue(c1.upstream_branch in self.remote_repo.git.branch())
         self.remote_repo.git.checkout(c1.upstream_branch)

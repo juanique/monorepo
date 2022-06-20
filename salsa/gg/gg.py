@@ -110,9 +110,17 @@ class GitHubRepoMetadata(BaseModel):
 
     @classmethod
     def from_github_url(cls, url: str) -> "GitHubRepoMetadata":
-        parts = re.findall(r"https://github.com/(.*)/([^\.]*).*", url)
-        owner, name = parts[0]
-        return cls(owner=owner, name=name)
+        """Parses a clone url from github and extract the repo metadata."""
+
+        if url.startswith("https"):
+            parts = re.findall(r"https://github.com/(.*)/([^\.]*).*", url)
+            owner, name = parts[0]
+            return cls(owner=owner, name=name)
+        if url.startswith("git@"):
+            parts = re.findall(r"git@github.com:(.*)/([^\.]*).*", url)
+            owner, name = parts[0]
+            return cls(owner=owner, name=name)
+        raise ValueError(f"Can't parse {url}")
 
 
 class RepoMetadata(BaseModel):
@@ -295,6 +303,7 @@ class GitGud:
         else:
             self.repo.git.push("origin", f"{commit.history_branch}:{commit.upstream_branch}")
 
+        self.get_commit(commit_id).uploaded = True
         self.update(previous_head_id)
         self.save_state()
 
@@ -432,7 +441,7 @@ class GitGud:
             description=commit_msg,
             parent_hash=self.head().hash,
             parent_id=self.head().id,
-            uploaded=True,
+            uploaded=False,
         )
         gud_commit.snapshots.append(gud_commit.get_metadata_for_snapshot())
 
