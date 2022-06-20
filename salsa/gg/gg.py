@@ -64,6 +64,8 @@ class GudCommit(BaseModel):
     old_hash: Optional[str]
     parent_hash: Optional[str]
     parent_id: Optional[str]
+    upstream_branch: Optional[str]
+    uploaded: bool
 
     history_branch: Optional[str]
     snapshots: List[Snapshot] = []
@@ -185,6 +187,7 @@ class GitGud:
             hash=repo.head.commit.hexsha,
             description=repo.head.commit.message.strip(),
             remote=True,
+            uploaded=True,
             history_branch=master_commit_id,
         )
 
@@ -228,7 +231,7 @@ class GitGud:
         commit_msg = "Initial commit"
         commit = repo.index.commit(commit_msg)
         branch_name = repo.active_branch.name
-        root = GudCommit(id=branch_name, hash=commit.hexsha, description=commit_msg)
+        root = GudCommit(id=branch_name, hash=commit.hexsha, description=commit_msg, uploaded=True)
         state = RepoState(
             repo_dir=repo.working_tree_dir, root=root.id, head=root.id, commits={root.id: root}
         )
@@ -262,6 +265,38 @@ class GitGud:
             parent = self.get_commit(commit.parent_id)
 
         return commit
+
+    def upload(self, commit_id: Optional[str] = None, all_commits: bool = False) -> None:
+        """Upload commit changes to remote."""
+
+        if commit_id and all_commits:
+            raise ValueError("Use commit_id or all_commits, not both")
+
+        if all_commits:
+            for single_commit_id in self.state.commits:
+                commit = self.get_commit(single_commit_id)
+                if not commit.remote:
+                    self.upload(commit_id=single_commit_id)
+            return
+
+        if not commit_id:
+            commit_id = self.head().id
+
+        logging.info("Uploading commit %s", commit_id)
+
+        previous_head_id = self.head().id
+        commit = self.get_commit(commit_id)
+
+        self.repo.git.checkout(commit.history_branch)
+        if not commit.upstream_branch:
+            commit.upstream_branch = commit.id
+            self.repo.git.push("-u", "origin", f"{commit.history_branch}:{commit.upstream_branch}")
+
+        else:
+            self.repo.git.push("origin", f"{commit.history_branch}:{commit.upstream_branch}")
+
+        self.update(previous_head_id)
+        self.save_state()
 
     def sync(self) -> GudCommit:
         if self.head().remote:
@@ -397,6 +432,7 @@ class GitGud:
             description=commit_msg,
             parent_hash=self.head().hash,
             parent_id=self.head().id,
+            uploaded=True,
         )
         gud_commit.snapshots.append(gud_commit.get_metadata_for_snapshot())
 
@@ -483,6 +519,7 @@ class GitGud:
             c.needs_evolve = True
 
         self.traverse(self.head().id, f, skip=True)
+        self.head().uploaded = False
         self.snapshot(message)
 
     def merge_conflict_begin(
@@ -644,6 +681,7 @@ class GitGud:
         self.update(child.id)
         child.hash = self.repo.head.commit.hexsha
         self.head().needs_evolve = False
+        self.head().uploaded = False
         self.head().hash = self.repo.head.commit.hexsha
 
         # Merge commit histories
@@ -702,6 +740,13 @@ class GitGud:
         print("")
         dirty_state = self.get_dirty_state()
 
+        symbols: Dict[str, str] = {}
+        for commit in self.state.commits.values():
+            if not commit.uploaded:
+                symbols["↟"] = "Needs upload"
+            if commit.needs_evolve:
+                symbols["×"] = "Needs evolve"
+
         if dirty_state.modified_files and not self.state.merge_conflict_state:
             print("Modified files:")
             for filename in dirty_state.modified_files:
@@ -717,6 +762,13 @@ class GitGud:
         if self.state.merge_conflict_state:
             print("[bold red]Rebase in progress[/bold red]: stopped due to merge conflict.")
             print("")
+
+        if symbols:
+            print("Legend:")
+            for symbol, explanation in symbols.items():
+                print(f" [bold red]{symbol}[/bold red]: {explanation}")
+            print("")
+
         tree = self.get_tree()
         print(tree)
         if self.state.merge_conflict_state:
@@ -742,7 +794,11 @@ class GitGud:
 
         needs_evolve = ""
         if commit.needs_evolve and not self.state.merge_conflict_state:
-            needs_evolve = "*"
+            needs_evolve = " ×"
+
+        needs_upload = ""
+        if not commit.uploaded:
+            needs_upload = " ↟"
 
         conflict = ""
         if self.state.merge_conflict_state:
@@ -769,7 +825,8 @@ class GitGud:
             name_annotations = f" [bold yellow]({' '.join(name_tags)})[/bold yellow]"
 
         line = f"[bold {color}]{commit.id}[/bold {color}]"
-        line += f"{needs_evolve}{conflict}{name_annotations} {url}: {commit.get_oneliner()}"
+        line += f"{needs_evolve}{needs_upload}{conflict}{name_annotations} "
+        line += f"{url}: {commit.get_oneliner()}"
         for snapshot in commit.snapshots:
             vertical = "│" if commit.children else " "
             line += f"\n{vertical} [grey37]{snapshot.hash} : {snapshot.description}[/grey37]"

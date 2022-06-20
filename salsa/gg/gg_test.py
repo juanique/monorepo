@@ -224,6 +224,74 @@ class TestGitGudWithRemote(TestGitGud):
         self.assertFileContents(synced_filename, "more-contents-from-remote\n")
         self.assertFileContents(local_filename, "locally added content\n")
 
+    def test_upload(self) -> None:
+        """A local commit can be uploaded to remote."""
+
+        local_filename = self.make_test_filename(self.local_repo_path)
+        append(local_filename, "locally added content")
+        c1 = self.gg.commit("Added local content")
+        self.gg.upload()
+
+        self.assertTrue(c1.upstream_branch in self.remote_repo.git.branch())
+        self.remote_repo.git.checkout(c1.upstream_branch)
+        synced_filename = os.path.join(self.remote_repo_path, os.path.basename(local_filename))
+        self.assertFileContents(synced_filename, "locally added content\n")
+
+        # Add another commit and also push it
+        append(local_filename, "More local content")
+        c2 = self.gg.commit("More local content")
+        self.gg.upload()
+
+        self.assertTrue(c1.upstream_branch in self.remote_repo.git.branch())
+        self.remote_repo.git.checkout(c1.upstream_branch)
+        synced_filename = os.path.join(self.remote_repo_path, os.path.basename(local_filename))
+        self.assertFileContents(synced_filename, "locally added content\n")
+
+        self.assertTrue(c2.upstream_branch in self.remote_repo.git.branch())
+        self.remote_repo.git.checkout(c2.upstream_branch)
+        synced_filename = os.path.join(self.remote_repo_path, os.path.basename(local_filename))
+        self.assertFileContents(synced_filename, "locally added content\nMore local content\n")
+
+    def test_upload_all(self) -> None:
+        """All local commits can be uploaded to remote with a single command."""
+
+        local_filename_1 = self.make_test_filename(self.local_repo_path)
+        append(local_filename_1, "locally added content")
+        c1 = self.gg.commit("Added local content")
+
+        local_filename_2 = self.make_test_filename(self.local_repo_path)
+        append(local_filename_2, "More local content")
+        c2 = self.gg.commit("More local content")
+        self.gg.upload(all_commits=True)
+
+        self.assertTrue(c1.upstream_branch in self.remote_repo.git.branch())
+        self.remote_repo.git.checkout(c1.upstream_branch)
+        synced_filename = os.path.join(self.remote_repo_path, os.path.basename(local_filename_1))
+        self.assertFileContents(synced_filename, "locally added content\n")
+
+        self.assertTrue(c2.upstream_branch in self.remote_repo.git.branch())
+        self.remote_repo.git.checkout(c2.upstream_branch)
+        synced_filename = os.path.join(self.remote_repo_path, os.path.basename(local_filename_2))
+        self.assertFileContents(synced_filename, "More local content\n")
+
+    def test_upload_amend_upload(self) -> None:
+        """Amends can be uploaded to remote."""
+
+        local_filename = self.make_test_filename(self.local_repo_path)
+        append(local_filename, "content1")
+        c1 = self.gg.commit("Added local content")
+        self.gg.upload()
+
+        append(local_filename, "content2")
+        self.gg.amend()
+
+        self.gg.upload()
+
+        self.assertTrue(c1.upstream_branch in self.remote_repo.git.branch())
+        self.remote_repo.git.checkout(c1.upstream_branch)
+        synced_filename = os.path.join(self.remote_repo_path, os.path.basename(local_filename))
+        self.assertFileContents(synced_filename, "content1\ncontent2\n")
+
 
 class TestGitGudLocalOnly(TestGitGud):
     def setUp(self) -> None:
