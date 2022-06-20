@@ -10,9 +10,10 @@
 - **✓** `gg evolve`
 - **✓** `gg rebase`
 - **✓** `gg sync`
+- **✓** `gg upload`
 
 ### TODO / Known Issues
 
-- **✗** `gg upload` not supported at all
+- **✗** `gg upload` does not create PRs
 - **✗** `gg snapshot` missing CLI support
 - **✗** `gg sync` does not handle already merged commits
