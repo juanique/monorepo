@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from enum import Enum
 import re
 from typing import Dict, List, Optional, Callable
@@ -11,6 +12,7 @@ from git import Repo, GitCommandError
 from pydantic import BaseModel
 from rich import print
 from rich.tree import Tree
+from github import Github
 
 from salsa.os.environ_ctx import modified_environ
 
@@ -66,6 +68,7 @@ class GudCommit(BaseModel):
     parent_id: Optional[str]
     upstream_branch: Optional[str]
     uploaded: bool
+    pull_request_id: Optional[str]
 
     history_branch: Optional[str]
     snapshots: List[Snapshot] = []
@@ -103,6 +106,13 @@ class GitHubRepoMetadata(BaseModel):
 
     def get_commit_url(self, commit_hash: str) -> str:
         return f"{self.url}/commit/{commit_hash}"
+
+    def get_pull_request_url(self, pr_id: str) -> str:
+        return f"{self.url}/pull/{pr_id}"
+
+    @property
+    def full_repo_name(self) -> str:
+        return f"{self.owner}/{self.name}"
 
     @property
     def url(self) -> str:
@@ -149,13 +159,41 @@ def get_oneliner(string: str) -> str:
     return string.split("\n")[0][0:40]
 
 
+class HostedRepo(ABC):
+    def __init__(self, repo_name: str):
+        self.repo_name = repo_name
+
+    @abstractmethod
+    def create_pull_request(self, title: str, remote_branch: str, remote_base_branch: str) -> str:
+        """Create a pull request on the hosting service. Returns the ID of the
+        recently created PR."""
+
+
+class GitHubHostedRepo(HostedRepo):
+    def __init__(self, repo_name: str, github: Github):
+        super().__init__(repo_name)
+        self.github = github
+
+    def create_pull_request(self, title: str, remote_branch: str, remote_base_branch: str) -> str:
+        repo = self.github.get_repo(self.repo_name)
+        pr = repo.create_pull(
+            title=title,
+            body="",
+            head=remote_branch,
+            base=remote_base_branch,
+            draft=True,
+        )
+        return str(pr.number)
+
+
 class GitGud:
     repo: Repo
     state: RepoState
 
-    def __init__(self, repo: Repo, state: RepoState):
+    def __init__(self, repo: Repo, state: RepoState, hosted_repo: Optional[HostedRepo] = None):
         self.repo = repo
         self.state = state
+        self.hosted_repo = hosted_repo
 
     def get_summary(self) -> RepoSummary:
         return RepoSummary(commit_tree=self.get_commit_summary(self.state.root))
@@ -185,7 +223,7 @@ class GitGud:
             json.dump(self.state.dict(), out_file, sort_keys=True, indent=4, ensure_ascii=False)
 
     @staticmethod
-    def get_remote_commit(repo: Repo) -> GudCommit:
+    def get_remote_commit(repo: Repo, remote_master: str) -> GudCommit:
         master_commit_id = f"master@{repo.head.commit.hexsha[0:8]}"
         new_branch = repo.create_head(master_commit_id)
         new_branch.checkout()
@@ -197,19 +235,39 @@ class GitGud:
             remote=True,
             uploaded=True,
             history_branch=master_commit_id,
+            upstream_branch=remote_master,
         )
 
     @staticmethod
-    def clone(remote_repo_path: str, local_repo_path: str) -> "GitGud":
-        """Clone an external repo into the given path."""
-        repo = Repo.clone_from(remote_repo_path, local_repo_path)
-        root = GitGud.get_remote_commit(repo)
+    def get_hosted_repo(repo_metadata: Optional[RepoMetadata]) -> Optional[HostedRepo]:
+        """Given the metadata for the remote repo being tracked, get an instance
+        of the repo api."""
 
+        if not repo_metadata:
+            return None
+
+        if repo_metadata.github:
+            if "GITHUB_GG_TOKEN" not in os.environ:
+                raise ValueError("Missing env variable GITHUB_GG_TOKEN")
+
+            github_client = Github(os.environ["GITHUB_GG_TOKEN"])
+            return GitHubHostedRepo(repo_metadata.github.full_repo_name, github_client)
+
+        return None
+
+    @staticmethod
+    def clone(
+        remote_repo_path: str, local_repo_path: str, hosted_repo: Optional[HostedRepo] = None
+    ) -> "GitGud":
+        """Clone an external repo into the given path."""
         repo_metadata = None
         if "github" in remote_repo_path:
-            repo_metadata = RepoMetadata(
-                github=GitHubRepoMetadata.from_github_url(remote_repo_path)
-            )
+            github_repo = GitHubRepoMetadata.from_github_url(remote_repo_path)
+            repo_metadata = RepoMetadata(github=github_repo)
+            hosted_repo = GitGud.get_hosted_repo(repo_metadata)
+
+        repo = Repo.clone_from(remote_repo_path, local_repo_path)
+        root = GitGud.get_remote_commit(repo, repo.active_branch.name)
 
         state = RepoState(
             repo_dir=local_repo_path,
@@ -218,7 +276,7 @@ class GitGud:
             commits={root.id: root},
             repo_metadata=repo_metadata,
         )
-        gg = GitGud(repo, state)
+        gg = GitGud(repo, state, hosted_repo)
         gg.save_state()
         return gg
 
@@ -251,7 +309,8 @@ class GitGud:
 
         repo_state = GitGud.load_state_for_directory(working_dir)
         repo = Repo(working_dir)
-        return GitGud(repo, repo_state)
+        hosted_repo = GitGud.get_hosted_repo(repo_state.repo_metadata)
+        return GitGud(repo, repo_state, hosted_repo)
 
     def get_oldest_non_remote(self, commit_id: str) -> GudCommit:
         """Given a commit id, find the oldest ancestor that is not remote."""
@@ -299,7 +358,17 @@ class GitGud:
         if not commit.upstream_branch:
             commit.upstream_branch = commit.id
             self.repo.git.push("-u", "origin", f"{commit.history_branch}:{commit.upstream_branch}")
+            if self.hosted_repo:
+                logging.info("Creating PR in hosted repo.")
+                assert commit.parent_id is not None
+                base_commit = self.get_commit(commit.parent_id)
 
+                assert base_commit.upstream_branch is not None
+                commit.pull_request_id = self.hosted_repo.create_pull_request(
+                    commit.description, commit.upstream_branch, base_commit.upstream_branch
+                )
+            else:
+                logging.info("No hosted repo, skipping PR creation")
         else:
             self.repo.git.push("origin", f"{commit.history_branch}:{commit.upstream_branch}")
 
@@ -376,7 +445,7 @@ class GitGud:
 
         self.repo.git.checkout(self.state.master_branch)
         self.repo.git.pull("--rebase", "origin", self.state.master_branch)
-        pulled_commit = GitGud.get_remote_commit(self.repo)
+        pulled_commit = GitGud.get_remote_commit(self.repo, self.state.master_branch)
 
         newest_remote.children.insert(0, pulled_commit.id)
         self.state.commits[pulled_commit.id] = pulled_commit
@@ -826,6 +895,16 @@ class GitGud:
             if self.state.repo_metadata and self.state.repo_metadata.github:
                 url = self.state.repo_metadata.github.get_commit_url(commit.hash[0:5])
                 url = f"[bold]{url}[/bold]"
+
+        if (
+            not commit.remote
+            and commit.pull_request_id
+            and self.state.repo_metadata
+            and self.state.repo_metadata.github
+        ):
+            url = self.state.repo_metadata.github.get_pull_request_url(commit.pull_request_id)
+            url = f"[bold]{url}[/bold]"
+
         if commit == self.head():
             name_tags.append("Current")
 

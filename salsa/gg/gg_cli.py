@@ -19,6 +19,12 @@ def init() -> None:
 
 
 @click.command()
+def debug() -> None:
+    gg = GitGud.for_working_dir(os.getcwd())
+    print(gg.state.dict())
+
+
+@click.command()
 @click.option("--all/--no-all", "all_", default=False, is_flag=True)
 def upload(all_: bool) -> None:
     gg = GitGud.for_working_dir(os.getcwd())
@@ -143,6 +149,7 @@ cli.add_command(evolve)
 cli.add_command(rebase)
 cli.add_command(sync)
 cli.add_command(upload)
+cli.add_command(debug)
 
 if __name__ == "__main__":
     cli()

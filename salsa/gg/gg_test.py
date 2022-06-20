@@ -3,13 +3,20 @@ import logging
 import os
 import shutil
 import unittest
-from typing import List, Any
+from typing import Dict, List, Any
 
 import dataclasses
 
+from pydantic import BaseModel
 from git import Repo
 
-from salsa.gg.gg import ConfigNotFoundError, GitGud, GitHubRepoMetadata, InvalidOperationForRemote
+from salsa.gg.gg import (
+    ConfigNotFoundError,
+    GitGud,
+    GitHubRepoMetadata,
+    HostedRepo,
+    InvalidOperationForRemote,
+)
 from salsa.util.subsets import subset_diff
 
 REPO_DIR_NAME = "repo_dir"
@@ -36,6 +43,31 @@ def make_directory(dirname: str) -> None:
     if os.path.isdir(dirname):
         shutil.rmtree(dirname)
     os.makedirs(dirname)
+
+
+class FakePr(BaseModel):
+    id: str
+    title: str
+    remote_branch: str
+    remote_base_branch: str
+
+
+class FakeHostedRepo(HostedRepo):
+    def __init__(self) -> None:
+        super().__init__("repo_name")
+        self.next_id = 0
+        self.pull_requests: Dict[str, FakePr] = {}
+
+    def create_pull_request(self, title: str, remote_branch: str, remote_base_branch: str) -> str:
+        pr_id = str(self.next_id)
+        self.next_id += 1
+        self.pull_requests[pr_id] = FakePr(
+            id=pr_id,
+            title=title,
+            remote_branch=remote_branch,
+            remote_base_branch=remote_base_branch,
+        )
+        return pr_id
 
 
 class TestGithubRepoMetadata(unittest.TestCase):
@@ -110,7 +142,8 @@ class TestGitGudWithRemote(TestGitGud):
         self.remote_repo.git.add("-A")
         self.remote_repo.git.commit("-a", "-m", "Initial commit")
 
-        self.gg = GitGud.clone(self.remote_repo_path, self.local_repo_path)
+        self.hosted_repo = FakeHostedRepo()
+        self.gg = GitGud.clone(self.remote_repo_path, self.local_repo_path, self.hosted_repo)
         self.gg.repo.git.config("user.email", "test@example.com")
         self.gg.repo.git.config("user.name", "test_user")
 
@@ -240,6 +273,11 @@ class TestGitGudWithRemote(TestGitGud):
         self.remote_repo.git.checkout(c1.upstream_branch)
         synced_filename = os.path.join(self.remote_repo_path, os.path.basename(local_filename))
         self.assertFileContents(synced_filename, "locally added content\n")
+
+        # There should be a PR created in the hosted repo
+        self.assertEqual(len(self.hosted_repo.pull_requests), 1)
+        pr_id = list(self.hosted_repo.pull_requests.keys())[0]
+        self.assertEqual(self.hosted_repo.pull_requests[pr_id].title, c1.description)
 
         # Add another commit and also push it
         append(local_filename, "More local content")
