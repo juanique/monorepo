@@ -87,7 +87,7 @@ class TestGitGud(unittest.TestCase):
         expected_log = inspect.cleandoc(expected_log)
         # Clear empty spaces at end of lines
         actual_log = "\n".join([line.strip() for line in git_log.split("\n")])
-        logging.info("Git log is %s", actual_log)
+        logging.info("Git log is \n%s", actual_log)
         self.assertEqual(actual_log, expected_log)
 
     def assertFileContents(self, filename: str, contents: str) -> None:
@@ -149,6 +149,7 @@ class TestGitGudWithRemote(TestGitGud):
         local_filename = os.path.join(self.local_repo_path, os.path.basename(remote_filename))
         self.assertEqual(["more-contents-from-remote\n"], get_file_contents(local_filename))
         summary = self.gg.get_summary()
+        self.gg.print_status()
         self.assertEqual(summary.commit_tree.description, "Added more content")
         self.assertEqual(len(summary.commit_tree.children), 0)
 
@@ -180,7 +181,48 @@ class TestGitGudWithRemote(TestGitGud):
         self.assertEqual(summary.commit_tree.children[0].description, "Added more remote content")
         self.assertEqual(summary.commit_tree.children[1].description, "Added local content")
 
+    def test_sync_remote_with_local_changes_and_rebase(self) -> None:
+        """Local changes can be rebased off of newer remote commits after syncing."""
+
+        remote_filename = self.make_test_filename(self.remote_repo_path)
+        append(remote_filename, "more-contents-from-remote")
+        self.remote_repo.git.add("-A")
+        self.remote_repo.git.commit("-a", "-m", "Added more remote content")
+
+        local_filename = self.make_test_filename(self.local_repo_path)
+        append(local_filename, "locally added content")
+        local_commit = self.gg.commit("Added local content")
+
+        self.gg.update(self.gg.state.root)
+        new_remote_commit = self.gg.sync()
+
         self.gg.print_status()
+        self.gg.rebase(source_id=local_commit.id, dest_id=new_remote_commit.id)
+        self.gg.print_status()
+
+        synced_filename = os.path.join(self.local_repo_path, os.path.basename(remote_filename))
+        self.assertFileContents(synced_filename, "more-contents-from-remote\n")
+        self.assertFileContents(local_filename, "locally added content\n")
+
+    def test_sync_remote_from_commit_with_local_changes(self) -> None:
+        """Local changes can be synced to a newer remote ancestor."""
+
+        remote_filename = self.make_test_filename(self.remote_repo_path)
+        append(remote_filename, "more-contents-from-remote")
+        self.remote_repo.git.add("-A")
+        self.remote_repo.git.commit("-a", "-m", "Added more remote content")
+
+        local_filename = self.make_test_filename(self.local_repo_path)
+        append(local_filename, "locally added content")
+        self.gg.commit("Added local content")
+
+        self.gg.print_status()
+        self.gg.sync()
+        self.gg.print_status()
+
+        synced_filename = os.path.join(self.local_repo_path, os.path.basename(remote_filename))
+        self.assertFileContents(synced_filename, "more-contents-from-remote\n")
+        self.assertFileContents(local_filename, "locally added content\n")
 
 
 class TestGitGudLocalOnly(TestGitGud):
@@ -355,6 +397,7 @@ class TestGitGudLocalOnly(TestGitGud):
 
         logging.info("User resolves merge conflict")
         self.gg.rebase_continue()
+        self.gg.print_status()
 
         expected = "testing1\nmore testing1\ntesting1.1\n"
 

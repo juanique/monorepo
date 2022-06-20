@@ -9,9 +9,10 @@
 - **✓** `gg amend`
 - **✓** `gg evolve`
 - **✓** `gg rebase`
+- **✓** `gg sync`
 
 ### TODO / Known Issues
 
-- **✗** `gg sync` only supported for remote commits
 - **✗** `gg upload` not supported at all
 - **✗** `gg snapshot` missing CLI support
+- **✗** `gg sync` does not handle already merged commits
