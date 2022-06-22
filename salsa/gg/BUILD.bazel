@@ -1,5 +1,3 @@
-# This is a bazel port of https://github.com/laurent-laporte-pro/stackoverflow-q2059482
-# by Laurent LAPORTE - MIT License
 load("@pip_deps//:requirements.bzl", "requirement")
 load("//:bazel/python.bzl", "py_binary", "py_library", "py_test")
 

@@ -542,8 +542,14 @@ class GitGud:
             raise ValueError(f"Snapshot not found: {snapshot_hash}")
 
         logging.info("Restoring snapshot %s - %s", snapshot.hash, snapshot.description)
-        self.repo.git.checkout(snapshot.hash, ".")
+        self._copy_branch_state(snapshot_hash, self.head().id)
         self.amend(f"Restore snapshot {snapshot.hash} - {snapshot.description}")
+
+    def _copy_branch_state(self, source_branch: str, dest_branch: str) -> None:
+        temp_branch_name = "temp_" + dest_branch
+        self.repo.git.switch("-c", temp_branch_name, source_branch)
+        self.repo.git.reset("--soft", dest_branch)
+        self.repo.git.branch("-M", dest_branch)
 
     def snapshot(self, message: str = "", commit: bool = True) -> None:
         """Take a snapshot of the current commit state and add it to the history branch."""
@@ -553,10 +559,10 @@ class GitGud:
             snapshot_message += f": {message}"
 
         if commit:
-            self.repo.git.checkout(self.head().history_branch)
-            self.repo.git.checkout(self.head().id, ".")
-            self.add_changes_to_index()
-            self.repo.index.commit(snapshot_message)
+            history_branch = self.head().history_branch
+            assert history_branch is not None
+            self._copy_branch_state(self.head().id, history_branch)
+            self.repo.git.commit("-m", snapshot_message)
 
         hash = self.repo.head.commit.hexsha
         new_snapshot = Snapshot(hash=hash, description=snapshot_message)
@@ -588,7 +594,7 @@ class GitGud:
         logging.info("Amending commit %s", self.head().id)
 
         self.add_changes_to_index()
-        self.repo.git.commit("--amend", "--no-edit")
+        self.repo.git.commit("--amend", "--no-edit", "--allow-empty")
 
         new_hash = self.repo.head.commit.hexsha
         self.head().old_hash, self.head().hash = self.head().hash, new_hash
@@ -769,9 +775,18 @@ class GitGud:
             self.repo.git.merge("--no-ff", "-m", commit_msg, parent.history_branch)
         except GitCommandError as e:
             assert "CONFLICT" in e.stdout
+
+            # This is just a quick way to get out the merge state, we amend this
+            # commit right after. This is because we can't do `_copy_branch_state()`
+            # during conflict resolution since it switches branches.
             self.repo.git.checkout(child.id, ".")
             self.repo.git.add("-A")
             self.repo.git.commit("-m", commit_msg)
+
+            # We get the actual desired state.
+            assert child.history_branch is not None
+            self._copy_branch_state(child.id, child.history_branch)
+            self.repo.git.commit("--amend", "-a", "--no-edit")
 
         self.repo.git.checkout(child.id)
         self.snapshot(commit_msg, commit=False)
