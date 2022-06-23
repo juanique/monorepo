@@ -55,6 +55,14 @@ def update(commit_id: str) -> None:
 
 
 @click.command()
+@click.argument("commit_id")
+def drop(commit_id: str) -> None:
+    gg = GitGud.for_working_dir(os.getcwd())
+    gg.drop_commit(commit_id)
+    gg.print_status()
+
+
+@click.command()
 @click.option("-m", "--message")
 def commit(message: str) -> None:
     gg = GitGud.for_working_dir(os.getcwd())
@@ -114,6 +122,7 @@ def set_config(key: str, value: str) -> None:
     gg = GitGud.for_working_dir(os.getcwd())
     config = gg.get_config()
     setattr(config, key, value)
+    gg.set_config(config)
 
 
 @click.command()
@@ -166,6 +175,9 @@ cli.add_command(rebase)
 cli.add_command(sync)
 cli.add_command(upload)
 cli.add_command(debug)
+cli.add_command(drop)
+cli.add_command(get_config)
+cli.add_command(set_config)
 
 if __name__ == "__main__":
     cli()

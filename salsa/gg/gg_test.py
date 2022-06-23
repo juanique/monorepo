@@ -52,6 +52,7 @@ class FakePr(BaseModel):
     title: str
     remote_branch: str
     remote_base_branch: str
+    state: str
 
 
 class FakeHostedRepo(HostedRepo):
@@ -68,15 +69,22 @@ class FakeHostedRepo(HostedRepo):
             title=title,
             remote_branch=remote_branch,
             remote_base_branch=remote_base_branch,
+            state="DRAFT",
         )
         return pr_id
+
+    def close_pull_request(self, pull_request_id: str) -> None:
+        self.pull_requests[pull_request_id].state = "CLOSED"
 
 
 class TestBranchName(unittest.TestCase):
     def test_branch_name(self) -> None:
-        self.assertEqual(get_branch_name("branch"), "branch")
-        self.assertEqual(get_branch_name("My Branch"), "my_branch")
-        self.assertEqual(get_branch_name("Pequeña: ramita"), "pequena_ramita")
+        self.assertEqual(get_branch_name("branch", randomize=False), "branch")
+        self.assertEqual(get_branch_name("My Branch", randomize=False), "my_branch")
+        self.assertEqual(get_branch_name("Pequeña: ramita", randomize=False), "pequena_ramita")
+
+    def test_branch_name_randomized(self) -> None:
+        self.assertRegex(get_branch_name("branch"), r"^branch_[0-9a-f]{5}$")
 
 
 class TestGithubRepoMetadata(unittest.TestCase):
@@ -153,6 +161,8 @@ class TestGitGudWithRemote(TestGitGud):
 
         self.hosted_repo = FakeHostedRepo()
         self.gg = GitGud.clone(self.remote_repo_path, self.local_repo_path, self.hosted_repo)
+        config = GitGudConfig(randomize_branches=False)
+        self.gg.set_config(config)
         self.gg.repo.git.config("user.email", "test@example.com")
         self.gg.repo.git.config("user.name", "test_user")
 
@@ -279,6 +289,17 @@ class TestGitGudWithRemote(TestGitGud):
         self.gg.upload()
         self.assertEqual(c1.upstream_branch, "jemunoz/added_local_content")
 
+    def test_drop(self) -> None:
+        local_filename = self.make_test_filename(self.local_repo_path)
+        append(local_filename, "locally added content")
+        c1 = self.gg.commit("Added local content")
+        self.gg.upload()
+
+        self.gg.drop_commit(c1.id)
+        self.assertFalse(c1.id in self.gg.state.commits)
+        assert c1.pull_request_id is not None
+        self.assertEqual(self.hosted_repo.pull_requests[c1.pull_request_id].state, "CLOSED")
+
     def test_upload(self) -> None:
         """A local commit can be uploaded to remote."""
 
@@ -395,6 +416,8 @@ class TestGitGudLocalOnly(TestGitGud):
         self.repo.git.config("user.email", "test@example.com")
         self.repo.git.config("user.name", "test_user")
         self.gg = GitGud.for_clean_repo(self.repo)
+        config = GitGudConfig(randomize_branches=False)
+        self.gg.set_config(config)
 
     def test_commit_remove_file(self) -> None:
         """Commits correctly pick up deleted files."""
