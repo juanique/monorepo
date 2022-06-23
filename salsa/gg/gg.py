@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from enum import Enum
+import random
 import re
 from typing import Dict, List, Optional, Callable
 
@@ -140,6 +141,7 @@ class RepoMetadata(BaseModel):
 
 class GitGudConfig(BaseModel):
     remote_branch_prefix: str = ""
+    randomize_branches: bool = True
 
 
 class RepoState(BaseModel):
@@ -157,9 +159,16 @@ class RepoState(BaseModel):
         use_enum_values = True
 
 
-def get_branch_name(string: str) -> str:
+def get_branch_name(string: str, randomize: bool = True) -> str:
+    suffix = ""
+    if randomize:
+        alphabet = "0123456789abcdef"
+        r = random.SystemRandom()
+        suffix = "_" + "".join([r.choice(alphabet) for i in range(5)])
+
     return unidecode(
         string.split("\n")[0][0:20].lower().replace(" ", "_").replace(".", "").replace(":", "")
+        + suffix
     )
 
 
@@ -175,6 +184,10 @@ class HostedRepo(ABC):
     def create_pull_request(self, title: str, remote_branch: str, remote_base_branch: str) -> str:
         """Create a pull request on the hosting service. Returns the ID of the
         recently created PR."""
+
+    @abstractmethod
+    def close_pull_request(self, pull_request_id: str) -> None:
+        """Closes an open pull request."""
 
 
 class GitHubHostedRepo(HostedRepo):
@@ -192,6 +205,11 @@ class GitHubHostedRepo(HostedRepo):
             draft=True,
         )
         return str(pr.number)
+
+    def close_pull_request(self, pull_request_id: str) -> None:
+        repo = self.github.get_repo(self.repo_name)
+        pr = repo.get_pull(int(pull_request_id))
+        pr.edit(state="closed")
 
 
 class GitGud:
@@ -507,7 +525,7 @@ class GitGud:
             raise ValueError("Cannot commit during merge conflict.")
 
         logging.info("Creating new commit: %s", get_oneliner(commit_msg))
-        branch_name = get_branch_name(commit_msg)
+        branch_name = get_branch_name(commit_msg, self.state.config.randomize_branches)
         history_branch_name = f"history_{branch_name}"
 
         if self.head():
@@ -767,6 +785,35 @@ class GitGud:
             self.update(source_id)
         except GitCommandError as e:
             self.handle_merge_conflict(source_commit, dest_commit, e)
+
+    def drop_commit(self, commit_id: str) -> None:
+        """Drop a commit and close the associated pull request."""
+
+        commit = self.get_commit(commit_id)
+
+        if commit.remote:
+            raise ValueError("Cannot drop remote commits")
+
+        if len(self.state.commits.keys()) == 1:
+            raise ValueError("Cannot drop only commit")
+
+        if commit.children:
+            raise ValueError("Cannot drop commit with children.")
+
+        if commit.id == self.head().id:
+            assert commit.parent_id is not None
+            self.update(commit.parent_id)
+
+        if commit.pull_request_id:
+            assert self.hosted_repo is not None
+            self.hosted_repo.close_pull_request(commit.pull_request_id)
+
+        for other_commit in self.state.commits.values():
+            if commit.id in other_commit.children:
+                other_commit.children.remove(commit.id)
+
+        self.state.commits.pop(commit.id)
+        self.save_state()
 
     def continue_evolve(self, target_commit_id: str, parent_id: str, commit_msg: str = "") -> None:
         """After changes have been propagated (potentially with conflict
