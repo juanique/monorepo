@@ -451,6 +451,31 @@ class TestGitGudLocalOnly(TestGitGud):
         self.gg.update(c2.id)
         self.assertEqual(["testing1\n", "testing2\n"], get_file_contents(filename))
 
+    def test_amend_remove_file(self) -> None:
+        """Regression test for a bug that caused deleted files not to be
+        propagated to the history branch."""
+
+        filename_1 = self.make_test_filename()
+        append(filename_1, "testing1")
+        c1 = self.gg.commit("My first commit")
+
+        self.gg.update(c1.id)
+        os.remove(filename_1)
+        self.gg.amend("Delete file1")
+
+        self.gg.print_status()
+
+        append(filename_1, "testing1")
+        self.gg.amend("Add file again")
+
+        # History snapshot 1 is when file was deleted
+        self.gg.restore_snapshot(self.gg.head().snapshots[1].hash)
+        self.assertFileDoesNotExist(filename_1)
+
+        # History snapshot 2 is when file was created again
+        self.gg.restore_snapshot(self.gg.head().snapshots[2].hash)
+        self.assertFileContents(filename_1, "testing1\n")
+
     def test_amend_evolve_single_line(self) -> None:
         """Can update old commits and propagate changes on a linear chain.
 

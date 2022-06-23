@@ -1,3 +1,5 @@
+# This is a bazel port of https://github.com/laurent-laporte-pro/stackoverflow-q2059482
+# by Laurent LAPORTE - MIT License
 load("//:bazel/python.bzl", "py_library", "py_test")
 
 package(default_visibility = ["//visibility:public"])
