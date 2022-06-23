@@ -13,6 +13,7 @@ from git import Repo
 from salsa.gg.gg import (
     ConfigNotFoundError,
     GitGud,
+    GitGudConfig,
     GitHubRepoMetadata,
     HostedRepo,
     InvalidOperationForRemote,
@@ -268,6 +269,15 @@ class TestGitGudWithRemote(TestGitGud):
         synced_filename = os.path.join(self.local_repo_path, os.path.basename(remote_filename))
         self.assertFileContents(synced_filename, "more-contents-from-remote\n")
         self.assertFileContents(local_filename, "locally added content\n")
+
+    def test_upstream_branch_prefix(self) -> None:
+        local_filename = self.make_test_filename(self.local_repo_path)
+        append(local_filename, "locally added content")
+        c1 = self.gg.commit("Added local content")
+        config = GitGudConfig(remote_branch_prefix="jemunoz/")
+        self.gg.set_config(config)
+        self.gg.upload()
+        self.assertEqual(c1.upstream_branch, "jemunoz/added_local_content")
 
     def test_upload(self) -> None:
         """A local commit can be uploaded to remote."""

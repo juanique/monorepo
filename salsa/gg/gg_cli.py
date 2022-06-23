@@ -102,6 +102,21 @@ def amend(message: str = "") -> None:
 
 
 @click.command()
+def get_config() -> None:
+    gg = GitGud.for_working_dir(os.getcwd())
+    print(gg.get_config())
+
+
+@click.command()
+@click.option("-k", "--key")
+@click.option("-v", "--value")
+def set_config(key: str, value: str) -> None:
+    gg = GitGud.for_working_dir(os.getcwd())
+    config = gg.get_config()
+    setattr(config, key, value)
+
+
+@click.command()
 @click.argument("path")
 def clone(path: str) -> None:
     # extract the repo name from the URL

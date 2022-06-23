@@ -138,6 +138,10 @@ class RepoMetadata(BaseModel):
     github: Optional[GitHubRepoMetadata]
 
 
+class GitGudConfig(BaseModel):
+    remote_branch_prefix: str = ""
+
+
 class RepoState(BaseModel):
     repo_dir: str
     head: str
@@ -147,6 +151,7 @@ class RepoState(BaseModel):
     pending_operations: List[PendingOperation] = []
     master_branch: str = "master"
     repo_metadata: Optional[RepoMetadata]
+    config: GitGudConfig = GitGudConfig()
 
     class Config:
         use_enum_values = True
@@ -211,6 +216,13 @@ class GitGud:
             child_summary = self.get_commit_summary(child_id)
             summary.children.append(child_summary)
         return summary
+
+    def get_config(self) -> GitGudConfig:
+        return self.state.config
+
+    def set_config(self, config: GitGudConfig) -> None:
+        self.state.config = config
+        self.save_state()
 
     @staticmethod
     def state_filename(directory: str) -> str:
@@ -359,7 +371,7 @@ class GitGud:
 
         self.repo.git.checkout(commit.history_branch)
         if not commit.upstream_branch:
-            commit.upstream_branch = commit.id
+            commit.upstream_branch = self.get_config().remote_branch_prefix + commit.id
             self.repo.git.push("-u", "origin", f"{commit.history_branch}:{commit.upstream_branch}")
             if self.hosted_repo:
                 logging.info("Creating PR in hosted repo.")
@@ -831,7 +843,7 @@ class GitGud:
 
         return self.state.commits[id]
 
-    def print_status(self, full: bool=False) -> None:
+    def print_status(self, full: bool = False) -> None:
         """Print the state of the local branches."""
         print("")
         dirty_state = self.get_dirty_state()
@@ -882,7 +894,7 @@ class GitGud:
             print(" [bold]gg rebase --abort[/bold]")
         print("")
 
-    def get_tree(self, commit: GudCommit = None, tree: Tree = None, full: bool=False) -> Tree:
+    def get_tree(self, commit: GudCommit = None, tree: Tree = None, full: bool = False) -> Tree:
         """Return a tree representation of the local gitgud state for printing."""
 
         commit = commit or self.root()
