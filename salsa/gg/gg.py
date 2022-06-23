@@ -8,6 +8,7 @@ import logging
 import hashlib
 import json
 
+from unidecode import unidecode
 from git import Repo, GitCommandError
 from pydantic import BaseModel
 from rich import print
@@ -152,7 +153,9 @@ class RepoState(BaseModel):
 
 
 def get_branch_name(string: str) -> str:
-    return string.split("\n")[0][0:20].lower().replace(" ", "_").replace(".", "")
+    return unidecode(
+        string.split("\n")[0][0:20].lower().replace(" ", "_").replace(".", "").replace(":", "")
+    )
 
 
 def get_oneliner(string: str) -> str:
@@ -828,7 +831,7 @@ class GitGud:
 
         return self.state.commits[id]
 
-    def print_status(self) -> None:
+    def print_status(self, full: bool=False) -> None:
         """Print the state of the local branches."""
         print("")
         dirty_state = self.get_dirty_state()
@@ -862,7 +865,7 @@ class GitGud:
                 print(f" [bold red]{symbol}[/bold red]: {explanation}")
             print("")
 
-        tree = self.get_tree()
+        tree = self.get_tree(full=full)
         print(tree)
         if self.state.merge_conflict_state:
             print("")
@@ -879,7 +882,7 @@ class GitGud:
             print(" [bold]gg rebase --abort[/bold]")
         print("")
 
-    def get_tree(self, commit: GudCommit = None, tree: Tree = None) -> Tree:
+    def get_tree(self, commit: GudCommit = None, tree: Tree = None, full: bool=False) -> Tree:
         """Return a tree representation of the local gitgud state for printing."""
 
         commit = commit or self.root()
@@ -930,9 +933,10 @@ class GitGud:
         line = f"[bold {color}]{commit.id}[/bold {color}]"
         line += f"[bold red]{needs_evolve}{needs_upload}{conflict}[/bold red]{name_annotations} "
         line += f"{url}: {commit.get_oneliner()}"
-        for snapshot in commit.snapshots:
-            vertical = "│" if commit.children else " "
-            line += f"\n{vertical} [grey37]{snapshot.hash} : {snapshot.description}[/grey37]"
+        if full:
+            for snapshot in commit.snapshots:
+                vertical = "│" if commit.children else " "
+                line += f"\n{vertical} [grey37]{snapshot.hash} : {snapshot.description}[/grey37]"
 
         if not tree:
             branch = Tree(line)
@@ -940,7 +944,7 @@ class GitGud:
             branch = tree.add(line)
 
         for child_id in commit.children:
-            self.get_tree(self.get_commit(child_id), branch)
+            self.get_tree(self.get_commit(child_id), branch, full=full)
 
         return branch
 

@@ -12,6 +12,7 @@ py_library(
         requirement("GitPython"),
         requirement("pydantic"),
         requirement("PyGithub"),
+        requirement("Unidecode"),
     ],
 )
 

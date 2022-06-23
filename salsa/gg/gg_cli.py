@@ -110,9 +110,10 @@ def clone(path: str) -> None:
 
 
 @click.command()
-def status() -> None:
+@click.option("--full/--no-full", default=False, is_flag=True)
+def status(full: bool = False) -> None:
     gg = GitGud.for_working_dir(os.getcwd())
-    gg.print_status()
+    gg.print_status(full=full)
 
 
 @click.command()

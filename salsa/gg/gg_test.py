@@ -16,6 +16,7 @@ from salsa.gg.gg import (
     GitHubRepoMetadata,
     HostedRepo,
     InvalidOperationForRemote,
+    get_branch_name,
 )
 from salsa.util.subsets import subset_diff
 
@@ -68,6 +69,13 @@ class FakeHostedRepo(HostedRepo):
             remote_base_branch=remote_base_branch,
         )
         return pr_id
+
+
+class TestBranchName(unittest.TestCase):
+    def test_branch_name(self) -> None:
+        self.assertEqual(get_branch_name("branch"), "branch")
+        self.assertEqual(get_branch_name("My Branch"), "my_branch")
+        self.assertEqual(get_branch_name("Pequeña: ramita"), "pequena_ramita")
 
 
 class TestGithubRepoMetadata(unittest.TestCase):
