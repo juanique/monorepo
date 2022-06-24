@@ -351,7 +351,7 @@ class GitGud:
         commit = self.get_commit(commit_id)
 
         if commit.remote:
-            raise ValueError("Commit is remote")
+            raise ValueError(f"Commit {commit_id} is remote")
 
         if not commit.parent_id:
             return commit
@@ -373,10 +373,12 @@ class GitGud:
             raise ValueError("Use commit_id or all_commits, not both")
 
         if all_commits:
-            for single_commit_id in self.state.commits:
-                commit = self.get_commit(single_commit_id)
-                if not commit.remote:
-                    self.upload(commit_id=single_commit_id)
+
+            def f(c: GudCommit) -> None:
+                if not c.remote:
+                    self.upload(commit_id=c.id)
+
+            self.traverse(self.root().id, f, skip=False)
             return
 
         if not commit_id:
@@ -410,11 +412,21 @@ class GitGud:
         self.save_state()
 
     def sync(self) -> GudCommit:
+        """Pull changes from remote and rebase the current commit to a more recent master branch."""
+
         if self.head().remote:
             return self.pull_remote()
 
-        root = self.get_oldest_non_remote(self.head().id)
+        starting_commit_id = self.head().id
+
         new_remote_commit = self.pull_remote()
+        root = self.get_oldest_non_remote(starting_commit_id)
+
+        if root.pull_request_id:
+            assert self.hosted_repo is not None
+            # TODO: Finish syncing merged commits
+            # merged_root_sha = self.hosted_repo.get_merged_commit_sha(root.pull_request_id)
+
         self.rebase(source_id=root.id, dest_id=new_remote_commit.id)
         self.save_state()
         return new_remote_commit
@@ -438,19 +450,28 @@ class GitGud:
             if commit.children and commit.remote and not non_remote_children:
                 to_prune.append(commit_id)
 
-        for commit_to_prune in to_prune:
+        for commit_to_prune_id in to_prune:
+            logging.info("Prunning commit %s", commit_to_prune_id)
+            commit_to_prune = self.get_commit(commit_to_prune_id)
+
             for commit_id, commit in self.state.commits.items():
-                if commit.parent_id == commit_to_prune:
-                    commit.parent_id = None
-                    commit.parent_hash = None
+                if commit.parent_id == commit_to_prune_id:
 
-            to_prune = self.get_commit(commit_to_prune)
-            if self.state.root == to_prune.id:
-                self.state.root = to_prune.children[0]
+                    if not self.state.root == commit_to_prune.id:
+                        assert commit_to_prune.parent_id is not None
+                        parent_of_prunned = self.get_commit(commit_to_prune.parent_id)
+                        commit.parent_id = parent_of_prunned.id
+                        commit.parent_hash = parent_of_prunned.hash
+                        parent_of_prunned.children.append(commit.id)
 
-            logging.info("Prunning commit %s", commit_to_prune)
-            self.state.commits.pop(commit_to_prune)
-            self.repo.git.branch("-D", to_prune.id)
+                if commit_to_prune_id in commit.children:
+                    commit.children.remove(commit_to_prune_id)
+
+            if self.state.root == commit_to_prune.id:
+                self.state.root = commit_to_prune.children[0]
+
+            self.state.commits.pop(commit_to_prune_id)
+            self.repo.git.branch("-D", commit_to_prune.id)
 
     def pull_remote(self) -> GudCommit:
         """Pulls the latest commit from remote master and adds it as a child of
@@ -465,7 +486,7 @@ class GitGud:
                     continue
 
                 revcount = int(
-                    self.repo.rev_list("--count", f"{newest_remote.hash}..{commit.hash}")
+                    self.repo.git.rev_list("--count", f"{newest_remote.hash}..{commit.hash}")
                 )
                 if revcount > 0:
                     newest_remote = commit
@@ -479,10 +500,14 @@ class GitGud:
         self.repo.git.checkout(self.state.master_branch)
         self.repo.git.pull("--rebase", "origin", self.state.master_branch)
         pulled_commit = GitGud.get_remote_commit(self.repo, self.state.master_branch)
+        if pulled_commit.id == newest_remote.id:
+            logging.info("Nothing to do, already at latest remote HEAD")
+            return newest_remote
 
-        newest_remote.children.insert(0, pulled_commit.id)
         self.state.commits[pulled_commit.id] = pulled_commit
-
+        newest_remote.children.insert(0, pulled_commit.id)
+        pulled_commit.parent_hash = newest_remote.hash
+        pulled_commit.parent_id = newest_remote.id
         self.prune_commits()
         self.update(pulled_commit.id)
         self.save_state()

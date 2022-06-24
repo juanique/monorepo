@@ -3,7 +3,7 @@ import logging
 import os
 import shutil
 import unittest
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 
 import dataclasses
 
@@ -53,6 +53,8 @@ class FakePr(BaseModel):
     remote_branch: str
     remote_base_branch: str
     state: str
+    merge_commit_sha: Optional[str]
+    merged: bool = False
 
 
 class FakeHostedRepo(HostedRepo):
@@ -279,6 +281,48 @@ class TestGitGudWithRemote(TestGitGud):
         synced_filename = os.path.join(self.local_repo_path, os.path.basename(remote_filename))
         self.assertFileContents(synced_filename, "more-contents-from-remote\n")
         self.assertFileContents(local_filename, "locally added content\n")
+
+    def test_sync_more_than_one_remote(self) -> None:
+        """Verify that we can have multiple remote commits at the same time and
+        pull even more."""
+
+        remote_filename = self.make_test_filename(self.remote_repo_path)
+        append(remote_filename, "more-contents-from-remote")
+        self.remote_repo.git.add("-A")
+        self.remote_repo.git.commit("-a", "-m", "Added more remote content")
+
+        local_filename = self.make_test_filename(self.local_repo_path)
+        append(local_filename, "locally added content")
+        self.gg.commit("Added local content")
+
+        self.gg.update(self.gg.state.root)
+        self.gg.sync()
+
+        local_filename_2 = self.make_test_filename(self.local_repo_path)
+        append(local_filename_2, "locally added content")
+        self.gg.commit("2 Added local content")
+
+        self.gg.sync()
+
+        append(remote_filename, "even-more-contents-from-remote")
+        self.remote_repo.git.add("-A")
+        self.remote_repo.git.commit("-a", "-m", "Added even more remote content")
+
+        self.gg.print_status()
+        self.gg.sync()
+        self.gg.print_status()
+
+        summary = self.gg.get_summary()
+        # We expect something like:
+        #
+        #  master@b97f3814 (Remote) : Initial commit
+        #  ├── added_local_content ↟ : Added local
+        #  └── master@9cca2297 (Remote) : Added even more remote
+        #      └── 2_added_local_conten ↟ (Current) : 2 Added local conte
+        self.assertTrue(summary.commit_tree.id.startswith("master@"))
+        self.assertEqual(summary.commit_tree.children[0].id, "added_local_content")
+        self.assertTrue(summary.commit_tree.children[1].id.startswith("master@"))
+        self.assertEqual(summary.commit_tree.children[1].children[0].id, "2_added_local_conten")
 
     def test_upstream_branch_prefix(self) -> None:
         local_filename = self.make_test_filename(self.local_repo_path)
