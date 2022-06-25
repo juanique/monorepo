@@ -4,7 +4,6 @@ import os
 import shutil
 import unittest
 from typing import Dict, List, Any
-from rich import print
 
 import dataclasses
 
@@ -96,7 +95,6 @@ class TestBranchName(unittest.TestCase):
 
     def test_branch_name_randomized(self) -> None:
         self.assertRegex(get_branch_name("branch"), r"^branch_[0-9a-f]{5}$")
-
 
 
 class TestGithubRepoMetadata(unittest.TestCase):
@@ -485,7 +483,7 @@ class TestGitGudWithRemote(TestGitGud):
 
         local_filename_2 = self.make_test_filename(self.local_repo_path)
         append(local_filename_2, "content2")
-        c2 = self.gg.commit("content2")
+        self.gg.commit("content2")
 
         self.gg.print_status()
         self.gg.upload(all_commits=True)
@@ -502,6 +500,31 @@ class TestGitGudWithRemote(TestGitGud):
             "commit_tree": {"description": "content1", "children": [{"description": "content2"}]}
         }
         self.assertSubset(expected, summary.dict())
+
+    def test_sync_merged_not_at_remote_head(self) -> None:
+        """Verify that children of a merged commit are rebases to remote head after
+        merged commit is dropped."""
+
+        local_filename_1 = self.make_test_filename(self.local_repo_path)
+        append(local_filename_1, "content1")
+        c1 = self.gg.commit("content1")
+
+        local_filename_2 = self.make_test_filename(self.local_repo_path)
+        append(local_filename_2, "content2")
+        self.gg.commit("content2")
+        self.gg.upload(all_commits=True)
+
+        assert c1.pull_request is not None
+        self.hosted_repo.merge_pull_request(c1.pull_request.id)
+
+        remote_filename = self.make_test_filename(self.remote_repo_path)
+        append(remote_filename, "more-contents-from-remote")
+        self.remote_repo.git.add("-A")
+        self.remote_repo.git.commit("-a", "-m", "Added more remote content")
+
+        self.gg.print_status()
+        self.gg.sync()
+        self.gg.print_status()
 
     def test_amend_merged_commit(self) -> None:
         """Merged commits cannot be ameded."""

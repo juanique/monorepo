@@ -464,7 +464,48 @@ class GitGud:
         assert self.hosted_repo is not None
         commit.pull_request = self.hosted_repo.get_pull_request(commit.pull_request.id)
 
-    def _rebase_merged_commit(self, commit: GudCommit) -> None:
+    def comes_before(self, commit_1: GudCommit, commit_2: GudCommit) -> bool:
+        """Returns True if commit_1 comes before commit_2."""
+        self.repo.git.checkout(self.state.master_branch)
+        revcount = int(self.repo.git.rev_list("--count", f"{commit_1.hash}..{commit_2.hash}"))
+        result = revcount > 0
+        return result
+
+    def _insert_remote_commit(self, commit: GudCommit) -> None:
+        logging.info("Inserting remote commit %s", commit.id)
+        self.print_status()
+        parent = self.root()
+
+        next_child = None
+        while True:
+            next_parent: Optional[GudCommit] = None
+
+            for child_id in parent.children:
+                child = self.get_commit(child_id)
+                if not child.remote:
+                    continue
+                next_parent = child
+                break
+
+            if not next_parent:
+                break
+
+            if not self.comes_before(next_parent, commit):
+                next_child = next_parent
+                break
+
+            parent = next_parent
+
+        logging.info("Will insert under %s", parent.id)
+        self.state.commits[commit.id] = commit
+        parent.children.append(commit.id)
+        commit.parent_hash = parent.hash
+        commit.parent_id = parent.id
+
+        if next_child:
+            self.rebase(source_id=next_child.id, dest_id=commit.id)
+
+    def _rebase_merged_commit(self, commit: GudCommit) -> GudCommit:
         assert commit.pull_request is not None
 
         if commit.pull_request.state != "MERGED":
@@ -475,14 +516,12 @@ class GitGud:
 
         self.repo.git.checkout(commit.pull_request.merge_commit_sha)
         pulled_commit = GitGud.get_remote_commit(self.repo, self.state.master_branch)
-        if pulled_commit.id == self.root().id:
-            merged_commit = self.root()
+
+        if pulled_commit.id in self.state.commits:
+            merged_commit = self.get_commit(pulled_commit.id)
         else:
+            self._insert_remote_commit(pulled_commit)
             merged_commit = pulled_commit
-            self.state.commits[merged_commit.id] = merged_commit
-            self.root().children.append(merged_commit.id)
-            merged_commit.parent_hash = self.root().hash
-            merged_commit.parent_id = self.root().id
 
         # TODO: Handle rebase conflicts which may happen if the commit was modified after merge
         self.rebase(commit.id, merged_commit.id)
@@ -494,6 +533,7 @@ class GitGud:
             self.rebase(child_id, merged_commit.id)
 
         self.drop_commit(commit.id)
+        return merged_commit
 
     def sync(self) -> GudCommit:
         """Pull changes from remote and rebase the current commit to a more recent master branch."""
@@ -514,8 +554,13 @@ class GitGud:
             self._sync_pr_state(root)
             logging.info("Commit has pull request and it's %s", root.pull_request.state)
             if root.pull_request.merged:
-                self._rebase_merged_commit(root)
-                return
+                merged_commit = self._rebase_merged_commit(root)
+
+                for child_id in merged_commit.children:
+                    self.update(child_id)
+                    self.sync()
+
+                return merged_commit
 
         self.rebase(source_id=root.id, dest_id=new_remote_commit.id)
         self.prune_commits()
@@ -576,10 +621,7 @@ class GitGud:
                     newest_remote = commit
                     continue
 
-                revcount = int(
-                    self.repo.git.rev_list("--count", f"{newest_remote.hash}..{commit.hash}")
-                )
-                if revcount > 0:
+                if self.comes_before(newest_remote, commit):
                     newest_remote = commit
                     continue
 
@@ -741,11 +783,12 @@ class GitGud:
         if self.head().remote:
             raise InvalidOperationForRemote("Cannot amend remote commits.")
 
-        logging.info("Amending commit %s", self.head().id)
-
         self._sync_pr_state(self.head())
-        if self.head().pull_request and self.head().pull_request.merged:
+        pr = self.head().pull_request
+        if pr and pr.merged:
             raise CommitAlreadyMerged("Cannot amend merged commits.")
+
+        logging.info("Amending commit %s", self.head().id)
 
         self.add_changes_to_index()
         self.repo.git.commit("--amend", "--no-edit", "--allow-empty")
@@ -885,7 +928,21 @@ class GitGud:
         dest_commit = self.get_commit(dest_id)
 
         if source_commit.remote:
-            raise ValueError("Cannot rebase remote commits")
+            if not dest_commit.remote:
+                raise ValueError("Remote commits can only be rebased to other remote commits.")
+
+            if not self.comes_before(dest_commit, source_commit):
+                raise ValueError(
+                    f"{dest_commit.id} does not come before {source_commit.id}, cannot rebase"
+                )
+
+            if source_commit.parent_id:
+                self.get_commit(source_commit.parent_id).children.remove(source_commit.id)
+
+            dest_commit.children.append(source_commit.id)
+            source_commit.parent_id = dest_commit.parent_id
+            source_commit.parent_hash = dest_commit.parent_hash
+            return
 
         assert source_commit.parent_id is not None
 
@@ -945,6 +1002,8 @@ class GitGud:
         child = self.get_commit(target_commit_id)
         parent = self.get_commit(parent_id)
 
+        logging.info("child is %s, parent is %s", child.id, parent.id)
+
         child.parent_hash = parent.hash
         child.parent_id = parent.id
         self.update(child.id)
@@ -976,8 +1035,8 @@ class GitGud:
         self.repo.git.checkout(child.id)
         self.snapshot(commit_msg, commit=False)
         self.save_state()
-
         self.execute_pending_operations()
+
         self.prune_commits()
         self.save_state()
 
