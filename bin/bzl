@@ -3,7 +3,6 @@
 GIT_ROOT=`git rev-parse --git-dir`
 REPO_ROOT=`realpath $GIT_ROOT | sed 's/....$//'`
 echo "Repo root is $REPO_ROOT"
-BUILD_OUTPUT=/tmp/build_output
 USER_ID=`id -u`
 CURRENT_DIR=`pwd`
 DOCKER_SOCK=/var/run/docker.sock
@@ -60,7 +59,6 @@ else
     --network=br0 \
     -v $DOCKER_SOCK:$DOCKER_SOCK \
     -v $REPO_ROOT:$REPO_ROOT \
-    -v $BUILD_OUTPUT:$BUILD_OUTPUT \
     -v $CACHE_DIR:/$CACHE_DIR \
     -w $REPO_ROOT juanzolotoochin/ubuntu-build tail -f /dev/null
 fi
