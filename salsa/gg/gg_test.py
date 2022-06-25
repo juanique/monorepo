@@ -3,20 +3,21 @@ import logging
 import os
 import shutil
 import unittest
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 
 import dataclasses
 
-from pydantic import BaseModel
 from git import Repo
 
 from salsa.gg.gg import (
+    CommitAlreadyMerged,
     ConfigNotFoundError,
     GitGud,
     GitGudConfig,
     GitHubRepoMetadata,
     HostedRepo,
     InvalidOperationForRemote,
+    GudPullRequest,
     get_branch_name,
 )
 from salsa.util.subsets import subset_diff
@@ -47,41 +48,48 @@ def make_directory(dirname: str) -> None:
     os.makedirs(dirname)
 
 
-class FakePr(BaseModel):
-    id: str
-    title: str
-    remote_branch: str
-    remote_base_branch: str
-    state: str
-    merge_commit_sha: Optional[str]
-    merged: bool = False
-
-
 class FakeHostedRepo(HostedRepo):
-    def __init__(self) -> None:
+    def __init__(self, repo: Repo) -> None:
         super().__init__("repo_name")
+        self.repo = repo
         self.next_id = 0
-        self.pull_requests: Dict[str, FakePr] = {}
+        self.pull_requests: Dict[str, GudPullRequest] = {}
 
-    def create_pull_request(self, title: str, remote_branch: str, remote_base_branch: str) -> str:
+    def create_pull_request(
+        self, title: str, remote_branch: str, remote_base_branch: str
+    ) -> GudPullRequest:
         pr_id = str(self.next_id)
         self.next_id += 1
-        self.pull_requests[pr_id] = FakePr(
+        self.pull_requests[pr_id] = GudPullRequest(
             id=pr_id,
             title=title,
             remote_branch=remote_branch,
             remote_base_branch=remote_base_branch,
             state="DRAFT",
         )
-        return pr_id
+        return self.pull_requests[pr_id]
 
     def close_pull_request(self, pull_request_id: str) -> None:
         self.pull_requests[pull_request_id].state = "CLOSED"
+
+    def get_pull_request(self, pull_request_id: str) -> GudPullRequest:
+        return self.pull_requests[pull_request_id]
+
+    def merge_pull_request(self, pull_request_id: str) -> GudPullRequest:
+        pr = self.pull_requests[pull_request_id]
+
+        self.repo.git.checkout(pr.remote_base_branch)
+        self.repo.git.merge(pr.remote_branch)
+        pr.state = "MERGED"
+        pr.merged = True
+        pr.merge_commit_sha = self.repo.head.commit.hexsha
+        return pr
 
 
 class TestBranchName(unittest.TestCase):
     def test_branch_name(self) -> None:
         self.assertEqual(get_branch_name("branch", randomize=False), "branch")
+        self.assertEqual(get_branch_name("branch\n", randomize=False), "branch")
         self.assertEqual(get_branch_name("My Branch", randomize=False), "my_branch")
         self.assertEqual(get_branch_name("Pequeña: ramita", randomize=False), "pequena_ramita")
 
@@ -161,7 +169,7 @@ class TestGitGudWithRemote(TestGitGud):
         self.remote_repo.git.add("-A")
         self.remote_repo.git.commit("-a", "-m", "Initial commit")
 
-        self.hosted_repo = FakeHostedRepo()
+        self.hosted_repo = FakeHostedRepo(self.remote_repo)
         self.gg = GitGud.clone(self.remote_repo_path, self.local_repo_path, self.hosted_repo)
         config = GitGudConfig(randomize_branches=False)
         self.gg.set_config(config)
@@ -341,8 +349,8 @@ class TestGitGudWithRemote(TestGitGud):
 
         self.gg.drop_commit(c1.id)
         self.assertFalse(c1.id in self.gg.state.commits)
-        assert c1.pull_request_id is not None
-        self.assertEqual(self.hosted_repo.pull_requests[c1.pull_request_id].state, "CLOSED")
+        assert c1.pull_request is not None
+        self.assertEqual(self.hosted_repo.pull_requests[c1.pull_request.id].state, "CLOSED")
 
     def test_upload(self) -> None:
         """A local commit can be uploaded to remote."""
@@ -447,6 +455,91 @@ class TestGitGudWithRemote(TestGitGud):
         self.remote_repo.git.checkout(c1.upstream_branch)
         synced_filename = os.path.join(self.remote_repo_path, os.path.basename(local_filename))
         self.assertFileContents(synced_filename, "content1\ncontent2\n")
+
+    def test_sync_merged_commit(self) -> None:
+        """When syncing, commits that are merged should go away."""
+
+        local_filename = self.make_test_filename(self.local_repo_path)
+        append(local_filename, "content1")
+        c1 = self.gg.commit("Added local content")
+        self.gg.upload()
+
+        assert c1.pull_request is not None
+        self.hosted_repo.merge_pull_request(c1.pull_request.id)
+
+        self.gg.print_status()
+        self.gg.sync()
+
+        summary = self.gg.get_summary()
+        self.assertEqual(summary.commit_tree.description, "Added local content")
+        self.assertEqual(len(summary.commit_tree.children), 0)
+
+    def test_sync_merged_commit_with_children(self) -> None:
+        """When syncing, commits that are merged should go away."""
+
+        local_filename_1 = self.make_test_filename(self.local_repo_path)
+        append(local_filename_1, "content1")
+        c1 = self.gg.commit("content1")
+
+        local_filename_2 = self.make_test_filename(self.local_repo_path)
+        append(local_filename_2, "content2")
+        self.gg.commit("content2")
+
+        self.gg.print_status()
+        self.gg.upload(all_commits=True)
+
+        # Merge the first commit in the hosted repo
+        assert c1.pull_request is not None
+        self.hosted_repo.merge_pull_request(c1.pull_request.id)
+
+        self.gg.sync()
+        self.gg.print_status()
+
+        summary = self.gg.get_summary()
+        expected = {
+            "commit_tree": {"description": "content1", "children": [{"description": "content2"}]}
+        }
+        self.assertSubset(expected, summary.dict())
+
+    def test_sync_merged_not_at_remote_head(self) -> None:
+        """Verify that children of a merged commit are rebases to remote head after
+        merged commit is dropped."""
+
+        local_filename_1 = self.make_test_filename(self.local_repo_path)
+        append(local_filename_1, "content1")
+        c1 = self.gg.commit("content1")
+
+        local_filename_2 = self.make_test_filename(self.local_repo_path)
+        append(local_filename_2, "content2")
+        self.gg.commit("content2")
+        self.gg.upload(all_commits=True)
+
+        assert c1.pull_request is not None
+        self.hosted_repo.merge_pull_request(c1.pull_request.id)
+
+        remote_filename = self.make_test_filename(self.remote_repo_path)
+        append(remote_filename, "more-contents-from-remote")
+        self.remote_repo.git.add("-A")
+        self.remote_repo.git.commit("-a", "-m", "Added more remote content")
+
+        self.gg.print_status()
+        self.gg.sync()
+        self.gg.print_status()
+
+    def test_amend_merged_commit(self) -> None:
+        """Merged commits cannot be ameded."""
+        local_filename_1 = self.make_test_filename(self.local_repo_path)
+        append(local_filename_1, "content1")
+        c1 = self.gg.commit("content1")
+        self.gg.upload(all_commits=True)
+
+        assert c1.pull_request is not None
+        self.hosted_repo.merge_pull_request(c1.pull_request.id)
+
+        append(local_filename_1, "content2")
+
+        with self.assertRaises(CommitAlreadyMerged):
+            self.gg.amend()
 
 
 class TestGitGudLocalOnly(TestGitGud):

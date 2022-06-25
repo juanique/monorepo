@@ -15,4 +15,3 @@
 ### TODO / Known Issues
 
 - **✗** `gg snapshot` missing CLI support
-- **✗** `gg sync` does not handle already merged commits

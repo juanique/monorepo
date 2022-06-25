@@ -14,11 +14,26 @@ from git import Repo, GitCommandError
 from pydantic import BaseModel
 from rich import print
 from rich.tree import Tree
+import github
 from github import Github
 
 from salsa.os.environ_ctx import modified_environ
 
 CONFIGS_ROOT = os.path.expanduser("~/.config/gg")
+
+
+class GudPullRequest(BaseModel):
+    id: str
+    title: str
+    remote_branch: str
+    remote_base_branch: str
+    state: str
+    merge_commit_sha: Optional[str]
+    merged: bool = False
+
+
+class CommitAlreadyMerged(Exception):
+    pass
 
 
 class InitializationError(Exception):
@@ -70,7 +85,7 @@ class GudCommit(BaseModel):
     parent_id: Optional[str]
     upstream_branch: Optional[str]
     uploaded: bool
-    pull_request_id: Optional[str]
+    pull_request: Optional[GudPullRequest]
 
     history_branch: Optional[str]
     snapshots: List[Snapshot] = []
@@ -181,7 +196,9 @@ class HostedRepo(ABC):
         self.repo_name = repo_name
 
     @abstractmethod
-    def create_pull_request(self, title: str, remote_branch: str, remote_base_branch: str) -> str:
+    def create_pull_request(
+        self, title: str, remote_branch: str, remote_base_branch: str
+    ) -> GudPullRequest:
         """Create a pull request on the hosting service. Returns the ID of the
         recently created PR."""
 
@@ -189,13 +206,24 @@ class HostedRepo(ABC):
     def close_pull_request(self, pull_request_id: str) -> None:
         """Closes an open pull request."""
 
+    @abstractmethod
+    def get_pull_request(self, pull_request_id: str) -> GudPullRequest:
+        """Get the pull request metadata."""
+
 
 class GitHubHostedRepo(HostedRepo):
-    def __init__(self, repo_name: str, github: Github):
+    def __init__(self, repo_name: str, github_client: Github):
         super().__init__(repo_name)
-        self.github = github
+        self.github = github_client
 
-    def create_pull_request(self, title: str, remote_branch: str, remote_base_branch: str) -> str:
+    def get_pull_request(self, pull_request_id: str) -> GudPullRequest:
+        repo = self.github.get_repo(self.repo_name)
+        pr = repo.get_pull(int(pull_request_id))
+        return self._convert(pr)
+
+    def create_pull_request(
+        self, title: str, remote_branch: str, remote_base_branch: str
+    ) -> GudPullRequest:
         repo = self.github.get_repo(self.repo_name)
         pr = repo.create_pull(
             title=title,
@@ -204,12 +232,27 @@ class GitHubHostedRepo(HostedRepo):
             base=remote_base_branch,
             draft=True,
         )
-        return str(pr.number)
+        return self._convert(pr)
 
     def close_pull_request(self, pull_request_id: str) -> None:
         repo = self.github.get_repo(self.repo_name)
         pr = repo.get_pull(int(pull_request_id))
         pr.edit(state="closed")
+
+    def _convert(self, pr: github.PullRequest.PullRequest) -> GudPullRequest:
+        pull_request = GudPullRequest(
+            id=str(pr.number),
+            title=pr.title,
+            remote_brAanch=pr.head.ref,
+            remote_base_branch=pr.base.ref,
+            state=pr.state.upper(),
+            merged=pr.merged,
+        )
+
+        if pr.merge_commit_sha:
+            pull_request.merge_commit_sha = pr.merge_commit_sha
+
+        return pull_request
 
 
 class GitGud:
@@ -398,8 +441,10 @@ class GitGud:
                 assert commit.parent_id is not None
                 base_commit = self.get_commit(commit.parent_id)
 
-                assert base_commit.upstream_branch is not None
-                commit.pull_request_id = self.hosted_repo.create_pull_request(
+                if not base_commit.upstream_branch:
+                    raise ValueError("Can't upload commit. Parent is not uploaded, use --all")
+
+                commit.pull_request = self.hosted_repo.create_pull_request(
                     commit.description, commit.upstream_branch, base_commit.upstream_branch
                 )
             else:
@@ -411,23 +456,113 @@ class GitGud:
         self.update(previous_head_id)
         self.save_state()
 
+    def _sync_pr_state(self, commit: GudCommit) -> None:
+        if not commit.pull_request:
+            logging.info("Nothing to sync. Commit has no PR.")
+            return
+
+        assert self.hosted_repo is not None
+        commit.pull_request = self.hosted_repo.get_pull_request(commit.pull_request.id)
+
+    def comes_before(self, commit_1: GudCommit, commit_2: GudCommit) -> bool:
+        """Returns True if commit_1 comes before commit_2."""
+        self.repo.git.checkout(self.state.master_branch)
+        revcount = int(self.repo.git.rev_list("--count", f"{commit_1.hash}..{commit_2.hash}"))
+        result = revcount > 0
+        return result
+
+    def _insert_remote_commit(self, commit: GudCommit) -> None:
+        logging.info("Inserting remote commit %s", commit.id)
+        parent = self.root()
+
+        next_child = None
+        while True:
+            next_parent: Optional[GudCommit] = None
+
+            for child_id in parent.children:
+                child = self.get_commit(child_id)
+                if not child.remote:
+                    continue
+                next_parent = child
+                break
+
+            if not next_parent:
+                break
+
+            if not self.comes_before(next_parent, commit):
+                next_child = next_parent
+                break
+
+            parent = next_parent
+
+        logging.info("Will insert under %s", parent.id)
+        self.state.commits[commit.id] = commit
+        parent.children.append(commit.id)
+        commit.parent_hash = parent.hash
+        commit.parent_id = parent.id
+
+        if next_child:
+            self.rebase(source_id=next_child.id, dest_id=commit.id)
+
+    def _rebase_merged_commit(self, commit: GudCommit) -> GudCommit:
+        assert commit.pull_request is not None
+
+        if commit.pull_request.state != "MERGED":
+            raise ValueError("Pull request is not merged.")
+
+        if not commit.pull_request.merge_commit_sha:
+            raise ValueError("Missing merge commit SHA")
+
+        self.repo.git.checkout(commit.pull_request.merge_commit_sha)
+        pulled_commit = GitGud.get_remote_commit(self.repo, self.state.master_branch)
+
+        if pulled_commit.id in self.state.commits:
+            merged_commit = self.get_commit(pulled_commit.id)
+        else:
+            self._insert_remote_commit(pulled_commit)
+            merged_commit = pulled_commit
+
+        # TODO: Handle rebase conflicts which may happen if the commit was modified after merge
+        self.rebase(commit.id, merged_commit.id)
+        diff = self.repo.git.diff(commit.id, merged_commit.id)
+        if diff:
+            raise ValueError("Not implemented.")
+
+        for child_id in commit.children:
+            self.rebase(child_id, merged_commit.id)
+
+        self.drop_commit(commit.id)
+        return merged_commit
+
     def sync(self) -> GudCommit:
         """Pull changes from remote and rebase the current commit to a more recent master branch."""
+        logging.info("Syncing branch.")
 
         if self.head().remote:
-            return self.pull_remote()
+            commit = self.pull_remote(prune=False)
+            self.prune_commits()
+            self.save_state()
+            return commit
 
         starting_commit_id = self.head().id
-
         new_remote_commit = self.pull_remote()
         root = self.get_oldest_non_remote(starting_commit_id)
 
-        if root.pull_request_id:
+        if root.pull_request:
             assert self.hosted_repo is not None
-            # TODO: Finish syncing merged commits
-            # merged_root_sha = self.hosted_repo.get_merged_commit_sha(root.pull_request_id)
+            self._sync_pr_state(root)
+            logging.info("Commit has pull request and it's %s", root.pull_request.state)
+            if root.pull_request.merged:
+                merged_commit = self._rebase_merged_commit(root)
+
+                for child_id in merged_commit.children:
+                    self.update(child_id)
+                    self.sync()
+
+                return merged_commit
 
         self.rebase(source_id=root.id, dest_id=new_remote_commit.id)
+        self.prune_commits()
         self.save_state()
         return new_remote_commit
 
@@ -436,8 +571,8 @@ class GitGud:
 
         - Nested remote commits with no local changes. We only care about the
         most recent one
-        - TODO: Already merged commits after sync.
         """
+        logging.info("Checking for commits to prune")
         if len(self.state.commits.keys()) == 1:
             # Always need to have at least one commit
             return
@@ -473,7 +608,7 @@ class GitGud:
             self.state.commits.pop(commit_to_prune_id)
             self.repo.git.branch("-D", commit_to_prune.id)
 
-    def pull_remote(self) -> GudCommit:
+    def pull_remote(self, prune: bool = True) -> GudCommit:
         """Pulls the latest commit from remote master and adds it as a child of
         the most recent remote commit."""
 
@@ -485,10 +620,7 @@ class GitGud:
                     newest_remote = commit
                     continue
 
-                revcount = int(
-                    self.repo.git.rev_list("--count", f"{newest_remote.hash}..{commit.hash}")
-                )
-                if revcount > 0:
+                if self.comes_before(newest_remote, commit):
                     newest_remote = commit
                     continue
 
@@ -508,7 +640,8 @@ class GitGud:
         newest_remote.children.insert(0, pulled_commit.id)
         pulled_commit.parent_hash = newest_remote.hash
         pulled_commit.parent_id = newest_remote.id
-        self.prune_commits()
+        if prune:
+            self.prune_commits()
         self.update(pulled_commit.id)
         self.save_state()
         return pulled_commit
@@ -648,6 +781,11 @@ class GitGud:
 
         if self.head().remote:
             raise InvalidOperationForRemote("Cannot amend remote commits.")
+
+        self._sync_pr_state(self.head())
+        pr = self.head().pull_request
+        if pr and pr.merged:
+            raise CommitAlreadyMerged("Cannot amend merged commits.")
 
         logging.info("Amending commit %s", self.head().id)
 
@@ -789,7 +927,21 @@ class GitGud:
         dest_commit = self.get_commit(dest_id)
 
         if source_commit.remote:
-            raise ValueError("Cannot rebase remote commits")
+            if not dest_commit.remote:
+                raise ValueError("Remote commits can only be rebased to other remote commits.")
+
+            if not self.comes_before(dest_commit, source_commit):
+                raise ValueError(
+                    f"{dest_commit.id} does not come before {source_commit.id}, cannot rebase"
+                )
+
+            if source_commit.parent_id:
+                self.get_commit(source_commit.parent_id).children.remove(source_commit.id)
+
+            dest_commit.children.append(source_commit.id)
+            source_commit.parent_id = dest_commit.parent_id
+            source_commit.parent_hash = dest_commit.parent_hash
+            return
 
         assert source_commit.parent_id is not None
 
@@ -815,6 +967,7 @@ class GitGud:
         """Drop a commit and close the associated pull request."""
 
         commit = self.get_commit(commit_id)
+        self._sync_pr_state(commit)
 
         if commit.remote:
             raise ValueError("Cannot drop remote commits")
@@ -829,9 +982,10 @@ class GitGud:
             assert commit.parent_id is not None
             self.update(commit.parent_id)
 
-        if commit.pull_request_id:
+        if commit.pull_request:
             assert self.hosted_repo is not None
-            self.hosted_repo.close_pull_request(commit.pull_request_id)
+            if commit.pull_request.state != "MERGED":
+                self.hosted_repo.close_pull_request(commit.pull_request.id)
 
         for other_commit in self.state.commits.values():
             if commit.id in other_commit.children:
@@ -878,8 +1032,8 @@ class GitGud:
         self.repo.git.checkout(child.id)
         self.snapshot(commit_msg, commit=False)
         self.save_state()
-
         self.execute_pending_operations()
+
         self.prune_commits()
         self.save_state()
 
@@ -1000,7 +1154,7 @@ class GitGud:
 
         if (
             not commit.remote
-            and commit.pull_request_id
+            and commit.pull_request
             and self.state.repo_metadata
             and self.state.repo_metadata.github
         ):
