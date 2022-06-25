@@ -473,7 +473,6 @@ class GitGud:
 
     def _insert_remote_commit(self, commit: GudCommit) -> None:
         logging.info("Inserting remote commit %s", commit.id)
-        self.print_status()
         parent = self.root()
 
         next_child = None
@@ -1001,8 +1000,6 @@ class GitGud:
         """
         child = self.get_commit(target_commit_id)
         parent = self.get_commit(parent_id)
-
-        logging.info("child is %s, parent is %s", child.id, parent.id)
 
         child.parent_hash = parent.hash
         child.parent_id = parent.id
