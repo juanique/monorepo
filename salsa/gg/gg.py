@@ -244,7 +244,7 @@ class GitHubHostedRepo(HostedRepo):
         pull_request = GudPullRequest(
             id=str(pr.number),
             title=pr.title,
-            remote_brAanch=pr.head.ref,
+            remote_branch=pr.head.ref,
             remote_base_branch=pr.base.ref,
             state=pr.state.upper(),
             merged=pr.merged,
@@ -1162,7 +1162,7 @@ class GitGud:
             and self.state.repo_metadata
             and self.state.repo_metadata.github
         ):
-            url = self.state.repo_metadata.github.get_pull_request_url(commit.pull_request_id)
+            url = self.state.repo_metadata.github.get_pull_request_url(commit.pull_request.id)
             url = f"[bold]{url}[/bold]"
 
         if commit == self.head():
