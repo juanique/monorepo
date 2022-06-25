@@ -157,6 +157,7 @@ class RepoMetadata(BaseModel):
 class GitGudConfig(BaseModel):
     remote_branch_prefix: str = ""
     randomize_branches: bool = True
+    verbose: bool = False
 
 
 class RepoState(BaseModel):
@@ -263,6 +264,9 @@ class GitGud:
         self.repo = repo
         self.state = state
         self.hosted_repo = hosted_repo
+
+        if self.state.config.verbose:
+            logging.basicConfig(level=logging.INFO)
 
     def get_summary(self) -> RepoSummary:
         return RepoSummary(commit_tree=self.get_commit_summary(self.state.root))
