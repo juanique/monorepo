@@ -63,9 +63,6 @@ else
     -v $CACHE_DIR:/$CACHE_DIR \
     -v $DOCKER_DIR:/$DOCKER_DIR \
     -w $REPO_ROOT juanzolotoochin/ubuntu-build tail -f /dev/null
-
-    echo "ACA"
-    echo $DOCKER_DIR
 fi
 
 if [ "$START_SHELL" = "true" ]; then

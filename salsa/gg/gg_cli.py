@@ -116,6 +116,11 @@ def get_config() -> None:
 
 
 @click.command()
+def version() -> None:
+    print("gg-version-alpha-1")
+
+
+@click.command()
 @click.option("-k", "--key")
 @click.option("-v", "--value")
 def set_config(key: str, value: str) -> None:
@@ -178,6 +183,7 @@ cli.add_command(debug)
 cli.add_command(drop)
 cli.add_command(get_config)
 cli.add_command(set_config)
+cli.add_command(version)
 
 if __name__ == "__main__":
     cli()
