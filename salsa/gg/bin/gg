@@ -1,3 +1,4 @@
+#!/bin/bash
 CONFIG_DIR=$HOME/.config/gg
 NETWORK_NAME=br0
 
