@@ -363,6 +363,8 @@ class GitGud:
     @staticmethod
     def load_state_for_directory(directory: str) -> RepoState:
         """Load GitGud repo state from the given directory."""
+        if not os.path.exists(directory):
+            raise ConfigNotFoundError(f"No GitGud state for {directory}.")
 
         state_file = GitGud.state_filename(directory)
         if not os.path.exists(state_file):
@@ -386,6 +388,9 @@ class GitGud:
     @staticmethod
     def for_working_dir(working_dir: str) -> "GitGud":
         """Resume a GitGud instance for a previously cloned directory."""
+
+        if not os.path.exists(working_dir):
+            raise ConfigNotFoundError(f"No GitGud state for {working_dir}.")
 
         repo = Repo(working_dir)
         repo_state = GitGud.load_state_for_directory(repo.working_tree_dir)
