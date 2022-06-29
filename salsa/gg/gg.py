@@ -511,7 +511,7 @@ class GitGud:
     def _rebase_merged_commit(self, commit: GudCommit) -> GudCommit:
         assert commit.pull_request is not None
 
-        if commit.pull_request.state != "MERGED":
+        if not commit.pull_request.merged:
             raise ValueError("Pull request is not merged.")
 
         if not commit.pull_request.merge_commit_sha:
@@ -988,7 +988,7 @@ class GitGud:
 
         if commit.pull_request:
             assert self.hosted_repo is not None
-            if commit.pull_request.state != "MERGED":
+            if commit.pull_request.state not in ("MERGED", "CLOSED"):
                 self.hosted_repo.close_pull_request(commit.pull_request.id)
 
         for other_commit in self.state.commits.values():

@@ -6,6 +6,7 @@ echo "Repo root is $REPO_ROOT"
 USER_ID=`id -u`
 CURRENT_DIR=`pwd`
 DOCKER_SOCK=/var/run/docker.sock
+DOCKER_DIR=$HOME/.docker
 CACHE_DIR=$HOME/.cache
 
 for i in "$@"; do
@@ -60,6 +61,7 @@ else
     -v $DOCKER_SOCK:$DOCKER_SOCK \
     -v $REPO_ROOT:$REPO_ROOT \
     -v $CACHE_DIR:/$CACHE_DIR \
+    -v $DOCKER_DIR:/$DOCKER_DIR \
     -w $REPO_ROOT juanzolotoochin/ubuntu-build tail -f /dev/null
 fi
 

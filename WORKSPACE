@@ -194,6 +194,13 @@ container_pull(
 )
 
 container_pull(
+    name = "build",
+    registry = "docker.io",
+    repository = "juanzolotoochin/ubuntu-build",
+    tag = "latest",
+)
+
+container_pull(
     name = "postgres",
     registry = "docker.io",
     repository = "postgres",
