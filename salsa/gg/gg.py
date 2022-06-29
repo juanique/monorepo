@@ -387,8 +387,8 @@ class GitGud:
     def for_working_dir(working_dir: str) -> "GitGud":
         """Resume a GitGud instance for a previously cloned directory."""
 
-        repo_state = GitGud.load_state_for_directory(working_dir)
         repo = Repo(working_dir)
+        repo_state = GitGud.load_state_for_directory(repo.working_tree_dir)
         hosted_repo = GitGud.get_hosted_repo(repo_state.repo_metadata)
         return GitGud(repo, repo_state, hosted_repo)
 
