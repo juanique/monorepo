@@ -1,0 +1,27 @@
+CONFIG_DIR=$HOME/.config/gg
+NETWORK_NAME=br0
+
+if [[ ! -d $CONFIG_DIR ]]; then
+    echo "Creating $CONFIG_DIR"
+    mkdir -p $CONFIG_DIR
+fi
+
+if [[ "$(docker network ls | grep "${NETWORK_NAME}")" == "" ]] ; then
+    docker network create "${NETWORK_NAME}"
+fi
+
+#!/bin/bash
+docker run -it \
+--name=gg_cli --rm \
+-v $HOME/.ssh:$HOME/.ssh \
+-v $HOME/.gitconfig:$HOME/.gitconfig \
+-v /etc/passwd:/etc/passwd \
+-v $CONFIG_DIR:$CONFIG_DIR \
+-v $PWD:$PWD \
+-v $HOME/.config/gg:$HOME/.config/gg \
+-e HOME=$HOME \
+-e GITHUB_GG_TOKEN=$GITHUB_GG_TOKEN \
+-e USER=`id -u` -u `id -u`:`id -g` \
+-t \
+--network=$NETWORK_NAME \
+-w $PWD juanzolotoochin/gg_cli:latest "$@"
