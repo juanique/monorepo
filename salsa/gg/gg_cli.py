@@ -117,7 +117,7 @@ def get_config() -> None:
 
 @click.command()
 def version() -> None:
-    print("gg-version-alpha-1")
+    print("gg-version-alpha-2")
 
 
 @click.command()
