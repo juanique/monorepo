@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from enum import Enum
+from pathlib import Path
 import random
 import re
 from typing import Dict, List, Optional, Callable
@@ -8,6 +9,7 @@ import os
 import logging
 import hashlib
 import json
+import git
 
 from unidecode import unidecode
 from git import Repo, GitCommandError
@@ -190,6 +192,15 @@ def get_branch_name(string: str, randomize: bool = True) -> str:
 
 def get_oneliner(string: str) -> str:
     return string.split("\n")[0][0:40]
+
+
+def find_repo_root(path: Path):
+    while not (path / ".git").is_dir():
+        if path.parent == path:
+            raise ValueError("Not a git repo")
+
+        path = path.parent
+    return path
 
 
 class HostedRepo(ABC):
@@ -392,7 +403,7 @@ class GitGud:
         if not os.path.exists(working_dir):
             raise ConfigNotFoundError(f"No GitGud state for {working_dir}.")
 
-        repo = Repo(working_dir)
+        repo = Repo(find_repo_root(Path(working_dir)))
         repo_state = GitGud.load_state_for_directory(repo.working_tree_dir)
         hosted_repo = GitGud.get_hosted_repo(repo_state.repo_metadata)
         return GitGud(repo, repo_state, hosted_repo)
