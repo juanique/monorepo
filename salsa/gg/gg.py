@@ -9,7 +9,6 @@ import os
 import logging
 import hashlib
 import json
-import git
 
 from unidecode import unidecode
 from git import Repo, GitCommandError
@@ -194,7 +193,7 @@ def get_oneliner(string: str) -> str:
     return string.split("\n")[0][0:40]
 
 
-def find_repo_root(path: Path):
+def find_repo_root(path: Path) -> Path:
     while not (path / ".git").is_dir():
         if path.parent == path:
             raise ValueError("Not a git repo")
