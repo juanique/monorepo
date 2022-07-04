@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package salsa.gg.server;
+
+service GgService {
+    rpc CallCliCommand (CallCliCommandRequest) returns (CallCliCommandResponse) {}
+}
+
+message 
+
+message CallCliCommandRequest {
+    string workind_dir = 1;
+    repeated string args = 2;
+}
+
+message CallCliCommandResponse {
+    string stdout = 2;
+}

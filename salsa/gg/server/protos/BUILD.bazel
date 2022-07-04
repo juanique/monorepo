@@ -1,0 +1,21 @@
+load("@rules_proto//proto:defs.bzl", "proto_library")
+load("@com_github_grpc_grpc//bazel:python_rules.bzl", "py_grpc_library", "py_proto_library")
+
+proto_library(
+    name = "cli_proxy_proto",
+    srcs = ["cli_proxy.proto"],
+    visibility = ["//visibility:public"],
+)
+
+py_proto_library(
+    name = "cli_proxy_py_proto",
+    visibility = ["//visibility:public"],
+    deps = [":cli_proxy_proto"],
+)
+
+py_grpc_library(
+    name = "cli_proxy_py_grpc",
+    srcs = [":cli_proxy_proto"],
+    visibility = ["//visibility:public"],
+    deps = [":cli_proxy_py_proto"],
+)
