@@ -9,4 +9,4 @@ rm -f ~/bin/gg_dev
 
 echo '#!/usr/bin/env python' > ~/bin/gg_dev
 cat bazel-bin/salsa/gg/gg_cli.zip >> ~/bin/gg_dev
-chmod +x ~/bin/gg
+chmod +x ~/bin/gg_dev
