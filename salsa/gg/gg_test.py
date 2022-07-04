@@ -206,6 +206,70 @@ class TestGitGudWithRemote(TestGitGud):
             self.gg.amend()
         self.assertIn("Cannot amend remote commits", str(cm.exception))
 
+    def test_sync_dirty(self) -> None:
+        """Cannot sync on a dirty state."""
+        # Remote change
+        remote_filename = self.make_test_filename(self.remote_repo_path)
+        append(remote_filename, "more-contents-from-remote")
+        self.remote_repo.git.add("-A")
+        self.remote_repo.git.commit("-a", "-m", "Added more content")
+
+        # local
+        local_filename_1 = self.make_test_filename(self.local_repo_path)
+        append(local_filename_1, "locally added content")
+
+        with self.assertRaises(ValueError) as cm:
+            self.gg.sync()
+        self.assertEqual("Cannot sync with uncommited local changes.", str(cm.exception))
+
+    def test_sync_all(self) -> None:
+        """When passing all=True to sync(), all local commits are synced."""
+
+        # Remote change
+        remote_filename = self.make_test_filename(self.remote_repo_path)
+        append(remote_filename, "more-contents-from-remote")
+        self.remote_repo.git.add("-A")
+        self.remote_repo.git.commit("-a", "-m", "Added more content")
+
+        # local changes
+        root = self.gg.head()
+        local_filename_1 = self.make_test_filename(self.local_repo_path)
+        append(local_filename_1, "locally added content")
+        c1 = self.gg.commit("local-1")
+
+        self.gg.update(root.id)
+        local_filename_2 = self.make_test_filename(self.local_repo_path)
+        append(local_filename_2, "locally added content 2")
+        c2 = self.gg.commit("local-2")
+
+        self.gg.print_status()
+        self.gg.sync(all=True)
+        self.gg.print_status()
+
+        # We should stay in the same commit.
+        self.assertEqual(self.gg.head().id, c2.id)
+
+        # Changes from remote should be here.
+        local_filename = os.path.join(self.local_repo_path, os.path.basename(remote_filename))
+        self.assertEqual(["more-contents-from-remote\n"], get_file_contents(local_filename))
+
+        # And also in the other commit
+        self.gg.update(c1.id)
+        local_filename = os.path.join(self.local_repo_path, os.path.basename(remote_filename))
+        self.assertEqual(["more-contents-from-remote\n"], get_file_contents(local_filename))
+
+        # Expected commit tree
+        expected = {
+            "commit_tree": {
+                "description": "Added more content",
+                "children": [
+                    {"description": "local-1"},
+                    {"description": "local-2"},
+                ],
+            }
+        }
+        self.assertSubset(expected, self.gg.get_summary().dict())
+
     def test_sync_remote(self) -> None:
         """Remote changes can be pulled locally by calling GitGud::sync().
 
@@ -635,6 +699,22 @@ class TestGitGudLocalOnly(TestGitGud):
 
         self.gg.update(c2.id)
         self.assertEqual(["testing1\n", "testing2\n"], get_file_contents(filename))
+
+    def test_update_dirty(self) -> None:
+        """Cannot change commit with dirty local state."""
+        filename = self.make_test_filename()
+        append(filename, "testing1")
+        c1 = self.gg.commit("My first commit")
+        append(filename, "testing2")
+        c2 = self.gg.commit("My second commit")
+
+        self.assertFalse(self.gg.is_dirty())
+        append(filename, "testing3")
+        self.assertTrue(self.gg.is_dirty())
+
+        with self.assertRaises(ValueError) as cm:
+            self.gg.update(c1.id)
+        self.assertEqual("Cannot update with uncommited local changes.", str(cm.exception))
 
     def test_amend_remove_file(self) -> None:
         """Regression test for a bug that caused deleted files not to be
