@@ -1,5 +1,6 @@
-load("@pip_deps//:requirements.bzl", "requirement")
+load("//:bazel/docker.bzl", "py_image")
 load("//:bazel/python.bzl", "py_binary", "py_library", "py_test")
+load("@pip_deps//:requirements.bzl", "requirement")
 load("@io_bazel_rules_docker//container:container.bzl", "container_push")
 load("@io_bazel_rules_docker//lang:image.bzl", "app_layer")
 
@@ -48,6 +49,24 @@ py_binary(
         ":gg",
         requirement("GitPython"),
     ],
+)
+
+py_binary(
+    name = "cli_server",
+    srcs = ["cli_server.py"],
+    deps = [
+        requirement("grpcio"),
+        requirement("grpcio-reflection"),
+        ":gg_cli",
+        "//salsa/cli_proxy/protos:cli_proxy_py_grpc",
+        "//salsa/cli_proxy/protos:cli_proxy_py_proto",
+    ],
+)
+
+py_image(
+    name = "cli_server_docker",
+    binary = ":cli_server",
+    port = "50051",
 )
 
 app_layer(
