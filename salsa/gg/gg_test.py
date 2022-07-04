@@ -181,6 +181,13 @@ class TestGitGudWithRemote(TestGitGud):
         self.assertEqual(["contents-from-remote\n"], get_file_contents(local_filename))
         self.gg.print_status()
 
+    def test_for_working_directory_repo_subdir(self) -> None:
+        directory = os.path.join(self.local_repo_path, "subdir")
+        make_directory(directory)
+        gg = GitGud.for_working_dir(directory)
+        state = gg.get_summary()
+        self.assertEqual(state.commit_tree.description, "Initial commit")
+
     def test_for_working_directory_not_git_directory(self) -> None:
         with self.assertRaises(ConfigNotFoundError) as cm:
             GitGud.for_working_dir("/tmp/i-dont-exist")
