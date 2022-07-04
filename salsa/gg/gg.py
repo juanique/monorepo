@@ -184,7 +184,12 @@ def get_branch_name(string: str, randomize: bool = True) -> str:
         suffix = "_" + "".join([r.choice(alphabet) for i in range(5)])
 
     return unidecode(
-        string.split("\n")[0][0:20].lower().replace(" ", "_").replace(".", "").replace(":", "")
+        string.split("\n")[0][0:20]
+        .lower()
+        .replace(" ", "_")
+        .replace(".", "")
+        .replace(":", "")
+        .replace("-", "")
         + suffix
     )
 

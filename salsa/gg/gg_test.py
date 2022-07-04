@@ -88,6 +88,7 @@ class FakeHostedRepo(HostedRepo):
 
 class TestBranchName(unittest.TestCase):
     def test_branch_name(self) -> None:
+        self.assertEqual(get_branch_name("--branch", randomize=False), "branch")
         self.assertEqual(get_branch_name("branch", randomize=False), "branch")
         self.assertEqual(get_branch_name("branch\n", randomize=False), "branch")
         self.assertEqual(get_branch_name("My Branch", randomize=False), "my_branch")
