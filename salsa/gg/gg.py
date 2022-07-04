@@ -3,7 +3,7 @@ from enum import Enum
 from pathlib import Path
 import random
 import re
-from typing import Dict, List, Optional, Callable, Set
+from typing import Dict, List, Optional, Callable
 
 import os
 import logging
@@ -586,10 +586,12 @@ class GitGud:
 
             if starting_commit_id in self.state.commits:
                 self.update(starting_commit_id)
-                return
+                self.save_state()
+                return self.head()
 
             self.update(self.root().id)
-            return
+            self.save_state()
+            return self.head()
 
         if self.head().remote:
             commit = self.pull_remote(prune=False)

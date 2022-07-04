@@ -707,7 +707,7 @@ class TestGitGudLocalOnly(TestGitGud):
         append(filename, "testing1")
         c1 = self.gg.commit("My first commit")
         append(filename, "testing2")
-        c2 = self.gg.commit("My second commit")
+        self.gg.commit("My second commit")
 
         self.assertFalse(self.gg.is_dirty())
         append(filename, "testing3")
