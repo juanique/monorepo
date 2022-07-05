@@ -184,7 +184,12 @@ def get_branch_name(string: str, randomize: bool = True) -> str:
         suffix = "_" + "".join([r.choice(alphabet) for i in range(5)])
 
     return unidecode(
-        string.split("\n")[0][0:20].lower().replace(" ", "_").replace(".", "").replace(":", "")
+        string.split("\n")[0][0:20]
+        .lower()
+        .replace(" ", "_")
+        .replace(".", "")
+        .replace(":", "")
+        .replace("-", "")
         + suffix
     )
 
@@ -553,9 +558,40 @@ class GitGud:
         self.drop_commit(commit.id)
         return merged_commit
 
-    def sync(self) -> GudCommit:
+    def sync(self, all: bool = False) -> GudCommit:
         """Pull changes from remote and rebase the current commit to a more recent master branch."""
         logging.info("Syncing branch.")
+
+        if self.is_dirty():
+            raise ValueError("Cannot sync with uncommited local changes.")
+
+        if all:
+            starting_commit_id = self.head().id
+            commit_ids_to_sync: List[str] = []
+
+            for commit_id in sorted(self.state.commits.keys()):
+                commit = self.get_commit(commit_id)
+                if commit.remote:
+                    continue
+                non_remote_ancestor = self.get_oldest_non_remote(commit_id).id
+
+                if non_remote_ancestor not in commit_ids_to_sync:
+                    # We are not using a set here just to have deterministic results
+                    commit_ids_to_sync.append(non_remote_ancestor)
+
+            logging.info("Will sync commits %s", commit_ids_to_sync)
+            for commit_id in commit_ids_to_sync:
+                self.update(commit_id)
+                self.sync(all=False)
+
+            if starting_commit_id in self.state.commits:
+                self.update(starting_commit_id)
+                self.save_state()
+                return self.head()
+
+            self.update(self.root().id)
+            self.save_state()
+            return self.head()
 
         if self.head().remote:
             commit = self.pull_remote(prune=False)
@@ -1057,6 +1093,9 @@ class GitGud:
         self.save_state()
 
     def update(self, commit_id: str) -> None:
+        if self.is_dirty():
+            raise ValueError("Cannot update with uncommited local changes.")
+
         if self.state.merge_conflict_state:
             raise ValueError("Cannot update during merge conflict.")
 
@@ -1204,6 +1243,9 @@ class GitGud:
             self.get_tree(self.get_commit(child_id), branch, full=full)
 
         return branch
+
+    def is_dirty(self) -> bool:
+        return self.get_dirty_state() != DirtyState()
 
     def get_dirty_state(self) -> DirtyState:
         state = DirtyState()

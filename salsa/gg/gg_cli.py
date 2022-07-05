@@ -33,9 +33,10 @@ def upload(all_: bool) -> None:
 
 
 @click.command()
-def sync() -> None:
+@click.option("--all/--no-all", "all_", default=False, is_flag=True)
+def sync(all_: bool) -> None:
     gg = GitGud.for_working_dir(os.getcwd())
-    gg.sync()
+    gg.sync(all=all_)
     gg.print_status()
 
 
