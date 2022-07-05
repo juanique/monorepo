@@ -613,6 +613,21 @@ class TestGitGudWithRemote(TestGitGud):
         with self.assertRaises(CommitAlreadyMerged):
             self.gg.amend()
 
+    def test_sync_remote_twice(self) -> None:
+        # Remote changes
+        remote_filename = self.make_test_filename(self.remote_repo_path)
+        append(remote_filename, "more-contents-from-remote")
+        self.remote_repo.git.add("-A")
+        self.remote_repo.git.commit("-a", "-m", "Added more remote content")
+
+        # Local changes
+        local_filename_1 = self.make_test_filename(self.local_repo_path)
+        append(local_filename_1, "content1")
+        c1 = self.gg.commit("content1")
+
+        self.gg.sync(all=True)
+        self.gg.sync(all=True)
+
 
 class TestGitGudLocalOnly(TestGitGud):
     def setUp(self) -> None:
