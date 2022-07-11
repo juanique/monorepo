@@ -2,6 +2,23 @@
 CONFIG_DIR=$HOME/.config/gg
 NETWORK_NAME=br0
 
+for i in "$@"; do
+  case $i in
+    -u=*|--update=*)
+      UPDATE="${i#*=}"
+      shift # past argument=value
+      ;;
+    *)
+      # unknown option
+      ;;
+  esac
+done
+
+if [ "$UPDATE" = "true" ]; then
+    docker pull juanzolotoochin/gg_cli:latest
+    exit 0
+fi
+
 if [[ ! -d $CONFIG_DIR ]]; then
     echo "Creating $CONFIG_DIR"
     mkdir -p $CONFIG_DIR
