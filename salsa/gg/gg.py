@@ -717,19 +717,7 @@ class GitGud:
         }
 
     def add_changes_to_index(self) -> None:
-        """Equivalent of git add ."""
-
-        index = self.repo.index
-
-        for item in self.repo.index.diff(None):
-            if item.change_type == "D":
-                index.remove(item.a_path)
-                continue
-            index.add(item.a_path)
-
-        for untracked in self.repo.untracked_files:
-            logging.info("Adding untracked file: %s", untracked)
-            index.add(untracked)
+        self.repo.git.add("-A")
 
     def commit(self, commit_msg: str, all: bool = True) -> GudCommit:
         """Create a new commit that includes all local changes."""
@@ -1093,6 +1081,9 @@ class GitGud:
         self.save_state()
 
     def update(self, commit_id: str) -> None:
+        """Switch the local state to specified commit in order to amend it or
+        add new branching commits."""
+
         if self.is_dirty():
             raise ValueError("Cannot update with uncommited local changes.")
 
@@ -1102,6 +1093,7 @@ class GitGud:
         self.repo.git.checkout(commit_id)
         self.state.head = commit_id
         self.save_state()
+        self.repo.git.submodule("update", "--init", "--recursive")
 
     def rebase_continue(self) -> None:
         """Accept the current changes and continue rebase."""
