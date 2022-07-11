@@ -177,6 +177,77 @@ class TestGitGudWithRemote(TestGitGud):
         self.gg.repo.git.config("user.email", "test@example.com")
         self.gg.repo.git.config("user.name", "test_user")
 
+
+class TestGitGudWithRemoteAndSubmodules(TestGitGudWithRemote):
+    def setUp(self) -> None:
+        super().setUp()
+
+        self.submodule_root = os.path.join(self.get_test_root(), "submodule")
+        self.submodule_repo_path = os.path.join(self.submodule_root, "my_submodule")
+        make_directory(self.submodule_repo_path)
+
+        self.submodule_repo = Repo.init(self.submodule_repo_path)
+        self.submodule_repo.git.config("user.email", "test@example.com")
+        self.submodule_repo.git.config("user.name", "test_user")
+
+        self.submodule_filename = self.make_test_filename(self.submodule_repo_path)
+        append(self.submodule_filename, "contents-from-submodule")
+        self.submodule_repo.git.add("-A")
+        self.submodule_repo.git.commit("-a", "-m", "Initial commit in submodule")
+
+        self.gg.repo.git.submodule("add", self.submodule_repo_path, "./a-submodule")
+        self.gg.commit("Added submodule.")
+
+    def test_submodule_initialized(self) -> None:
+        local_filename = os.path.join(
+            self.local_repo_path, "a-submodule", os.path.basename(self.submodule_filename)
+        )
+        self.assertEqual(["contents-from-submodule\n"], get_file_contents(local_filename))
+
+    def update_submodule_in_commit(self) -> None:
+        """Different commits may be changing the commit of a submodule. Switching between commits,
+        updates the local state to match."""
+
+        local_filename = os.path.join(
+            self.local_repo_path, "a-submodule", os.path.basename(self.submodule_filename)
+        )
+
+        c0 = self.gg.head()
+
+        # Submodule change
+        append(self.submodule_filename, "more-contents-from-submodule")
+        self.submodule_repo.git.add("-A")
+        self.submodule_repo.git.commit("-a", "-m", "Added more content")
+
+        # We don't have an api for submodules yet, we can just use git
+        assert self.gg.is_dirty() is False
+        self.gg.repo.git.submodule("update", "--remote", "--merge")
+        assert self.gg.is_dirty()
+
+        self.gg.print_status()
+        c1 = self.gg.commit("Update submodule")
+        self.gg.print_status()
+        assert self.gg.is_dirty() is False
+
+        self.assertEqual(
+            ["contents-from-submodule\n", "more-contents-from-submodule\n"],
+            get_file_contents(local_filename),
+        )
+
+        self.gg.update(c0.id)
+        self.assertEqual(
+            ["contents-from-submodule\n"],
+            get_file_contents(local_filename),
+        )
+
+        self.gg.update(c1.id)
+        self.assertEqual(
+            ["contents-from-submodule\n", "more-contents-from-submodule\n"],
+            get_file_contents(local_filename),
+        )
+
+
+class TestGitGudWithRemoteNoSubmodules(TestGitGudWithRemote):
     def test_clone(self) -> None:
         local_filename = os.path.join(self.local_repo_path, os.path.basename(self.remote_filename))
         self.assertEqual(["contents-from-remote\n"], get_file_contents(local_filename))
