@@ -739,6 +739,63 @@ class TestGitGudWithRemoteNoSubmodules(TestGitGudWithRemote):
         with self.assertRaises(CommitAlreadyMerged):
             self.gg.amend()
 
+    def test_patch_unknown_remote_branch(self) -> None:
+        with self.assertRaises(ValueError) as cm:
+            self.gg.patch("i-dont-exist")
+
+        self.assertEqual("Unknown remote branch: i-dont-exist", str(cm.exception))
+
+    def test_patch(self) -> None:
+        """Remote changes can be patched in locally to be managed by gg."""
+
+        local_filename = os.path.join(self.local_repo_path, os.path.basename(self.remote_filename))
+
+        # Create new branch in remote
+        self.remote_repo.git.checkout("-b", "feature_a")
+        append(self.remote_filename, "feature-a")
+        self.remote_repo.git.add("-A")
+        self.remote_repo.git.commit("-a", "-m", "Add feature A")
+
+        # We want to patch it as a commit here
+        self.gg.patch("feature_a")
+
+        self.assertEqual(
+            ["contents-from-remote\n", "feature-a\n"], get_file_contents(local_filename)
+        )
+        self.gg.print_status()
+
+    def test_patch_branch_in_future(self) -> None:
+        """If the remote change is in the future, the corresponding master commit is created."""
+
+        local_remote_filename = os.path.join(
+            self.local_repo_path, os.path.basename(self.remote_filename)
+        )
+
+        # Have a local commit
+        local_filename_1 = self.make_test_filename(self.local_repo_path)
+        append(local_filename_1, "local-content1")
+        self.gg.commit("local content 1")
+
+        # Move history forward in remote
+        append(self.remote_filename, "time_passing")
+        self.remote_repo.git.add("-A")
+        self.remote_repo.git.commit("-a", "-m", "time passes")
+
+        # Create new branch in remote
+        self.remote_repo.git.checkout("-b", "feature_a")
+        append(self.remote_filename, "feature-a")
+        self.remote_repo.git.add("-A")
+        self.remote_repo.git.commit("-a", "-m", "Add feature A")
+
+        # We want to patch it as a commit here
+        self.gg.patch("feature_a")
+
+        self.assertEqual(
+            ["contents-from-remote\n", "time_passing\n", "feature-a\n"],
+            get_file_contents(local_remote_filename),
+        )
+        self.gg.print_status()
+
 
 class TestGitGudLocalOnly(TestGitGud):
     def setUp(self) -> None:
