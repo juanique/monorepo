@@ -741,11 +741,13 @@ class TestGitGudWithRemoteNoSubmodules(TestGitGudWithRemote):
 
     def test_patch_unknown_remote_branch(self) -> None:
         with self.assertRaises(ValueError) as cm:
-            c1 = self.gg.patch("i-dont-exist")
+            self.gg.patch("i-dont-exist")
 
         self.assertEqual("Unknown remote branch: i-dont-exist", str(cm.exception))
 
     def test_patch(self) -> None:
+        """Remote changes can be patched in locally to be managed by gg."""
+
         local_filename = os.path.join(self.local_repo_path, os.path.basename(self.remote_filename))
 
         # Create new branch in remote
@@ -763,6 +765,8 @@ class TestGitGudWithRemoteNoSubmodules(TestGitGudWithRemote):
         self.gg.print_status()
 
     def test_patch_branch_in_future(self) -> None:
+        """If the remote change is in the future, the corresponding master commit is created."""
+
         local_remote_filename = os.path.join(
             self.local_repo_path, os.path.basename(self.remote_filename)
         )
@@ -770,7 +774,7 @@ class TestGitGudWithRemoteNoSubmodules(TestGitGudWithRemote):
         # Have a local commit
         local_filename_1 = self.make_test_filename(self.local_repo_path)
         append(local_filename_1, "local-content1")
-        c1 = self.gg.commit("local content 1")
+        self.gg.commit("local content 1")
 
         # Move history forward in remote
         append(self.remote_filename, "time_passing")

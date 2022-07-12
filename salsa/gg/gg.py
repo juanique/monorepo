@@ -1094,6 +1094,8 @@ class GitGud:
         self.save_state()
 
     def patch(self, remote_branch_name: str) -> GudCommit:
+        """Patch a remote change locally."""
+
         if self.is_dirty():
             raise ValueError("Cannot patch with uncommited local changes.")
 
