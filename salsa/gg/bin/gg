@@ -24,9 +24,6 @@ if [[ ! -d $CONFIG_DIR ]]; then
     mkdir -p $CONFIG_DIR
 fi
 
-if [[ "$(docker network ls | grep "${NETWORK_NAME}")" == "" ]] ; then
-    docker network create "${NETWORK_NAME}"
-fi
 
 #!/bin/bash
 docker run -it \
@@ -41,5 +38,4 @@ docker run -it \
 -e GITHUB_GG_TOKEN=$GITHUB_GG_TOKEN \
 -e USER=`id -u` -u `id -u`:`id -g` \
 -t \
---network=$NETWORK_NAME \
 -w $PWD juanzolotoochin/gg_cli:latest "$@"

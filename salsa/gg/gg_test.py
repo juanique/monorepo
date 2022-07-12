@@ -204,11 +204,11 @@ class TestGitGudWithRemoteAndSubmodules(TestGitGudWithRemote):
         )
         self.assertEqual(["contents-from-submodule\n"], get_file_contents(local_filename))
 
-    def update_submodule_in_commit(self) -> None:
+    def test_update_submodule_in_commit(self) -> None:
         """Different commits may be changing the commit of a submodule. Switching between commits,
         updates the local state to match."""
 
-        local_filename = os.path.join(
+        submodule_local_filename = os.path.join(
             self.local_repo_path, "a-submodule", os.path.basename(self.submodule_filename)
         )
 
@@ -231,20 +231,48 @@ class TestGitGudWithRemoteAndSubmodules(TestGitGudWithRemote):
 
         self.assertEqual(
             ["contents-from-submodule\n", "more-contents-from-submodule\n"],
-            get_file_contents(local_filename),
+            get_file_contents(submodule_local_filename),
         )
 
         self.gg.update(c0.id)
         self.assertEqual(
             ["contents-from-submodule\n"],
-            get_file_contents(local_filename),
+            get_file_contents(submodule_local_filename),
         )
 
         self.gg.update(c1.id)
         self.assertEqual(
             ["contents-from-submodule\n", "more-contents-from-submodule\n"],
-            get_file_contents(local_filename),
+            get_file_contents(submodule_local_filename),
         )
+
+        # Remote change to verify we can sync
+        remote_filename = self.make_test_filename(self.remote_repo_path)
+        remote_local_filename = os.path.join(
+            self.local_repo_path, os.path.basename(remote_filename)
+        )
+
+        append(remote_filename, "more-contents-from-remote")
+        self.remote_repo.git.add("-A")
+        self.remote_repo.git.commit("-a", "-m", "Added more content")
+
+        self.gg.sync(all=True)
+        self.gg.print_status()
+
+        # Verify after sync
+        self.gg.update(c0.id)
+        self.assertEqual(
+            ["contents-from-submodule\n"],
+            get_file_contents(submodule_local_filename),
+        )
+        self.assertEqual(["more-contents-from-remote\n"], get_file_contents(remote_local_filename))
+
+        self.gg.update(c1.id)
+        self.assertEqual(
+            ["contents-from-submodule\n", "more-contents-from-submodule\n"],
+            get_file_contents(submodule_local_filename),
+        )
+        self.assertEqual(["more-contents-from-remote\n"], get_file_contents(remote_local_filename))
 
 
 class TestGitGudWithRemoteNoSubmodules(TestGitGudWithRemote):

@@ -412,6 +412,10 @@ class GitGud:
         hosted_repo = GitGud.get_hosted_repo(repo_state.repo_metadata)
         return GitGud(repo, repo_state, hosted_repo)
 
+    def _checkout(self, branch_name: str) -> None:
+        self.repo.git.checkout(branch_name, "--recurse-submodules")
+        self.repo.git.submodule("update", "--init", "--recursive")
+
     def get_oldest_non_remote(self, commit_id: str) -> GudCommit:
         """Given a commit id, find the oldest ancestor that is not remote."""
 
@@ -456,7 +460,7 @@ class GitGud:
         previous_head_id = self.head().id
         commit = self.get_commit(commit_id)
 
-        self.repo.git.checkout(commit.history_branch)
+        self._checkout(commit.history_branch)
         if not commit.upstream_branch:
             commit.upstream_branch = self.get_config().remote_branch_prefix + commit.id
             self.repo.git.push("-u", "origin", f"{commit.history_branch}:{commit.upstream_branch}")
@@ -490,7 +494,7 @@ class GitGud:
 
     def comes_before(self, commit_1: GudCommit, commit_2: GudCommit) -> bool:
         """Returns True if commit_1 comes before commit_2."""
-        self.repo.git.checkout(self.state.master_branch)
+        self._checkout(self.state.master_branch)
         revcount = int(self.repo.git.rev_list("--count", f"{commit_1.hash}..{commit_2.hash}"))
         result = revcount > 0
         return result
@@ -537,7 +541,7 @@ class GitGud:
         if not commit.pull_request.merge_commit_sha:
             raise ValueError("Missing merge commit SHA")
 
-        self.repo.git.checkout(commit.pull_request.merge_commit_sha)
+        self._checkout(commit.pull_request.merge_commit_sha)
         pulled_commit = GitGud.get_remote_commit(self.repo, self.state.master_branch)
 
         if pulled_commit.id in self.state.commits:
@@ -684,7 +688,7 @@ class GitGud:
 
         logging.info("Starting of more recent remote commit %s", newest_remote.id)
 
-        self.repo.git.checkout(self.state.master_branch)
+        self._checkout(self.state.master_branch)
         self.repo.git.pull("--rebase", "origin", self.state.master_branch)
         pulled_commit = GitGud.get_remote_commit(self.repo, self.state.master_branch)
         if pulled_commit.id == newest_remote.id:
@@ -807,7 +811,7 @@ class GitGud:
             new_snapshot.description,
         )
         self.head().snapshots.append(new_snapshot)
-        self.repo.git.checkout(self.head().id)
+        self._checkout(self.head().id)
         self.save_state()
 
     def amend(self, message: str = "") -> None:
@@ -933,10 +937,11 @@ class GitGud:
             logging.info("No need to evolve.")
             return
 
-        logging.info("Envolving %s to %s", self.head().id, child.id)
+        logging.info("Evolving %s to %s", self.head().id, child.id)
 
         try:
             self.repo.git.rebase("--onto", self.head().hash, child.parent_hash, child.id)
+            self.repo.git.submodule("update", "--init", "--recursive")
             self.continue_evolve(
                 target_commit_id, self.head().id, f"Evolved changes from {self.head().id}"
             )
@@ -1053,7 +1058,7 @@ class GitGud:
         self.head().hash = self.repo.head.commit.hexsha
 
         # Merge commit histories
-        self.repo.git.checkout(child.history_branch)
+        self._checkout(child.history_branch)
         commit_msg = commit_msg or f"Merge commit {parent.id}"
         try:
             self.repo.git.merge("--no-ff", "-m", commit_msg, parent.history_branch)
@@ -1072,7 +1077,7 @@ class GitGud:
             self._copy_branch_state(child.id, child.history_branch)
             self.repo.git.commit("--amend", "-a", "--no-edit")
 
-        self.repo.git.checkout(child.id)
+        self._checkout(child.id)
         self.snapshot(commit_msg, commit=False)
         self.save_state()
         self.execute_pending_operations()
@@ -1090,10 +1095,9 @@ class GitGud:
         if self.state.merge_conflict_state:
             raise ValueError("Cannot update during merge conflict.")
 
-        self.repo.git.checkout(commit_id)
+        self._checkout(commit_id)
         self.state.head = commit_id
         self.save_state()
-        self.repo.git.submodule("update", "--init", "--recursive")
 
     def rebase_continue(self) -> None:
         """Accept the current changes and continue rebase."""
