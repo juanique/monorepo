@@ -3,7 +3,7 @@ from enum import Enum
 from pathlib import Path
 import random
 import re
-from typing import Dict, List, Optional, Callable
+from typing import Any, Dict, List, Optional, Callable
 
 import os
 import logging
@@ -23,11 +23,12 @@ from salsa.os.environ_ctx import modified_environ
 
 CONFIGS_ROOT = os.path.expanduser("~/.config/gg")
 
+
 class Progress(RemoteProgress):
-    def line_dropped(self, line: str):
+    def line_dropped(self, line: str) -> None:
         print(line)
 
-    def update(self, *args):
+    def update(self, *_: Any) -> None:
         print(self._cur_line)
 
 
