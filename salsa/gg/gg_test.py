@@ -195,18 +195,45 @@ class TestGitGudWithRemoteAndSubmodules(TestGitGudWithRemote):
         self.submodule_repo.git.add("-A")
         self.submodule_repo.git.commit("-a", "-m", "Initial commit in submodule")
 
+    def test_submodule_initialized(self) -> None:
         self.gg.repo.git.submodule("add", self.submodule_repo_path, "./a-submodule")
         self.gg.commit("Added submodule.")
-
-    def test_submodule_initialized(self) -> None:
         local_filename = os.path.join(
             self.local_repo_path, "a-submodule", os.path.basename(self.submodule_filename)
         )
         self.assertEqual(["contents-from-submodule\n"], get_file_contents(local_filename))
 
+    def test_sync_submodule_in_remote(self) -> None:
+        """Can pull submodules that were added in remote."""
+        # Submodule added in remote
+        self.remote_repo.git.submodule("add", self.submodule_repo_path, "./a-submodule")
+        self.remote_repo.git.commit("-m", "Added submodule.")
+
+        # Local commit
+        local_filename_1 = self.make_test_filename(self.local_repo_path)
+        append(local_filename_1, "content1")
+        self.gg.commit("content1")
+
+        append(local_filename_1, "content2")
+        self.gg.commit("content2")
+
+        self.gg.sync()
+        self.gg.print_status()
+
+        submodule_local_filename = os.path.join(
+            self.local_repo_path, "a-submodule", os.path.basename(self.submodule_filename)
+        )
+        self.assertEqual(
+            ["contents-from-submodule\n"],
+            get_file_contents(submodule_local_filename),
+        )
+
     def test_update_submodule_in_commit(self) -> None:
         """Different commits may be changing the commit of a submodule. Switching between commits,
         updates the local state to match."""
+
+        self.gg.repo.git.submodule("add", self.submodule_repo_path, "./a-submodule")
+        self.gg.commit("Added submodule.")
 
         submodule_local_filename = os.path.join(
             self.local_repo_path, "a-submodule", os.path.basename(self.submodule_filename)
