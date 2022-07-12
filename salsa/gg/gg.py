@@ -3,7 +3,7 @@ from enum import Enum
 from pathlib import Path
 import random
 import re
-from typing import Dict, List, Optional, Callable
+from typing import Any, Dict, List, Optional, Callable
 
 import os
 import logging
@@ -12,6 +12,7 @@ import json
 
 from unidecode import unidecode
 from git import Repo, GitCommandError
+from git.remote import RemoteProgress
 from pydantic import BaseModel
 from rich import print
 from rich.tree import Tree
@@ -21,6 +22,14 @@ from github import Github
 from salsa.os.environ_ctx import modified_environ
 
 CONFIGS_ROOT = os.path.expanduser("~/.config/gg")
+
+
+class Progress(RemoteProgress):
+    def line_dropped(self, line: str) -> None:
+        print(line)
+
+    def update(self, *_: Any) -> None:
+        print(self._cur_line)
 
 
 class GudPullRequest(BaseModel):
@@ -361,7 +370,7 @@ class GitGud:
             repo_metadata = RepoMetadata(github=github_repo)
             hosted_repo = GitGud.get_hosted_repo(repo_metadata)
 
-        repo = Repo.clone_from(remote_repo_path, local_repo_path)
+        repo = Repo.clone_from(remote_repo_path, local_repo_path, progress=Progress())
         root = GitGud.get_remote_commit(repo, repo.active_branch.name)
 
         state = RepoState(
