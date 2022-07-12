@@ -999,6 +999,7 @@ class GitGud:
             self.repo.git.rebase(
                 "--onto", dest_commit.hash, source_commit.parent_hash, source_commit.id
             )
+            self.repo.git.submodule("update", "--init", "--recursive")
             self.state.commits[source_commit.parent_id].children.remove(source_commit.id)
             self.state.commits[dest_commit.id].children.append(source_commit.id)
             self.continue_evolve(
