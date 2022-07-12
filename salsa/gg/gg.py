@@ -724,7 +724,9 @@ class GitGud:
     def add_changes_to_index(self) -> None:
         self.repo.git.add("-A")
 
-    def commit(self, commit_msg: str, all: bool = True) -> GudCommit:
+    def commit(
+        self, commit_msg: str, all: bool = True, use_existing_history_branch: str | None = None
+    ) -> GudCommit:
         """Create a new commit that includes all local changes."""
 
         if self.state.merge_conflict_state:
@@ -759,6 +761,9 @@ class GitGud:
         self.state.head = gud_commit.id
         logging.info("Created commit (%s): %s", gud_commit.id, get_oneliner(commit_msg))
         self.state.commits[gud_commit.id] = gud_commit
+
+        if use_existing_history_branch:
+            self._checkout(use_existing_history_branch)
 
         logging.info("Creating history branch: %s", history_branch_name)
         self.repo.create_head(history_branch_name)
@@ -1087,6 +1092,44 @@ class GitGud:
 
         self.prune_commits()
         self.save_state()
+
+    def patch(self, remote_branch_name: str) -> GudCommit:
+        """Patch a remote change locally."""
+
+        if self.is_dirty():
+            raise ValueError("Cannot patch with uncommited local changes.")
+
+        self._checkout(self.state.master_branch)
+        self.repo.git.pull("--rebase", "origin", self.state.master_branch)
+        self.repo.git.fetch()
+
+        all_branches = self.repo.git.for_each_ref("--format=%(refname:short)").split("\n")
+        if f"origin/{remote_branch_name}" not in all_branches:
+            raise ValueError(f"Unknown remote branch: {remote_branch_name}")
+
+        self._checkout(remote_branch_name)
+
+        # Find the fork point from master
+        fork_commit_id = self.repo.git.merge_base("--fork-point", self.state.master_branch)
+        logging.info("Branched forked off of master in %s", fork_commit_id)
+
+        # Create the master commit
+        self._checkout(fork_commit_id)
+        master_commit = GitGud.get_remote_commit(self.repo, self.state.master_branch)
+
+        if master_commit.id in self.state.commits:
+            master_commit = self.get_commit(master_commit.id)
+        else:
+            self._insert_remote_commit(master_commit)
+
+        self.update(master_commit.id)
+
+        # Create the gudcommit
+        self._copy_branch_state(remote_branch_name, master_commit.id)
+        commit = self.commit(f"Patched from {remote_branch_name}")
+        commit.upstream_branch = remote_branch_name
+
+        return commit
 
     def update(self, commit_id: str) -> None:
         """Switch the local state to specified commit in order to amend it or
