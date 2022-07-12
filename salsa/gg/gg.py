@@ -460,6 +460,7 @@ class GitGud:
         previous_head_id = self.head().id
         commit = self.get_commit(commit_id)
 
+        assert commit.history_branch is not None
         self._checkout(commit.history_branch)
         if not commit.upstream_branch:
             commit.upstream_branch = self.get_config().remote_branch_prefix + commit.id
@@ -1058,6 +1059,7 @@ class GitGud:
         self.head().hash = self.repo.head.commit.hexsha
 
         # Merge commit histories
+        assert child.history_branch is not None
         self._checkout(child.history_branch)
         commit_msg = commit_msg or f"Merge commit {parent.id}"
         try:
