@@ -15,3 +15,4 @@
 ### TODO / Known Issues
 
 - **✗** `gg snapshot` missing CLI support
+- **✗** `gg sync` missing sync a specific commit
