@@ -1014,8 +1014,6 @@ class GitGud:
                 "--onto", dest_commit.hash, source_commit.parent_hash, source_commit.id
             )
             self.repo.git.submodule("update", "--init", "--recursive")
-            self.state.commits[source_commit.parent_id].children.remove(source_commit.id)
-            self.state.commits[dest_commit.id].children.append(source_commit.id)
             self.continue_evolve(
                 source_commit.id,
                 dest_commit.id,
@@ -1025,7 +1023,7 @@ class GitGud:
             logging.info("Switching to update %s", source_id)
             self.update(source_id)
         except GitCommandError as e:
-            self.handle_merge_conflict(source_commit, dest_commit, e)
+            self.handle_merge_conflict(dest_commit, source_commit, e)
 
     def drop_commit(self, commit_id: str) -> None:
         """Drop a commit and close the associated pull request."""
@@ -1064,6 +1062,13 @@ class GitGud:
         """
         child = self.get_commit(target_commit_id)
         parent = self.get_commit(parent_id)
+
+        if parent.id != child.parent_id:
+            assert child.parent_id is not None
+            if child.id in self.state.commits[child.parent_id].children:
+                self.state.commits[child.parent_id].children.remove(child.id)
+            if child.id not in parent.children:
+                parent.children.append(child.id)
 
         child.parent_hash = parent.hash
         child.parent_id = parent.id
