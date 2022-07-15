@@ -1263,7 +1263,7 @@ class GitGud:
         if commit.remote:
             name_tags.append("Remote")
             if self.state.repo_metadata and self.state.repo_metadata.github:
-                url = self.state.repo_metadata.github.get_commit_url(commit.hash[0:5])
+                url = self.state.repo_metadata.github.get_commit_url(commit.hash[0:8])
                 url = f"[bold]{url}[/bold]"
 
         if (
