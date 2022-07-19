@@ -3,7 +3,7 @@ import logging
 import os
 import shutil
 import unittest
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Tuple
 
 import dataclasses
 
@@ -15,6 +15,7 @@ from salsa.gg.gg import (
     GitGud,
     GitGudConfig,
     GitHubRepoMetadata,
+    GudCommit,
     HostedRepo,
     InvalidOperationForRemote,
     GudPullRequest,
@@ -171,11 +172,23 @@ class TestGitGudWithRemote(TestGitGud):
         self.remote_repo.git.commit("-a", "-m", "Initial commit")
 
         self.hosted_repo = FakeHostedRepo(self.remote_repo)
-        self.gg = GitGud.clone(self.remote_repo_path, self.local_repo_path, self.hosted_repo)
+        gg = GitGud.clone(self.remote_repo_path, self.local_repo_path, self.hosted_repo)
         config = GitGudConfig(randomize_branches=False)
-        self.gg.set_config(config)
-        self.gg.repo.git.config("user.email", "test@example.com")
-        self.gg.repo.git.config("user.name", "test_user")
+        gg.set_config(config)
+        gg.repo.git.config("user.email", "test@example.com")
+        gg.repo.git.config("user.name", "test_user")
+
+    @property
+    def gg(self) -> GitGud:
+        gg = GitGud.for_working_dir(self.local_repo_path)
+        gg.hosted_repo = self.hosted_repo
+        return gg
+
+    def reload(self, commit: GudCommit) -> GudCommit:
+        return self.gg.get_commit(commit.id)
+
+    def reload_all(self, *args: GudCommit) -> Tuple[GudCommit, ...]:
+        return tuple(self.reload(c) for c in args)
 
 
 class TestGitGudWithRemoteAndSubmodules(TestGitGudWithRemote):
@@ -586,13 +599,16 @@ class TestGitGudWithRemoteNoSubmodules(TestGitGudWithRemote):
         config = GitGudConfig(remote_branch_prefix="jemunoz/")
         self.gg.set_config(config)
         self.gg.upload()
-        self.assertEqual(c1.upstream_branch, "jemunoz/added_local_content")
+        self.assertEqual(self.gg.get_commit(c1.id).upstream_branch, "jemunoz/added_local_content")
 
     def test_drop(self) -> None:
+        """Commits can be dropeed with gg drop. This closes the PR."""
+
         local_filename = self.make_test_filename(self.local_repo_path)
         append(local_filename, "locally added content")
         c1 = self.gg.commit("Added local content")
         self.gg.upload()
+        c1 = self.reload(c1)
 
         self.gg.drop_commit(c1.id)
         self.assertFalse(c1.id in self.gg.state.commits)
@@ -607,6 +623,7 @@ class TestGitGudWithRemoteNoSubmodules(TestGitGudWithRemote):
         c1 = self.gg.commit("Added local content")
         self.gg.upload()
 
+        c1 = self.reload(c1)
         self.assertTrue(c1.upstream_branch in self.remote_repo.git.branch())
         self.remote_repo.git.checkout(c1.upstream_branch)
         synced_filename = os.path.join(self.remote_repo_path, os.path.basename(local_filename))
@@ -624,6 +641,7 @@ class TestGitGudWithRemoteNoSubmodules(TestGitGudWithRemote):
         self.gg.upload()
         self.assertTrue(self.gg.head().uploaded)
 
+        c1, c2 = self.reload_all(c1, c2)
         self.assertTrue(c1.upstream_branch in self.remote_repo.git.branch())
         self.remote_repo.git.checkout(c1.upstream_branch)
         synced_filename = os.path.join(self.remote_repo_path, os.path.basename(local_filename))
@@ -652,14 +670,14 @@ class TestGitGudWithRemoteNoSubmodules(TestGitGudWithRemote):
         c3 = self.gg.commit("commit3")
 
         self.gg.upload(all_commits=True)
-        self.assertTrue(c1.uploaded)
-        self.assertTrue(c2.uploaded)
-        self.assertTrue(c3.uploaded)
+        self.assertTrue(self.gg.get_commit(c1.id).uploaded)
+        self.assertTrue(self.gg.get_commit(c2.id).uploaded)
+        self.assertTrue(self.gg.get_commit(c3.id).uploaded)
 
         self.gg.rebase(source_id=c2.id, dest_id=c3.id)
-        self.assertTrue(c1.uploaded)
-        self.assertFalse(c2.uploaded)
-        self.assertTrue(c3.uploaded)
+        self.assertTrue(self.gg.get_commit(c1.id).uploaded)
+        self.assertFalse(self.gg.get_commit(c2.id).uploaded)
+        self.assertTrue(self.gg.get_commit(c3.id).uploaded)
 
     def test_upload_all(self) -> None:
         """All local commits can be uploaded to remote with a single command."""
@@ -673,6 +691,7 @@ class TestGitGudWithRemoteNoSubmodules(TestGitGudWithRemote):
         c2 = self.gg.commit("More local content")
         self.gg.upload(all_commits=True)
 
+        c1, c2 = self.reload_all(c1, c2)
         self.assertTrue(c1.upstream_branch in self.remote_repo.git.branch())
         self.remote_repo.git.checkout(c1.upstream_branch)
         synced_filename = os.path.join(self.remote_repo_path, os.path.basename(local_filename_1))
@@ -698,6 +717,7 @@ class TestGitGudWithRemoteNoSubmodules(TestGitGudWithRemote):
         self.gg.upload()
         self.assertTrue(self.gg.head().uploaded)
 
+        c1 = self.reload(c1)
         self.assertTrue(c1.upstream_branch in self.remote_repo.git.branch())
         self.remote_repo.git.checkout(c1.upstream_branch)
         synced_filename = os.path.join(self.remote_repo_path, os.path.basename(local_filename))
@@ -711,6 +731,7 @@ class TestGitGudWithRemoteNoSubmodules(TestGitGudWithRemote):
         c1 = self.gg.commit("Added local content")
         self.gg.upload()
 
+        c1 = self.reload(c1)
         assert c1.pull_request is not None
         self.hosted_repo.merge_pull_request(c1.pull_request.id)
 
@@ -736,6 +757,7 @@ class TestGitGudWithRemoteNoSubmodules(TestGitGudWithRemote):
         self.gg.upload(all_commits=True)
 
         # Merge the first commit in the hosted repo
+        c1 = self.reload(c1)
         assert c1.pull_request is not None
         self.hosted_repo.merge_pull_request(c1.pull_request.id)
 
@@ -749,7 +771,7 @@ class TestGitGudWithRemoteNoSubmodules(TestGitGudWithRemote):
         self.assertSubset(expected, summary.dict())
 
     def test_sync_merged_not_at_remote_head(self) -> None:
-        """Verify that children of a merged commit are rebases to remote head after
+        """Verify that children of a merged commit are rebased to remote head after
         merged commit is dropped."""
 
         local_filename_1 = self.make_test_filename(self.local_repo_path)
@@ -761,6 +783,8 @@ class TestGitGudWithRemoteNoSubmodules(TestGitGudWithRemote):
         self.gg.commit("content2")
         self.gg.upload(all_commits=True)
 
+        self.gg.print_status()
+        c1 = self.gg.get_commit(c1.id)
         assert c1.pull_request is not None
         self.hosted_repo.merge_pull_request(c1.pull_request.id)
 
@@ -780,6 +804,7 @@ class TestGitGudWithRemoteNoSubmodules(TestGitGudWithRemote):
         c1 = self.gg.commit("content1")
         self.gg.upload(all_commits=True)
 
+        c1 = self.gg.get_commit(c1.id)
         assert c1.pull_request is not None
         self.hosted_repo.merge_pull_request(c1.pull_request.id)
 
@@ -856,9 +881,20 @@ class TestGitGudLocalOnly(TestGitGud):
         self.repo = Repo.init(self.local_repo_path)
         self.repo.git.config("user.email", "test@example.com")
         self.repo.git.config("user.name", "test_user")
-        self.gg = GitGud.for_clean_repo(self.repo)
+
+        gg = GitGud.for_clean_repo(self.repo)
         config = GitGudConfig(randomize_branches=False)
-        self.gg.set_config(config)
+        gg.set_config(config)
+
+    @property
+    def gg(self) -> GitGud:
+        return GitGud.for_working_dir(self.local_repo_path)
+
+    def reload(self, commit: GudCommit) -> GudCommit:
+        return self.gg.get_commit(commit.id)
+
+    def reload_all(self, *args: GudCommit) -> Tuple[GudCommit, ...]:
+        return tuple(self.reload(c) for c in args)
 
     def test_commit_remove_file(self) -> None:
         """Commits correctly pick up deleted files."""
@@ -996,6 +1032,7 @@ class TestGitGudLocalOnly(TestGitGud):
         append(filename, "testing3")
 
         self.gg.amend()
+        c1, c2 = self.reload_all(c1, c2)
         self.assertTrue(c2.needs_evolve)
 
         self.gg.evolve()
@@ -1013,6 +1050,7 @@ class TestGitGudLocalOnly(TestGitGud):
         self.assertEqual(expected, "".join(get_file_contents(filename)))
         set_file_contents(filename, "testing1\ntesting2\ntesting3")
         self.gg.rebase_continue()
+        c1, c2 = self.reload_all(c1, c2)
 
         self.assertEqual(c2.id, self.gg.head().id)
         self.assertFalse(c2.needs_evolve)
@@ -1199,6 +1237,7 @@ class TestGitGudLocalOnly(TestGitGud):
         append(filename_1, "stuff to amend")
 
         self.gg.amend()
+        c1, c2, c3, c4 = self.reload_all(c1, c2, c3, c4)
         self.assertTrue(c2.needs_evolve)
         self.assertTrue(c3.needs_evolve)
         self.assertTrue(c4.needs_evolve)
@@ -1206,18 +1245,21 @@ class TestGitGudLocalOnly(TestGitGud):
         self.gg.evolve()
 
         self.gg.update(c2.id)
+        c1, c2, c3, c4 = self.reload_all(c1, c2, c3, c4)
         expected = "testing1\nstuff to amend\n"
         self.assertEqual(expected, "".join(get_file_contents(filename_1)))
         expected = "testing1.1\n"
         self.assertEqual(expected, "".join(get_file_contents(filename_2)))
 
         self.gg.update(c3.id)
+        c1, c2, c3, c4 = self.reload_all(c1, c2, c3, c4)
         expected = "testing1\nstuff to amend\n"
         self.assertEqual(expected, "".join(get_file_contents(filename_1)))
         expected = "testing1.2\n"
         self.assertEqual(expected, "".join(get_file_contents(filename_3)))
 
         self.gg.update(c4.id)
+        c1, c2, c3, c4 = self.reload_all(c1, c2, c3, c4)
         expected = "testing1\nstuff to amend\n"
         self.assertEqual(expected, "".join(get_file_contents(filename_1)))
         expected = "testing1.2.1\n"
