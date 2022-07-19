@@ -667,6 +667,9 @@ class GitGud:
                         commit.parent_id = parent_of_prunned.id
                         commit.parent_hash = parent_of_prunned.hash
                         parent_of_prunned.children.append(commit.id)
+                    else:
+                        commit.parent_id = None
+                        commit.parent_hash = None
 
                 if commit_to_prune_id in commit.children:
                     commit.children.remove(commit_to_prune_id)
