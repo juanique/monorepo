@@ -4,7 +4,6 @@ import os
 import shutil
 import unittest
 from typing import Dict, List, Any, Tuple
-from rich.pretty import pprint
 
 import dataclasses
 
@@ -162,12 +161,6 @@ class TestGitGud(unittest.TestCase):
     def assertFileDoesNotExist(self, filename: str) -> None:
         self.assertFalse(os.path.exists(filename))
 
-    def reload(self, commit: GudCommit) -> GudCommit:
-        return self.gg.get_commit(commit.id)
-
-    def reload_all(self, *args: GudCommit) -> Tuple[GudCommit, ...]:
-        return (self.reload(c) for c in args)
-
 
 class TestGitGudWithRemote(TestGitGud):
     def setUp(self) -> None:
@@ -190,6 +183,12 @@ class TestGitGudWithRemote(TestGitGud):
         gg = GitGud.for_working_dir(self.local_repo_path)
         gg.hosted_repo = self.hosted_repo
         return gg
+
+    def reload(self, commit: GudCommit) -> GudCommit:
+        return self.gg.get_commit(commit.id)
+
+    def reload_all(self, *args: GudCommit) -> Tuple[GudCommit, ...]:
+        return tuple(self.reload(c) for c in args)
 
 
 class TestGitGudWithRemoteAndSubmodules(TestGitGudWithRemote):
@@ -603,6 +602,8 @@ class TestGitGudWithRemoteNoSubmodules(TestGitGudWithRemote):
         self.assertEqual(self.gg.get_commit(c1.id).upstream_branch, "jemunoz/added_local_content")
 
     def test_drop(self) -> None:
+        """Commits can be dropeed with gg drop. This closes the PR."""
+
         local_filename = self.make_test_filename(self.local_repo_path)
         append(local_filename, "locally added content")
         c1 = self.gg.commit("Added local content")
@@ -888,6 +889,12 @@ class TestGitGudLocalOnly(TestGitGud):
     @property
     def gg(self) -> GitGud:
         return GitGud.for_working_dir(self.local_repo_path)
+
+    def reload(self, commit: GudCommit) -> GudCommit:
+        return self.gg.get_commit(commit.id)
+
+    def reload_all(self, *args: GudCommit) -> Tuple[GudCommit, ...]:
+        return tuple(self.reload(c) for c in args)
 
     def test_commit_remove_file(self) -> None:
         """Commits correctly pick up deleted files."""
