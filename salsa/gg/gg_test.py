@@ -396,8 +396,9 @@ class TestGitGudWithRemoteNoSubmodules(TestGitGudWithRemote):
         self.assertSubset(expected_summary, self.gg.get_summary().dict())
 
     def test_sync_all_conflict(self) -> None:
-        """Regression test for a bug that was causing `gg sync --all` to leave the repo in a bad state
-        when there were merge conflicts in some of the synced branches."""
+        """Regression test for a bug that was causing `gg sync --all` to leave
+        the repo in a bad state when there were merge conflicts in some of the
+        synced branches."""
 
         append(self.remote_filename, "more-contents-from-remote")
         self.remote_repo.git.add("-A")
