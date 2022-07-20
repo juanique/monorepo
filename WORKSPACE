@@ -4,15 +4,13 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "rules_python",
-    sha256 = "954aa89b491be4a083304a2cb838019c8b8c3720a7abb9c4cb81ac7a24230cea",
-    urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_python/releases/download/0.4.0/rules_python-0.4.0.tar.gz",
-        "https://github.com/bazelbuild/rules_python/releases/download/0.4.0/rules_python-0.4.0.tar.gz",
-    ],
+    sha256 = "a3a6e99f497be089f81ec082882e40246bfd435f52f4e82f37e89449b04573f6",
+    strip_prefix = "rules_python-0.10.2",
+    url = "https://github.com/bazelbuild/rules_python/archive/refs/tags/0.10.2.tar.gz",
 )
 
 # pip dependencies
-load("@rules_python//python:pip.bzl", "pip_install")
+load("@rules_python//python:pip.bzl", "pip_parse")
 
 # Golang support
 http_archive(
@@ -41,6 +39,10 @@ go_rules_dependencies()
 go_register_toolchains(go_version = "1.17")
 
 gazelle_dependencies()
+
+load("@rules_python//gazelle:deps.bzl", _py_gazelle_deps = "gazelle_deps")
+
+_py_gazelle_deps()
 
 go_repository(
     name = "org_golang_google_grpc",
@@ -92,11 +94,18 @@ rules_proto_dependencies()
 
 rules_proto_toolchains()
 
-pip_install(
-    name = "pip_deps",
-    python_interpreter = "python3.10",
-    requirements = "//bazel/workspace:requirements.txt",
+# Create a central repo that knows about the dependencies needed from
+# requirements_lock.txt.
+pip_parse(
+    name = "pip",
+    requirements_lock = "//bazel/workspace:requirements_lock.txt",
 )
+
+# Load the starlark macro which will define your dependencies.
+load("@pip//:requirements.bzl", "install_deps")
+
+# Call it to define repos for your requirements.
+install_deps()
 
 # grpc
 _grpc_version = "1.45.0"

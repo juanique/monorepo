@@ -1,8 +1,8 @@
 rich==10.12.0
-GitPython
+GitPython==3.1.27
 grpcio==1.46.3
-click
-pytest
+click==8.1.3
+pytest==7.1.2
 pytest-pylint==0.18.0
 pydantic==1.8.2
 grpcio-reflection==1.46.3
@@ -11,3 +11,4 @@ docker==5.0.3
 psycopg2==2.9.3
 PyGithub==1.55
 Unidecode==1.3.4
+setuptools==63.2.0
