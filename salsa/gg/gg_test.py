@@ -395,6 +395,68 @@ class TestGitGudWithRemoteNoSubmodules(TestGitGudWithRemote):
         }
         self.assertSubset(expected_summary, self.gg.get_summary().dict())
 
+    def test_sync_all_conflict(self) -> None:
+        """Regression test for a bug that was causing `gg sync --all` to leave
+        the repo in a bad state when there were merge conflicts in some of the
+        synced branches."""
+
+        append(self.remote_filename, "more-contents-from-remote")
+        self.remote_repo.git.add("-A")
+        self.remote_repo.git.commit("-a", "-m", "Added more remote content")
+
+        root = self.gg.head()
+
+        # Unrelated commit
+        filename = self.make_test_filename()
+        append(filename, "something")
+        self.gg.commit("something")
+
+        self.gg.update(root.id)
+        local_filename = os.path.join(self.local_repo_path, os.path.basename(self.remote_filename))
+        append(local_filename, "more-contents-from-local")
+        c1 = self.gg.commit("added local content")
+
+        self.gg.update(root.id)
+        self.gg.print_status()
+        self.gg.sync(all=True)
+        self.gg.print_status()
+
+        expected = (
+            "contents-from-remote\n"
+            "<<<<<<< HEAD\n"
+            "more-contents-from-remote\n"
+            "=======\n"
+            "more-contents-from-local\n"
+            f">>>>>>> {c1.hash[0:7]} (added local content)\n"
+        )
+
+        self.assertEqual(expected, "".join(get_file_contents(local_filename)))
+
+        # Resolve the conflict
+        set_file_contents(
+            local_filename,
+            "contents-from-remote\nmore-contents-from-remote\nmore-contents-from-local\n",
+        )
+
+        self.gg.rebase_continue()
+        self.gg.sync(all=True)
+        self.gg.print_status()
+        c1 = self.gg.get_commit(c1.id)
+        assert c1.parent_id is not None
+        assert self.gg.get_commit(c1.parent_id).description == "Added more remote content"
+
+        # Expected commit tree
+        expected_summary = {
+            "commit_tree": {
+                "description": "Added more remote content",
+                "children": [
+                    {"description": "added local content"},
+                    {"description": "something"},
+                ],
+            }
+        }
+        self.assertSubset(expected_summary, self.gg.get_summary().dict())
+
     def test_sync_dirty(self) -> None:
         """Cannot sync on a dirty state."""
         # Remote change
