@@ -598,6 +598,9 @@ class GitGud:
                 self.update(commit_id)
                 self.sync(all=False)
 
+                if self.state.merge_conflict_state:
+                    return self.head()
+
             if starting_commit_id in self.state.commits:
                 self.update(starting_commit_id)
                 self.save_state()
