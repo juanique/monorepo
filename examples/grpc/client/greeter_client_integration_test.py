@@ -1,6 +1,4 @@
 import logging
-import sys
-import time
 import unittest
 import docker
 
