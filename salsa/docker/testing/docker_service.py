@@ -72,7 +72,7 @@ class DockerService:
             time.sleep(0.5)
             container = self._get_container()
             if not container:
-                logging.info("Container %s is not created yet not exist", self.container_name)
+                logging.info("Container %s is not created yet", self.container_name)
             else:
                 logging.info("Container %s is %s", self.container_name, container.status)
 
