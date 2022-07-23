@@ -51,7 +51,7 @@ class DockerService:
         )
 
         for line in container.logs(stream=True):
-            logger.info(f"{self.container_name} - {line.decode('utf-8').strip()}")
+            logger.info("%s - %s", self.container_name, line.decode("utf-8").strip())
 
         logger.info("Ending deamon for %s", self.container_name)
 
@@ -72,9 +72,9 @@ class DockerService:
             time.sleep(0.5)
             container = self._get_container()
             if not container:
-                logging.info(f"Container {self.container_name} is not created yet not exist")
+                logging.info("Container %s is not created yet not exist", self.container_name)
             else:
-                logging.info(f"Container {self.container_name} is %s", container.status)
+                logging.info("Container %s is %s", self.container_name, container.status)
 
         if wait_until_ready:
             self.wait_until_ready()
