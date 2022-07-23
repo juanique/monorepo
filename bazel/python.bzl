@@ -117,3 +117,32 @@ def pytest_test(name, srcs, deps = [], args = [], **kwargs):
         ],
         **kwargs
     )
+
+def py_executable(name, binary):
+    zip_target_name = binary.replace(":", "") + "_zip"
+    native.filegroup(
+        name = zip_target_name,
+        srcs = [binary],
+        output_group = "python_zip_file",
+    )
+
+    _py_executable_wrapper(name = name, binary = zip_target_name)
+
+def _py_executable_wrapper_impl(ctx):
+    output = ctx.actions.declare_file(ctx.attr.name)
+    input = ctx.file.binary
+    ctx.actions.run_shell(
+        inputs = [input],
+        outputs = [output],
+        arguments = [input.path, output.path],
+        command = "echo '#!/usr/bin/env python' >> $2 && cat $1 >> $2",
+    )
+
+    return [DefaultInfo(files = depset([output]))]
+
+_py_executable_wrapper = rule(
+    implementation = _py_executable_wrapper_impl,
+    attrs = {
+        "binary": attr.label(allow_single_file = True, mandatory = True),
+    },
+)
