@@ -1,6 +1,7 @@
 import logging
 import os
 import threading
+import time
 from typing import Optional
 
 import docker
@@ -30,6 +31,7 @@ class DockerService:
         self.network = network
         self.stopping = False
         self.thread: Optional[threading.Thread] = None
+        self.container = None
 
     def _thread_func(self) -> None:
         self.stop()
@@ -39,6 +41,7 @@ class DockerService:
             self.docker_client.images.load(tar_file)[0].tag(self.image_name, "latest")
 
         ports = None if self.network == "host" else {f"{self.port}": f"{self.port}"}
+        logger.info("Starting %s", self.container_name)
         container = self.docker_client.containers.run(
             self.image_name,
             name=self.container_name,
@@ -48,19 +51,33 @@ class DockerService:
         )
 
         for line in container.logs(stream=True):
-            logger.info(line)
+            logger.info("%s - %s", self.container_name, line.decode("utf-8").strip())
 
         logger.info("Ending deamon for %s", self.container_name)
 
+    def _get_container(self) -> Optional[docker.models.containers.Container]:
+        try:
+            return self.docker_client.containers.get(self.container_name)
+        except docker.errors.NotFound:
+            return None
 
     def start(self, wait_until_ready: bool = True) -> None:
         """Stop or restart the docker container running the service."""
         self.thread = threading.Thread(target=self._thread_func, daemon=True)
         self.thread.start()
 
+        container = self._get_container()
+
+        while not container or container.status != "running":
+            time.sleep(0.5)
+            container = self._get_container()
+            if not container:
+                logging.info("Container %s is not created yet", self.container_name)
+            else:
+                logging.info("Container %s is %s", self.container_name, container.status)
+
         if wait_until_ready:
             self.wait_until_ready()
-
 
     def host(self) -> str:
         return "localhost" if self.network in ["host", "bridge"] else self.container_name
