@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from enum import Enum
 from pathlib import Path
+from datetime import datetime
 import random
 import re
 from typing import Any, Dict, List, Optional, Callable, Set
@@ -18,6 +19,7 @@ from rich import print
 from rich.tree import Tree
 import github
 from github import Github
+import humanize
 
 from salsa.os.environ_ctx import modified_environ
 
@@ -108,6 +110,8 @@ class GudCommit(BaseModel):
     history_branch: Optional[str]
     snapshots: List[Snapshot] = []
 
+    date: Optional[datetime]
+
     def get_oneliner(self) -> str:
         return get_oneliner(self.description)
 
@@ -191,6 +195,12 @@ class RepoState(BaseModel):
 
     class Config:
         use_enum_values = True
+        json_encoders = {
+            datetime: lambda v: v.isoformat(),
+        }
+        dict_encoders = {
+            datetime: lambda v: v.isoformat(),
+        }
 
 
 def get_branch_name(string: str, randomize: bool = True) -> str:
@@ -332,13 +342,19 @@ class GitGud:
         os.makedirs(CONFIGS_ROOT, exist_ok=True)
         state_filename = GitGud.state_filename(self.state.repo_dir)
         with open(state_filename, "w", encoding="utf-8") as out_file:
-            json.dump(self.state.dict(), out_file, sort_keys=True, indent=4, ensure_ascii=False)
+            out_file.write(self.state.json())
 
     @staticmethod
     def get_remote_commit(repo: Repo, remote_master: str) -> GudCommit:
-        master_commit_id = f"master@{repo.head.commit.hexsha[0:8]}"
+        """Given a repo in a checkout out remote commit, generate the corresponding GudCommit."""
+
+        hash = repo.head.commit.hexsha
+        master_commit_id = f"master@{hash[0:8]}"
         new_branch = repo.create_head(master_commit_id)
         new_branch.checkout()
+
+        date_str = repo.git.show("-s", "--pretty=%ad", hash, "--date=iso-local")
+        date = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S %z")
 
         return GudCommit(
             id=master_commit_id,
@@ -348,6 +364,7 @@ class GitGud:
             uploaded=True,
             history_branch=master_commit_id,
             upstream_branch=remote_master,
+            date=date,
         )
 
     @staticmethod
@@ -1322,9 +1339,16 @@ class GitGud:
         if name_tags:
             name_annotations = f" [bold yellow]({' '.join(name_tags)})[/bold yellow]"
 
+        if commit.date:
+            now = datetime.now(datetime.now().astimezone().tzinfo)
+            date = f"[white bold]{humanize.naturaltime(now - commit.date)}[/white bold] - "
+        else:
+            date = ""
+
         line = f"[bold {color}]{commit.id}[/bold {color}]"
         line += f"[bold red]{needs_evolve}{needs_upload}{conflict}[/bold red]{name_annotations} "
-        line += f"{url}: {commit.get_oneliner()}"
+        line += f"{url}: {date}{commit.get_oneliner()}"
+
         if full:
             for snapshot in commit.snapshots:
                 vertical = "│" if commit.children else " "

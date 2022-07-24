@@ -15,6 +15,7 @@ py_library(
         requirement("pydantic"),
         requirement("PyGithub"),
         requirement("Unidecode"),
+        requirement("humanize"),
     ],
 )
 
