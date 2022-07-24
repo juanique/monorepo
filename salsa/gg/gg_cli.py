@@ -193,6 +193,7 @@ cli.add_command(drop)
 cli.add_command(get_config)
 cli.add_command(set_config)
 cli.add_command(version)
+cli.add_command(squash)
 
 if __name__ == "__main__":
     cli()
