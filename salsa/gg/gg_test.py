@@ -1053,7 +1053,7 @@ class TestGitGudWithRemoteNoSubmodules(TestGitGudWithRemote):
 
         $ gg update master@0
         $ gg sync
-        $ gg rebase -s commit2 -d commit3
+        $ gg rebase -s commit2 -d master@1
 
         We get:
 
