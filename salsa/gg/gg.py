@@ -34,7 +34,15 @@ class Progress(RemoteProgress):
         print(self._cur_line)
 
 
-class GudPullRequest(BaseModel):
+class GitGudModel(BaseModel):
+    def __hash__(self):
+        md5 = hashlib.md5()
+        encoded = self.json(sort_keys=True).encode()
+        md5.update(encoded)
+        return md5.hexdigest()
+
+
+class GudPullRequest(GitGudModel):
     id: str
     title: str
     remote_branch: str
@@ -64,11 +72,11 @@ class InvalidOperationForRemote(Exception):
     pass
 
 
-class BadGitGudState(BaseModel):
+class BadGitGudState(GitGudModel):
     message: str
 
 
-class DirtyState(BaseModel):
+class DirtyState(GitGudModel):
     """Exposes data of the diff between current state of the filesystem and
     locally or remotely commited state."""
 
@@ -76,7 +84,7 @@ class DirtyState(BaseModel):
     modified_files: List[str] = []
 
 
-class CommitSummary(BaseModel):
+class CommitSummary(GitGudModel):
     id: str
     hash: str
     is_head: bool = False
@@ -84,16 +92,16 @@ class CommitSummary(BaseModel):
     children: List["CommitSummary"] = []
 
 
-class RepoSummary(BaseModel):
+class RepoSummary(GitGudModel):
     commit_tree: CommitSummary
 
 
-class Snapshot(BaseModel):
+class Snapshot(GitGudModel):
     hash: str
     description: str
 
 
-class GudCommit(BaseModel):
+class GudCommit(GitGudModel):
     id: str
     hash: str
     description: str
@@ -119,7 +127,7 @@ class GudCommit(BaseModel):
         return Snapshot(hash=self.hash, description=self.description)
 
 
-class MergeConflictState(BaseModel):
+class MergeConflictState(GitGudModel):
     current: str
     incoming: str
     files: List[str]
@@ -129,17 +137,17 @@ class OperationType(str, Enum):
     EVOLVE = "EVOLVE"
 
 
-class EvolveOperation(BaseModel):
+class EvolveOperation(GitGudModel):
     base_commit_id: str
     target_commit_id: str
 
 
-class PendingOperation(BaseModel):
+class PendingOperation(GitGudModel):
     type: OperationType
     evolve_op: EvolveOperation
 
 
-class GitHubRepoMetadata(BaseModel):
+class GitHubRepoMetadata(GitGudModel):
     owner: str
     name: str
 
@@ -172,17 +180,17 @@ class GitHubRepoMetadata(BaseModel):
         raise ValueError(f"Can't parse {url}")
 
 
-class RepoMetadata(BaseModel):
+class RepoMetadata(GitGudModel):
     github: Optional[GitHubRepoMetadata]
 
 
-class GitGudConfig(BaseModel):
+class GitGudConfig(GitGudModel):
     remote_branch_prefix: str = ""
     randomize_branches: bool = True
     verbose: bool = False
 
 
-class RepoState(BaseModel):
+class RepoState(GitGudModel):
     repo_dir: str
     head: str
     root: str
@@ -1285,7 +1293,7 @@ class GitGud:
             print("")
             print("To abort run:")
             print(" [bold]gg rebase --abort[/bold]")
-        print("")
+            print("")
 
         bad_states = self.get_bad_states()
         for state in bad_states:
@@ -1380,7 +1388,14 @@ class GitGud:
     def _find_root(self, commit: GudCommit) -> GudCommit:
         if commit.parent_id is None:
             return commit
-        return self._find_root(self.get_commit(commit.parent_id))
+
+        try:
+            parent = self.get_commit(commit.parent_id)
+            return self._find_root(parent)
+        except ValueError:
+            # Error will be captured in one of the bad states. We consider a
+            # commit whose parent does not exist to be a root.
+            return commit
 
     def get_bad_states(self) -> List[BadGitGudState]:
         """Returns a list of inconstencies found in gitgud state. This should
@@ -1389,15 +1404,22 @@ class GitGud:
         bad_states = []
         roots: Set[str] = set()
 
-        if not self.is_dirty():
-            for commit_id in self.state.commits:
-                commit = self.get_commit(commit_id)
+        for commit_id in self.state.commits:
+            commit = self.get_commit(commit_id)
 
-                # Check 1: All commits must have a single common ancestors, check at the end
-                roots.add(self._find_root(commit).id)
+            logging.info("Checking commit %s with parent %s", commit.id, commit.parent_id)
 
-                # Check 2: Parent/child references must match
-                if commit.parent_id and commit.id not in self.get_commit(commit.parent_id).children:
+            if commit.parent_id:
+                if commit.parent_id not in self.state.commits:
+                    # Check 0: All parent references must exist
+                    bad_states.append(
+                        BadGitGudState(
+                            message=f"Missing commit {commit.parent_id} referenced as parent of {commit.id}"
+                        )
+                    )
+                elif commit.id not in self.get_commit(commit.parent_id).children:
+                    logging.info("DEBUG commit %s exists in commit lists", commit.parent_id)
+                    # Check 1: Parent/child references must match
                     bad_states.append(
                         BadGitGudState(
                             message=(
@@ -1407,14 +1429,14 @@ class GitGud:
                         )
                     )
 
-                # Check 3: On a clean state, history and main branch are in equal state
-                if not commit.history_branch:
-                    continue
+            # Check 2: All commits must have a single common ancestors, check at the end
+            roots.add(self._find_root(commit).id)
 
+            if not self.is_dirty() and commit.history_branch:
                 diff = self.repo.git.diff(commit.id, commit.history_branch)
                 if diff:
-                    logging.warning("Found diff in %s history branch:\n%s", commit.id, diff)
                     bad_states.append(
+                        # Check 3: On a clean state, history and main branch are in equal state
                         BadGitGudState(
                             message=(
                                 f"{commit.id} not in sync with its "
