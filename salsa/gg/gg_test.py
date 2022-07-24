@@ -223,6 +223,24 @@ class TestGitGudChecks(TestGitGudWithRemote):
             f"{c1.id} not in sync with its history branch {c1.history_branch}", str(cm.exception)
         )
 
+    def test_missing_parent(self) -> None:
+        """Check state function raises if there's a reference to a non existent parent."""
+
+        filename_1 = self.make_test_filename()
+        append(filename_1, "testing1")
+
+        with self.gg_instance() as gg:
+            c1 = gg.commit("Local change")
+            c1.parent_id = "i-dont-exist"
+
+        with self.assertRaises(BadGitGudStateError) as cm:
+            self.gg.check_state()
+
+        self.gg.print_status()
+        self.assertEqual(
+            f"Missing commit i-dont-exist referenced as parent of {c1.id}", str(cm.exception)
+        )
+
     def test_parent_child_mismatch(self) -> None:
         """Check state function raises if there's a parent/child reference mismatch."""
 
