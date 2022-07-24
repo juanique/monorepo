@@ -35,11 +35,11 @@ class Progress(RemoteProgress):
 
 
 class GitGudModel(BaseModel):
-    def __hash__(self):
+    def __hash__(self) -> int:
         md5 = hashlib.md5()
         encoded = self.json(sort_keys=True).encode()
         md5.update(encoded)
-        return md5.hexdigest()
+        return hash(md5.hexdigest())
 
 
 class GudPullRequest(GitGudModel):
