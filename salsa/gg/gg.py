@@ -1414,7 +1414,10 @@ class GitGud:
                     # Check 0: All parent references must exist
                     bad_states.append(
                         BadGitGudState(
-                            message=f"Missing commit {commit.parent_id} referenced as parent of {commit.id}"
+                            message=(
+                                f"Missing commit {commit.parent_id} referenced "
+                                f"as parent of {commit.id}"
+                            )
                         )
                     )
                 elif commit.id not in self.get_commit(commit.parent_id).children:
