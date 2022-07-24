@@ -1087,6 +1087,35 @@ class TestGitGudWithRemoteNoSubmodules(TestGitGudWithRemote):
 
         self.gg.check_state()
 
+    def test_squash(self) -> None:
+        """A child may be squashed into its parent."""
+
+        filename_1 = self.make_test_filename()
+        append(filename_1, "commit1")
+        c1 = self.gg.commit("commit1")
+
+        filename_2 = self.make_test_filename()
+        append(filename_2, "commit2")
+        c2 = self.gg.commit("commit2")
+
+        filename_3 = self.make_test_filename()
+        append(filename_3, "commit3")
+        c3 = self.gg.commit("commit3")
+
+        self.gg.print_status()
+        self.gg.squash(source_id=c2.id, dest_id=c1.id)
+        self.gg.print_status()
+
+        self.gg.update(c1.id)
+
+        c1 = self.reload(c1)
+        self.assertFileContents(filename_2, "commit2\n")
+        self.assertNotIn(c2.id, c1.children)
+        self.assertIn(c3.id, c1.children)
+
+        self.gg.update(c3.id)
+        self.assertFileContents(filename_3, "commit3\n")
+
 
 class TestGitGudLocalOnly(TestGitGud):
     def setUp(self) -> None:

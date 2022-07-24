@@ -35,11 +35,11 @@ class Progress(RemoteProgress):
 
 
 class GitGudModel(BaseModel):
-    def __hash__(self):
+    def __hash__(self) -> int:
         md5 = hashlib.md5()
         encoded = self.json(sort_keys=True).encode()
         md5.update(encoded)
-        return md5.hexdigest()
+        return hash(md5.hexdigest())
 
 
 class GudPullRequest(GitGudModel):
@@ -604,6 +604,24 @@ class GitGud:
 
         self.drop_commit(commit.id)
         return merged_commit
+
+    def squash(self, source_id: str, dest_id: str) -> None:
+        """Combines two commits into one."""
+
+        source = self.get_commit(source_id)
+        dest = self.get_commit(dest_id)
+
+        if source.id not in dest.children:
+            raise ValueError("Squash is only supported from a child commit to its parent.")
+
+        self.update(dest_id)
+        self._copy_branch_state(source_id, dest_id)
+        self.amend(f"Squashed {source_id} into {dest_id}")
+
+        for child_id in source.children:
+            self.rebase(source_id=child_id, dest_id=dest_id)
+
+        self.drop_commit(source_id)
 
     def sync(self, all: bool = False) -> GudCommit:
         """Pull changes from remote and rebase the current commit to a more recent master branch."""
@@ -1414,7 +1432,10 @@ class GitGud:
                     # Check 0: All parent references must exist
                     bad_states.append(
                         BadGitGudState(
-                            message=f"Missing commit {commit.parent_id} referenced as parent of {commit.id}"
+                            message=(
+                                f"Missing commit {commit.parent_id} referenced "
+                                f"as parent of {commit.id}"
+                            )
                         )
                     )
                 elif commit.id not in self.get_commit(commit.parent_id).children:

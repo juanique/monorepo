@@ -74,6 +74,14 @@ def commit(message: str) -> None:
 @click.command()
 @click.option("-s", "--source", default="")
 @click.option("-d", "--destination", default="")
+def squash(source: str, destination: str) -> None:
+    gg = GitGud.for_working_dir(os.getcwd())
+    gg.squash(source_id=source, dest_id=destination)
+
+
+@click.command()
+@click.option("-s", "--source", default="")
+@click.option("-d", "--destination", default="")
 @click.option("--continue/--no-continue", "cont_", default=False, is_flag=True)
 def rebase(source: str, destination: str, cont_: bool = False) -> None:
     """
