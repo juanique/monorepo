@@ -1,16 +1,17 @@
+from contextlib import contextmanager
 import inspect
 import logging
 import os
 import shutil
 import unittest
-from typing import Dict, List, Any, Tuple
+from typing import Dict, Iterator, List, Any, Tuple
 
 import dataclasses
 
 from git import Repo
 
 from salsa.gg.gg import (
-    BadGitGudState,
+    BadGitGudStateError,
     CommitAlreadyMerged,
     ConfigNotFoundError,
     GitGud,
@@ -179,6 +180,14 @@ class TestGitGudWithRemote(TestGitGud):
         gg.repo.git.config("user.email", "test@example.com")
         gg.repo.git.config("user.name", "test_user")
 
+    @contextmanager
+    def gg_instance(self) -> Iterator[GitGud]:
+        try:
+            gg = self.gg
+            yield gg
+        finally:
+            gg.save_state()
+
     @property
     def gg(self) -> GitGud:
         gg = GitGud.for_working_dir(self.local_repo_path)
@@ -190,6 +199,85 @@ class TestGitGudWithRemote(TestGitGud):
 
     def reload_all(self, *args: GudCommit) -> Tuple[GudCommit, ...]:
         return tuple(self.reload(c) for c in args)
+
+
+class TestGitGudChecks(TestGitGudWithRemote):
+    def test_check_history_branch_out_of_sync(self) -> None:
+        """The check_state function raises if the history branch is out of sync
+        when it shouldn't."""
+
+        filename_1 = self.make_test_filename()
+        append(filename_1, "testing1")
+        c1 = self.gg.commit("My first commit")
+
+        self.gg.repo.git.checkout(c1.history_branch)
+        append(filename_1, "out-of-sync")
+        self.gg.repo.git.commit("-a", "-m", "make history out of sync")
+        self.gg.repo.git.checkout(c1.id)
+
+        with self.assertRaises(BadGitGudStateError) as cm:
+            self.gg.check_state()
+
+        self.gg.print_status()
+        self.assertEqual(
+            f"{c1.id} not in sync with its history branch {c1.history_branch}", str(cm.exception)
+        )
+
+    def test_parent_child_mismatch(self) -> None:
+        """Check state function raises if there's a parent/child reference mismatch."""
+
+        root = self.gg.root()
+        filename_1 = self.make_test_filename()
+        append(filename_1, "testing1")
+        self.gg.commit("Local change")
+
+        append(filename_1, "testing2")
+        c2 = self.gg.commit("Local change 2")
+
+        with self.gg_instance() as gg:
+            gg.get_commit(c2.id).parent_id = root.id
+
+        with self.assertRaises(BadGitGudStateError) as cm:
+            self.gg.check_state()
+
+        self.gg.print_status()
+        self.assertIn("Parent/child mismatch", str(cm.exception))
+
+    def test_multiple_roots(self) -> None:
+        """Check state function raises if all commits don't have a single common
+        root ancestors."""
+
+        root = self.gg.root()
+
+        # Remote changes
+        append(self.remote_filename, "more-contents-from-remote")
+        self.remote_repo.git.add("-A")
+        self.remote_repo.git.commit("-a", "-m", "Added more remote content")
+
+        # Local changes
+        filename_1 = self.make_test_filename()
+        append(filename_1, "testing1")
+        self.gg.commit("Local change")
+
+        # Get latest master
+        self.gg.update(root.id)
+        new_master = self.gg.sync()
+
+        # We break the link between the two master commits
+        with self.gg_instance() as gg:
+            gg.get_commit(root.id).children.remove(new_master.id)
+            gg.get_commit(new_master.id).parent_hash = None
+            gg.get_commit(new_master.id).parent_id = None
+
+        self.gg.print_status()
+
+        with self.assertRaises(BadGitGudStateError) as cm:
+            self.gg.check_state()
+
+        self.assertEqual(
+            f"Multiple roots found: {', '.join(sorted({root.id, new_master.id}))}",
+            str(cm.exception),
+        )
 
 
 class TestGitGudWithRemoteAndSubmodules(TestGitGudWithRemote):
@@ -208,6 +296,9 @@ class TestGitGudWithRemoteAndSubmodules(TestGitGudWithRemote):
         append(self.submodule_filename, "contents-from-submodule")
         self.submodule_repo.git.add("-A")
         self.submodule_repo.git.commit("-a", "-m", "Initial commit in submodule")
+
+    def tearDown(self) -> None:
+        self.gg.check_state()
 
     def test_submodule_initialized(self) -> None:
         self.gg.repo.git.submodule("add", self.submodule_repo_path, "./a-submodule")
@@ -317,6 +408,9 @@ class TestGitGudWithRemoteAndSubmodules(TestGitGudWithRemote):
 
 
 class TestGitGudWithRemoteNoSubmodules(TestGitGudWithRemote):
+    def tearDown(self) -> None:
+        self.gg.check_state()
+
     def test_clone(self) -> None:
         local_filename = os.path.join(self.local_repo_path, os.path.basename(self.remote_filename))
         self.assertEqual(["contents-from-remote\n"], get_file_contents(local_filename))
@@ -1001,25 +1095,10 @@ class TestGitGudLocalOnly(TestGitGud):
     def reload_all(self, *args: GudCommit) -> Tuple[GudCommit, ...]:
         return tuple(self.reload(c) for c in args)
 
-    def test_check_history_branch_out_of_sync(self) -> None:
-        """The check_state function raises if the history branch is out of sync
-        when it shouldn't."""
 
-        filename_1 = self.make_test_filename()
-        append(filename_1, "testing1")
-        c1 = self.gg.commit("My first commit")
-
-        self.repo.git.checkout(c1.history_branch)
-        append(filename_1, "out-of-sync")
-        self.repo.git.commit("-a", "-m", "make history out of sync")
-        self.repo.git.checkout(c1.id)
-
-        with self.assertRaises(BadGitGudState) as cm:
-            self.gg.check_state()
-
-        self.assertEqual(
-            f"{c1.id} not in sync with its history branch {c1.history_branch}", str(cm.exception)
-        )
+class TestGitGudLocalNoChecks(TestGitGudLocalOnly):
+    def tearDown(self) -> None:
+        self.gg.check_state()
 
     def test_commit_remove_file(self) -> None:
         """Commits correctly pick up deleted files."""
