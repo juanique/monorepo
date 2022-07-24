@@ -10,6 +10,7 @@ import dataclasses
 from git import Repo
 
 from salsa.gg.gg import (
+    BadGitGudState,
     CommitAlreadyMerged,
     ConfigNotFoundError,
     GitGud,
@@ -932,6 +933,48 @@ class TestGitGudWithRemoteNoSubmodules(TestGitGudWithRemote):
         )
         self.gg.print_status()
 
+    def test_rebase_to_new_master(self) -> None:
+        """
+        We start with:
+
+        master@0 ----- commit1 ---- commit2
+
+        $ gg update master@0
+        $ gg sync
+        $ gg rebase -s commit2 -d commit3
+
+        We get:
+
+        master@0 ----- commit1
+                \
+                  --- master@1 ---- commit2
+        """
+
+        root = self.gg.root()
+
+        filename_1 = self.make_test_filename()
+        append(filename_1, "commit1")
+        self.gg.commit("commit1")
+
+        filename_2 = self.make_test_filename()
+        append(filename_2, "commit2")
+        c2 = self.gg.commit("commit2")
+
+        # Remote change
+        remote_filename = self.make_test_filename(self.remote_repo_path)
+        append(remote_filename, "more-contents-from-remote")
+        self.remote_repo.git.add("-A")
+        self.remote_repo.git.commit("-a", "-m", "Added more content")
+
+        self.gg.update(root.id)
+        new_master = self.gg.sync()
+
+        self.gg.print_status()
+        self.gg.rebase(source_id=c2.id, dest_id=new_master.id)
+        self.gg.print_status(full=True)
+
+        self.gg.check_state()
+
 
 class TestGitGudLocalOnly(TestGitGud):
     def setUp(self) -> None:
@@ -957,6 +1000,26 @@ class TestGitGudLocalOnly(TestGitGud):
 
     def reload_all(self, *args: GudCommit) -> Tuple[GudCommit, ...]:
         return tuple(self.reload(c) for c in args)
+
+    def test_check_history_branch_out_of_sync(self) -> None:
+        """The check_state function raises if the history branch is out of sync
+        when it shouldn't."""
+
+        filename_1 = self.make_test_filename()
+        append(filename_1, "testing1")
+        c1 = self.gg.commit("My first commit")
+
+        self.repo.git.checkout(c1.history_branch)
+        append(filename_1, "out-of-sync")
+        self.repo.git.commit("-a", "-m", "make history out of sync")
+        self.repo.git.checkout(c1.id)
+
+        with self.assertRaises(BadGitGudState) as cm:
+            self.gg.check_state()
+
+        self.assertEqual(
+            f"{c1.id} not in sync with its history branch {c1.history_branch}", str(cm.exception)
+        )
 
     def test_commit_remove_file(self) -> None:
         """Commits correctly pick up deleted files."""
@@ -1250,6 +1313,8 @@ class TestGitGudLocalOnly(TestGitGud):
         append(filename, "testing3")
         self.gg.amend()
         self.assertEqual(len(self.gg.head().snapshots), 3)
+
+        self.gg.print_status(full=True)
 
         # We restore to snapshot 1
         self.gg.restore_snapshot(self.gg.head().snapshots[1].hash)

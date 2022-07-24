@@ -42,6 +42,10 @@ class GudPullRequest(BaseModel):
     merged: bool = False
 
 
+class BadGitGudState(Exception):
+    pass
+
+
 class CommitAlreadyMerged(Exception):
     pass
 
@@ -821,7 +825,15 @@ class GitGud:
             history_branch = self.head().history_branch
             assert history_branch is not None
             self._copy_branch_state(self.head().id, history_branch)
-            self.repo.git.commit("-m", snapshot_message)
+
+            # only add a history commit if there were changes from the main branch
+            changes = False
+            diff_list = self.repo.head.commit.diff()
+            for _ in diff_list:
+                changes = True
+
+            if changes:
+                self.repo.git.commit("-m", snapshot_message)
 
         hash = self.repo.head.commit.hexsha
         new_snapshot = Snapshot(hash=hash, description=snapshot_message)
@@ -1106,7 +1118,7 @@ class GitGud:
             self.repo.git.commit("--amend", "-a", "--no-edit")
 
         self._checkout(child.id)
-        self.snapshot(commit_msg, commit=False)
+        self.snapshot(commit_msg)
         self.save_state()
         self.execute_pending_operations()
 
@@ -1318,3 +1330,22 @@ class GitGud:
             state.untracked_files.append(untracked)
 
         return state
+
+    def check_state(self) -> None:
+        """Perform various checks on the state of gg.
+
+        Raises if any issues are found."""
+
+        if not self.is_dirty():
+            for commit_id in self.state.commits:
+                logging.info("Checking commit %s", commit_id)
+                commit = self.get_commit(commit_id)
+                if not commit.history_branch:
+                    continue
+
+                diff = self.repo.git.diff(commit.id, commit.history_branch)
+                if diff:
+                    logging.warning("Found diff in %s history branch:\n%s", commit.id, diff)
+                    raise BadGitGudState(
+                        f"{commit.id} not in sync with its history branch {commit.history_branch}"
+                    )
