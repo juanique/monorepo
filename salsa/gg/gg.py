@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from enum import Enum
 from pathlib import Path
+from datetime import datetime
 import random
 import re
 from typing import Any, Dict, List, Optional, Callable, Set
@@ -18,6 +19,7 @@ from rich import print
 from rich.tree import Tree
 import github
 from github import Github
+import humanize
 
 from salsa.os.environ_ctx import modified_environ
 
@@ -32,7 +34,15 @@ class Progress(RemoteProgress):
         print(self._cur_line)
 
 
-class GudPullRequest(BaseModel):
+class GitGudModel(BaseModel):
+    def __hash__(self) -> int:
+        md5 = hashlib.md5()
+        encoded = self.json(sort_keys=True).encode()
+        md5.update(encoded)
+        return hash(md5.hexdigest())
+
+
+class GudPullRequest(GitGudModel):
     id: str
     title: str
     remote_branch: str
@@ -62,11 +72,11 @@ class InvalidOperationForRemote(Exception):
     pass
 
 
-class BadGitGudState(BaseModel):
+class BadGitGudState(GitGudModel):
     message: str
 
 
-class DirtyState(BaseModel):
+class DirtyState(GitGudModel):
     """Exposes data of the diff between current state of the filesystem and
     locally or remotely commited state."""
 
@@ -74,7 +84,7 @@ class DirtyState(BaseModel):
     modified_files: List[str] = []
 
 
-class CommitSummary(BaseModel):
+class CommitSummary(GitGudModel):
     id: str
     hash: str
     is_head: bool = False
@@ -82,16 +92,16 @@ class CommitSummary(BaseModel):
     children: List["CommitSummary"] = []
 
 
-class RepoSummary(BaseModel):
+class RepoSummary(GitGudModel):
     commit_tree: CommitSummary
 
 
-class Snapshot(BaseModel):
+class Snapshot(GitGudModel):
     hash: str
     description: str
 
 
-class GudCommit(BaseModel):
+class GudCommit(GitGudModel):
     id: str
     hash: str
     description: str
@@ -108,6 +118,8 @@ class GudCommit(BaseModel):
     history_branch: Optional[str]
     snapshots: List[Snapshot] = []
 
+    date: Optional[datetime]
+
     def get_oneliner(self) -> str:
         return get_oneliner(self.description)
 
@@ -115,7 +127,7 @@ class GudCommit(BaseModel):
         return Snapshot(hash=self.hash, description=self.description)
 
 
-class MergeConflictState(BaseModel):
+class MergeConflictState(GitGudModel):
     current: str
     incoming: str
     files: List[str]
@@ -125,17 +137,17 @@ class OperationType(str, Enum):
     EVOLVE = "EVOLVE"
 
 
-class EvolveOperation(BaseModel):
+class EvolveOperation(GitGudModel):
     base_commit_id: str
     target_commit_id: str
 
 
-class PendingOperation(BaseModel):
+class PendingOperation(GitGudModel):
     type: OperationType
     evolve_op: EvolveOperation
 
 
-class GitHubRepoMetadata(BaseModel):
+class GitHubRepoMetadata(GitGudModel):
     owner: str
     name: str
 
@@ -168,17 +180,17 @@ class GitHubRepoMetadata(BaseModel):
         raise ValueError(f"Can't parse {url}")
 
 
-class RepoMetadata(BaseModel):
+class RepoMetadata(GitGudModel):
     github: Optional[GitHubRepoMetadata]
 
 
-class GitGudConfig(BaseModel):
+class GitGudConfig(GitGudModel):
     remote_branch_prefix: str = ""
     randomize_branches: bool = True
     verbose: bool = False
 
 
-class RepoState(BaseModel):
+class RepoState(GitGudModel):
     repo_dir: str
     head: str
     root: str
@@ -191,6 +203,12 @@ class RepoState(BaseModel):
 
     class Config:
         use_enum_values = True
+        json_encoders = {
+            datetime: lambda v: v.isoformat(),
+        }
+        dict_encoders = {
+            datetime: lambda v: v.isoformat(),
+        }
 
 
 def get_branch_name(string: str, randomize: bool = True) -> str:
@@ -332,13 +350,19 @@ class GitGud:
         os.makedirs(CONFIGS_ROOT, exist_ok=True)
         state_filename = GitGud.state_filename(self.state.repo_dir)
         with open(state_filename, "w", encoding="utf-8") as out_file:
-            json.dump(self.state.dict(), out_file, sort_keys=True, indent=4, ensure_ascii=False)
+            out_file.write(self.state.json())
 
     @staticmethod
     def get_remote_commit(repo: Repo, remote_master: str) -> GudCommit:
-        master_commit_id = f"master@{repo.head.commit.hexsha[0:8]}"
+        """Given a repo in a checkout out remote commit, generate the corresponding GudCommit."""
+
+        hash = repo.head.commit.hexsha
+        master_commit_id = f"master@{hash[0:8]}"
         new_branch = repo.create_head(master_commit_id)
         new_branch.checkout()
+
+        date_str = repo.git.show("-s", "--pretty=%ad", hash, "--date=iso-local")
+        date = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S %z")
 
         return GudCommit(
             id=master_commit_id,
@@ -348,6 +372,7 @@ class GitGud:
             uploaded=True,
             history_branch=master_commit_id,
             upstream_branch=remote_master,
+            date=date,
         )
 
     @staticmethod
@@ -1268,7 +1293,7 @@ class GitGud:
             print("")
             print("To abort run:")
             print(" [bold]gg rebase --abort[/bold]")
-        print("")
+            print("")
 
         bad_states = self.get_bad_states()
         for state in bad_states:
@@ -1322,9 +1347,16 @@ class GitGud:
         if name_tags:
             name_annotations = f" [bold yellow]({' '.join(name_tags)})[/bold yellow]"
 
+        if commit.date:
+            now = datetime.now(datetime.now().astimezone().tzinfo)
+            date = f"[white bold]{humanize.naturaltime(now - commit.date)}[/white bold] - "
+        else:
+            date = ""
+
         line = f"[bold {color}]{commit.id}[/bold {color}]"
         line += f"[bold red]{needs_evolve}{needs_upload}{conflict}[/bold red]{name_annotations} "
-        line += f"{url}: {commit.get_oneliner()}"
+        line += f"{url}: {date}{commit.get_oneliner()}"
+
         if full:
             for snapshot in commit.snapshots:
                 vertical = "│" if commit.children else " "
@@ -1356,7 +1388,14 @@ class GitGud:
     def _find_root(self, commit: GudCommit) -> GudCommit:
         if commit.parent_id is None:
             return commit
-        return self._find_root(self.get_commit(commit.parent_id))
+
+        try:
+            parent = self.get_commit(commit.parent_id)
+            return self._find_root(parent)
+        except ValueError:
+            # Error will be captured in one of the bad states. We consider a
+            # commit whose parent does not exist to be a root.
+            return commit
 
     def get_bad_states(self) -> List[BadGitGudState]:
         """Returns a list of inconstencies found in gitgud state. This should
@@ -1365,15 +1404,25 @@ class GitGud:
         bad_states = []
         roots: Set[str] = set()
 
-        if not self.is_dirty():
-            for commit_id in self.state.commits:
-                commit = self.get_commit(commit_id)
+        for commit_id in self.state.commits:
+            commit = self.get_commit(commit_id)
 
-                # Check 1: All commits must have a single common ancestors, check at the end
-                roots.add(self._find_root(commit).id)
+            logging.info("Checking commit %s with parent %s", commit.id, commit.parent_id)
 
-                # Check 2: Parent/child references must match
-                if commit.parent_id and commit.id not in self.get_commit(commit.parent_id).children:
+            if commit.parent_id:
+                if commit.parent_id not in self.state.commits:
+                    # Check 0: All parent references must exist
+                    bad_states.append(
+                        BadGitGudState(
+                            message=(
+                                f"Missing commit {commit.parent_id} referenced "
+                                f"as parent of {commit.id}"
+                            )
+                        )
+                    )
+                elif commit.id not in self.get_commit(commit.parent_id).children:
+                    logging.info("DEBUG commit %s exists in commit lists", commit.parent_id)
+                    # Check 1: Parent/child references must match
                     bad_states.append(
                         BadGitGudState(
                             message=(
@@ -1383,14 +1432,14 @@ class GitGud:
                         )
                     )
 
-                # Check 3: On a clean state, history and main branch are in equal state
-                if not commit.history_branch:
-                    continue
+            # Check 2: All commits must have a single common ancestors, check at the end
+            roots.add(self._find_root(commit).id)
 
+            if not self.is_dirty() and commit.history_branch:
                 diff = self.repo.git.diff(commit.id, commit.history_branch)
                 if diff:
-                    logging.warning("Found diff in %s history branch:\n%s", commit.id, diff)
                     bad_states.append(
+                        # Check 3: On a clean state, history and main branch are in equal state
                         BadGitGudState(
                             message=(
                                 f"{commit.id} not in sync with its "
