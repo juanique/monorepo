@@ -3,7 +3,7 @@ from enum import Enum
 from pathlib import Path
 import random
 import re
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, Dict, List, Optional, Callable, Set
 
 import os
 import logging
@@ -42,7 +42,7 @@ class GudPullRequest(BaseModel):
     merged: bool = False
 
 
-class BadGitGudState(Exception):
+class BadGitGudStateError(Exception):
     pass
 
 
@@ -60,6 +60,10 @@ class ConfigNotFoundError(Exception):
 
 class InvalidOperationForRemote(Exception):
     pass
+
+
+class BadGitGudState(BaseModel):
+    message: str
 
 
 class DirtyState(BaseModel):
@@ -1201,6 +1205,18 @@ class GitGud:
 
         return self.state.commits[id]
 
+    def get_roots(self) -> List[GudCommit]:
+        """Returns the list of commits that have no parents.
+
+        In normal state, there is a single root. This exists just for debug
+        purposes and allow the user to recover when things go wrong."""
+
+        roots_ids: Set[str] = set()
+        for commit_id in self.state.commits:
+            roots_ids.add(self._find_root(self.get_commit(commit_id)).id)
+
+        return [self.get_commit(commit_id) for commit_id in roots_ids]
+
     def print_status(self, full: bool = False) -> None:
         """Print the state of the local branches."""
         print("")
@@ -1235,10 +1251,12 @@ class GitGud:
                 print(f" [bold red]{symbol}[/bold red]: {explanation}")
             print("")
 
-        tree = self.get_tree(full=full)
-        print(tree)
-        if self.state.merge_conflict_state:
+        for root in self.get_roots():
+            tree = self.get_tree(commit=root, full=full)
+            print(tree)
             print("")
+
+        if self.state.merge_conflict_state:
             print("Files with merge conflict:")
 
             for f in self.state.merge_conflict_state.files:
@@ -1251,6 +1269,10 @@ class GitGud:
             print("To abort run:")
             print(" [bold]gg rebase --abort[/bold]")
         print("")
+
+        bad_states = self.get_bad_states()
+        for state in bad_states:
+            print(f"[red]!! {state.message}[/red]")
 
     def get_tree(self, commit: GudCommit = None, tree: Tree = None, full: bool = False) -> Tree:
         """Return a tree representation of the local gitgud state for printing."""
@@ -1331,21 +1353,64 @@ class GitGud:
 
         return state
 
-    def check_state(self) -> None:
-        """Perform various checks on the state of gg.
+    def _find_root(self, commit: GudCommit) -> GudCommit:
+        if commit.parent_id is None:
+            return commit
+        return self._find_root(self.get_commit(commit.parent_id))
 
-        Raises if any issues are found."""
+    def get_bad_states(self) -> List[BadGitGudState]:
+        """Returns a list of inconstencies found in gitgud state. This should
+        always return empty."""
+
+        bad_states = []
+        roots: Set[str] = set()
 
         if not self.is_dirty():
             for commit_id in self.state.commits:
-                logging.info("Checking commit %s", commit_id)
                 commit = self.get_commit(commit_id)
+
+                # Check 1: All commits must have a single common ancestors, check at the end
+                roots.add(self._find_root(commit).id)
+
+                # Check 2: Parent/child references must match
+                if commit.parent_id and commit.id not in self.get_commit(commit.parent_id).children:
+                    bad_states.append(
+                        BadGitGudState(
+                            message=(
+                                f"Parent/child mismatch: {commit.id} has parent "
+                                f"{commit.parent_id}, which does not have it as a child."
+                            )
+                        )
+                    )
+
+                # Check 3: On a clean state, history and main branch are in equal state
                 if not commit.history_branch:
                     continue
 
                 diff = self.repo.git.diff(commit.id, commit.history_branch)
                 if diff:
                     logging.warning("Found diff in %s history branch:\n%s", commit.id, diff)
-                    raise BadGitGudState(
-                        f"{commit.id} not in sync with its history branch {commit.history_branch}"
+                    bad_states.append(
+                        BadGitGudState(
+                            message=(
+                                f"{commit.id} not in sync with its "
+                                f"history branch {commit.history_branch}"
+                            )
+                        )
                     )
+
+        if len(roots) > 1:
+            bad_states.append(
+                BadGitGudState(message=f"Multiple roots found: {', '.join(sorted(roots))}")
+            )
+
+        return bad_states
+
+    def check_state(self) -> None:
+        """Perform various checks on the state of gg.
+
+        Raises if any issues are found."""
+
+        bad_states = self.get_bad_states()
+        if bad_states:
+            raise BadGitGudStateError(bad_states[0].message)
