@@ -1,5 +1,5 @@
 load("@pip_deps//:requirements.bzl", "requirement")
-load("//:bazel/python.bzl", "py_binary", "py_library", "py_test")
+load("//:bazel/python.bzl", "py_binary", "py_executable", "py_library", "py_test")
 load("@io_bazel_rules_docker//container:container.bzl", "container_push")
 load("@io_bazel_rules_docker//lang:image.bzl", "app_layer")
 
@@ -64,4 +64,9 @@ container_push(
     registry = "docker.io",
     repository = "juanzolotoochin/gg_cli",
     tag = "latest",
+)
+
+py_executable(
+    name = "gg_executable",
+    binary = ":gg_cli",
 )
