@@ -1045,6 +1045,42 @@ class TestGitGudWithRemoteNoSubmodules(TestGitGudWithRemote):
         )
         self.gg.print_status()
 
+    def test_rebase_conflict(self) -> None:
+        """Conflicts may happen during rebase and can be resolved."""
+
+        root = self.gg.root()
+        filename = self.make_test_filename()
+
+        append(filename, "commit1")
+        c1 = self.gg.commit("commit1")
+
+        self.gg.update(root.id)
+
+        append(filename, "commit2")
+        c2 = self.gg.commit("commit2")
+
+        self.gg.rebase(source_id=c2.id, dest_id=c1.id)
+
+        expected = (
+            "<<<<<<< HEAD\n"
+            "commit1\n"
+            "=======\n"
+            "commit2\n"
+            f">>>>>>> {c2.hash[0:7]} (commit2)\n"
+        )
+
+        self.assertEqual(expected, "".join(get_file_contents(filename)))
+
+        set_file_contents(filename, "commit1\ncommit2")
+        self.gg.rebase_continue()
+        self.gg.print_status()
+
+        self.assertEqual(self.gg.head().id, c2.id)
+        self.assertFileContents(filename, "commit1\ncommit2\n")
+
+        self.gg.update(c1.id)
+        self.assertFileContents(filename, "commit1\n")
+
     def test_rebase_to_new_master(self) -> None:
         """
         We start with:

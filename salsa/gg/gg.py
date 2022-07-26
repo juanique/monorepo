@@ -347,6 +347,7 @@ class GitGud:
         return os.path.join(CONFIGS_ROOT, filename)
 
     def save_state(self) -> None:
+        logging.info("Saving state.")
         os.makedirs(CONFIGS_ROOT, exist_ok=True)
         state_filename = GitGud.state_filename(self.state.repo_dir)
         with open(state_filename, "w", encoding="utf-8") as out_file:
@@ -1045,6 +1046,7 @@ class GitGud:
             raise Exception(f"Unknown error: {error.stdout}") from error
 
         self.merge_conflict_begin(current, incoming, files)
+        self.save_state()
 
     def rebase(self, source_id: str, dest_id: str) -> None:
         """Change the parent commit of the given source commit to be the
