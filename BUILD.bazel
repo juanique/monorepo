@@ -1,9 +1,15 @@
 load("@bazel_gazelle//:def.bzl", "gazelle")
 load("@rules_python//python:defs.bzl", "py_runtime", "py_runtime_pair")
+load("@rules_python//gazelle:def.bzl", "GAZELLE_PYTHON_RUNTIME_DEPS")
 
-# gazelle:prefix
 gazelle(
     name = "gazelle",
+)
+
+gazelle(
+    name = "gazelle_python",
+    data = GAZELLE_PYTHON_RUNTIME_DEPS,
+    gazelle = "@rules_python//gazelle:gazelle_python_binary",
 )
 
 py_runtime(
