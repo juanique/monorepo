@@ -350,7 +350,7 @@ class GitGud:
         os.makedirs(CONFIGS_ROOT, exist_ok=True)
         state_filename = GitGud.state_filename(self.state.repo_dir)
         with open(state_filename, "w", encoding="utf-8") as out_file:
-            out_file.write(self.state.json())
+            out_file.write(self.state.json(indent=4))
 
     @staticmethod
     def get_remote_commit(repo: Repo, remote_master: str) -> GudCommit:
