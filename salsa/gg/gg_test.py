@@ -823,6 +823,39 @@ class TestGitGudWithRemoteNoSubmodules(TestGitGudWithRemote):
         self.assertTrue(summary.commit_tree.children[1].id.startswith("master@"))
         self.assertEqual(summary.commit_tree.children[1].children[0].id, "2_added_local_conten")
 
+    def test_sync_merged_then_remote(self) -> None:
+        """Regression test for a bug that occured when there were multiple commits branching from
+        a master and the sync included a merged commit and another remote commit after."""
+
+        local_filename = self.make_test_filename(self.local_repo_path)
+        append(local_filename, "locally added content")
+        c1 = self.gg.commit("Added local content")
+
+        append(local_filename, "more locally added content")
+        self.gg.commit("Added more local content")
+
+        self.gg.update(self.gg.state.root)
+        local_filename2 = self.make_test_filename(self.local_repo_path)
+        append(local_filename2, "more locally added content")
+        self.gg.commit("more local content from root")
+
+        self.gg.upload(all_commits=True)
+        c1 = self.reload(c1)
+        assert c1.pull_request is not None
+        self.hosted_repo.merge_pull_request(c1.pull_request.id)
+
+        remote_filename = self.make_test_filename(self.remote_repo_path)
+        append(remote_filename, "more-contents-from-remote")
+        self.remote_repo.git.add("-A")
+        self.remote_repo.git.commit("-a", "-m", "Added even more remote content")
+
+        self.gg.print_status()
+        self.gg.sync(all=True)
+        self.gg.print_status()
+
+        # Verify that state is consistent
+        self.gg.check_state()
+
     def test_upstream_branch_prefix(self) -> None:
         local_filename = self.make_test_filename(self.local_repo_path)
         append(local_filename, "locally added content")
@@ -1226,7 +1259,9 @@ class TestGitGudLocalOnly(TestGitGud):
 
     @property
     def gg(self) -> GitGud:
-        return GitGud.for_working_dir(self.local_repo_path)
+        gg = GitGud.for_working_dir(self.local_repo_path)
+        gg.check_state()
+        return gg
 
     def reload(self, commit: GudCommit) -> GudCommit:
         return self.gg.get_commit(commit.id)
