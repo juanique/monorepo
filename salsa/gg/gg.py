@@ -1051,7 +1051,6 @@ class GitGud:
         """Change the parent commit of the given source commit to be the
         destination commit."""
 
-        logging.info("Rebase %s to %s", source_id, dest_id)
         source_commit = self.get_commit(source_id)
         dest_commit = self.get_commit(dest_id)
 
@@ -1065,11 +1064,14 @@ class GitGud:
                 )
 
             if source_commit.parent_id:
+                logging.info(
+                    "Removing %s from parent %s", source_commit.id, source_commit.parent_id
+                )
                 self.get_commit(source_commit.parent_id).children.remove(source_commit.id)
 
             dest_commit.children.append(source_commit.id)
-            source_commit.parent_id = dest_commit.parent_id
-            source_commit.parent_hash = dest_commit.parent_hash
+            source_commit.parent_id = dest_commit.id
+            source_commit.parent_hash = dest_commit.hash
             return
 
         assert source_commit.parent_id is not None
