@@ -501,6 +501,9 @@ class GitGud:
 
         previous_head_id = self.head().id
         commit = self.get_commit(commit_id)
+        if commit.uploaded:
+            logging.info("Nothing to do, already up to date.")
+            return
 
         assert commit.history_branch is not None
         self._checkout(commit.history_branch)
@@ -1054,6 +1057,10 @@ class GitGud:
 
         source_commit = self.get_commit(source_id)
         dest_commit = self.get_commit(dest_id)
+
+        if source_commit.parent_id == dest_commit.parent_id:
+            logging.info("Nothing to do, commit already at right parent.")
+            return
 
         if source_commit.remote:
             if not dest_commit.remote:
