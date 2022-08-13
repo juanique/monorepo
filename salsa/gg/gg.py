@@ -757,6 +757,7 @@ class GitGud:
 
         self._checkout(self.state.master_branch)
         self.repo.git.pull("--rebase", "origin", self.state.master_branch)
+        self.repo.git.submodule("update", "--init", "--recursive")
         pulled_commit = GitGud.get_remote_commit(self.repo, self.state.master_branch)
         if pulled_commit.id == newest_remote.id:
             logging.info("Nothing to do, already at latest remote HEAD")
@@ -1064,9 +1065,6 @@ class GitGud:
                 )
 
             if source_commit.parent_id:
-                logging.info(
-                    "Removing %s from parent %s", source_commit.id, source_commit.parent_id
-                )
                 self.get_commit(source_commit.parent_id).children.remove(source_commit.id)
 
             dest_commit.children.append(source_commit.id)
@@ -1439,8 +1437,6 @@ class GitGud:
         for commit_id in self.state.commits:
             commit = self.get_commit(commit_id)
 
-            logging.info("Checking commit %s with parent %s", commit.id, commit.parent_id)
-
             if commit.parent_id:
                 if commit.parent_id not in self.state.commits:
                     # Check 0: All parent references must exist
@@ -1453,7 +1449,6 @@ class GitGud:
                         )
                     )
                 elif commit.id not in self.get_commit(commit.parent_id).children:
-                    logging.info("DEBUG commit %s exists in commit lists", commit.parent_id)
                     # Check 1: Parent/child references must match
                     bad_states.append(
                         BadGitGudState(

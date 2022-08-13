@@ -328,6 +328,38 @@ class TestGitGudWithRemoteAndSubmodules(TestGitGudWithRemote):
 
     def test_sync_submodule_in_remote(self) -> None:
         """Can pull submodules that were added in remote."""
+
+        # Submodule added in remote
+        self.remote_repo.git.submodule("add", self.submodule_repo_path, "./a-submodule")
+        self.remote_repo.git.commit("-m", "Added submodule.")
+
+        self.gg.sync()
+
+        # Changes in submodule
+        append(self.submodule_filename, "more-contents-in-submodule")
+        self.submodule_repo.git.add("-A")
+        self.submodule_repo.git.commit("-a", "-m", "more contents in submodule")
+
+        # Master updates its submodule version
+        self.remote_repo.git.submodule("update", "--remote", "--merge")
+        self.remote_repo.git.commit("-a", "-m", "Updated submodule.")
+
+        # Sync local
+        self.gg.sync()
+        self.gg.print_status()
+
+        # Verify contents were propagated correctly.
+        submodule_local_filename = os.path.join(
+            self.local_repo_path, "a-submodule", os.path.basename(self.submodule_filename)
+        )
+        self.assertEqual(
+            ["contents-from-submodule\n", "more-contents-in-submodule\n"],
+            get_file_contents(submodule_local_filename),
+        )
+
+    def test_sync_submodule_in_remote_and_local_changes(self) -> None:
+        """Can pull submodules that were added in remote. And propagate changes to local commits."""
+
         # Submodule added in remote
         self.remote_repo.git.submodule("add", self.submodule_repo_path, "./a-submodule")
         self.remote_repo.git.commit("-m", "Added submodule.")
