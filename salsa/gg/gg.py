@@ -347,11 +347,10 @@ class GitGud:
         return os.path.join(CONFIGS_ROOT, filename)
 
     def save_state(self) -> None:
-        logging.info("Saving state.")
         os.makedirs(CONFIGS_ROOT, exist_ok=True)
         state_filename = GitGud.state_filename(self.state.repo_dir)
         with open(state_filename, "w", encoding="utf-8") as out_file:
-            out_file.write(self.state.json())
+            out_file.write(self.state.json(indent=4))
 
     @staticmethod
     def get_remote_commit(repo: Repo, remote_master: str) -> GudCommit:
@@ -1087,6 +1086,10 @@ class GitGud:
                 f"Rebased from {source_commit.parent_id} to {dest_commit.id}",
             )
             self.execute_pending_operations()
+
+            if self.state.merge_conflict_state:
+                return
+
             logging.info("Switching to update %s", source_id)
             self.update(source_id)
         except GitCommandError as e:
@@ -1139,6 +1142,9 @@ class GitGud:
 
         child.parent_hash = parent.hash
         child.parent_id = parent.id
+        if child.id not in parent.children:
+            parent.children.append(child.id)
+
         self.update(child.id)
         child.hash = self.repo.head.commit.hexsha
         self.head().needs_evolve = False
@@ -1170,6 +1176,10 @@ class GitGud:
         self.snapshot(commit_msg)
         self.save_state()
         self.execute_pending_operations()
+
+        if self.state.merge_conflict_state:
+            self.save_state()
+            return
 
         self.prune_commits()
         self.save_state()
