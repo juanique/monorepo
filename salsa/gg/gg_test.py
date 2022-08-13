@@ -459,6 +459,62 @@ class TestGitGudWithRemoteNoSubmodules(TestGitGudWithRemote):
             self.gg.amend()
         self.assertIn("Cannot amend remote commits", str(cm.exception))
 
+    def test_sync_conflict_evolve(self) -> None:
+        """Conflicts may appear while syncing from remote and they can be resolved, then evolved."""
+
+        append(self.remote_filename, "more-contents-from-remote")
+        self.remote_repo.git.add("-A")
+        self.remote_repo.git.commit("-a", "-m", "Added more remote content")
+
+        filename = self.make_test_filename(self.local_repo_path)
+        append(filename, "unrelated-content")
+        c1 = self.gg.commit("added unrelated content")
+
+        local_filename = os.path.join(self.local_repo_path, os.path.basename(self.remote_filename))
+        append(local_filename, "more-contents-from-local")
+        c2 = self.gg.commit("added content that conflicts with remote")
+
+        self.gg.print_status()
+        self.gg.sync()
+        self.gg.print_status()
+
+        expected = (
+            "contents-from-remote\n"
+            "<<<<<<< HEAD\n"
+            "more-contents-from-remote\n"
+            "=======\n"
+            "more-contents-from-local\n"
+            f">>>>>>> {c2.hash[0:7]} (added content that conflicts with remote)\n"
+        )
+
+        self.assertEqual(expected, "".join(get_file_contents(local_filename)))
+
+        # Resolve the conflict
+        set_file_contents(
+            local_filename,
+            "contents-from-remote\nmore-contents-from-remote\nmore-contents-from-local\n",
+        )
+
+        self.gg.rebase_continue()
+        self.gg.print_status()
+        c1 = self.gg.get_commit(c1.id)
+        assert c1.parent_id is not None
+        assert self.gg.get_commit(c1.parent_id).description == "Added more remote content"
+
+        # Expected commit tree
+        expected_summary = {
+            "commit_tree": {
+                "description": "Added more remote content",
+                "children": [
+                    {
+                        "description": "added unrelated content",
+                        "children": [{"description": "added content that conflicts with remote"}],
+                    },
+                ],
+            }
+        }
+        self.assertSubset(expected_summary, self.gg.get_summary().dict())
+
     def test_sync_conflict(self) -> None:
         """Conflicts may appear while syncing from remote and they can be resolved, then evolved."""
 
