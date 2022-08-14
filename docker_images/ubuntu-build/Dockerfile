@@ -65,4 +65,4 @@ RUN apt-get install -y openjdk-11-jdk --fix-missing
 
 WORKDIR /workdir
 
-ENV USE_BAZEL_VERSION=5.1.1
+ENV USE_BAZEL_VERSION=5.2.0
