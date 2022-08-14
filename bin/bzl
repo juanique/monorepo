@@ -50,6 +50,8 @@ then
     echo "Build container already running."
 else
     echo "Starting build container..."
+    docker network inspect bazel-dev-network >/dev/null 2>&1 || docker network create --driver bridge bazel-dev-network
+
     docker run -d \
     --name=bazel-build \
     -e HOME=$HOME \
@@ -57,7 +59,7 @@ else
     -u $(id -u ${USER_ID}):$(id -g ${USER_d}) \
     --privileged \
     -p 127.0.0.1:5678:5678 \
-    --network=br0 \
+    --network=bazel-dev-network \
     -v $DOCKER_SOCK:$DOCKER_SOCK \
     -v $REPO_ROOT:$REPO_ROOT \
     -v $CACHE_DIR:/$CACHE_DIR \
