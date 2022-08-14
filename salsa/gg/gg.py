@@ -1058,7 +1058,7 @@ class GitGud:
         source_commit = self.get_commit(source_id)
         dest_commit = self.get_commit(dest_id)
 
-        if source_commit.parent_id == dest_commit.parent_id:
+        if source_commit.parent_id == dest_commit.id:
             logging.info("Nothing to do, commit already at right parent.")
             return
 
