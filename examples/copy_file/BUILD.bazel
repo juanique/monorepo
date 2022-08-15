@@ -1,0 +1,6 @@
+load("//:bazel/toolkit.bzl", "copy_file")
+
+copy_file(
+    name = "copy_thing",
+    input = "//salsa/gg:gg_executable"
+)
