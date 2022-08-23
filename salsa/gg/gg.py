@@ -188,6 +188,7 @@ class GitGudConfig(GitGudModel):
     remote_branch_prefix: str = ""
     randomize_branches: bool = True
     verbose: bool = False
+    check_commits_on_status: bool = False
 
 
 class RepoState(GitGudModel):
@@ -1332,9 +1333,10 @@ class GitGud:
             print(" [bold]gg rebase --abort[/bold]")
             print("")
 
-        bad_states = self.get_bad_states()
-        for state in bad_states:
-            print(f"[red]!! {state.message}[/red]")
+        if full or self.get_config().check_commits_on_status:
+            bad_states = self.get_bad_states()
+            for state in bad_states:
+                print(f"[red]!! {state.message}[/red]")
 
     def get_tree(self, commit: GudCommit = None, tree: Tree = None, full: bool = False) -> Tree:
         """Return a tree representation of the local gitgud state for printing."""
