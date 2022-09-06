@@ -6,3 +6,6 @@ bazel-monorepo
 bazel-out
 bazel-testlogs
 bazel-cache
+
+bazel/workspace/node_modules
+examples/react/node_modules

@@ -239,3 +239,151 @@ rust_register_toolchains(
     edition = "2021",
     version = "1.61.0",
 )
+
+##################
+# rules_js setup #
+##################
+
+http_archive(
+    name = "aspect_rules_js",
+    sha256 = "db9f446752fe4100320cf8487e8fd476b9af0adf6b99b601bcfd70b289bb0598",
+    strip_prefix = "rules_js-1.1.2",
+    url = "https://github.com/aspect-build/rules_js/archive/refs/tags/v1.1.2.tar.gz",
+)
+
+load("@aspect_rules_js//js:repositories.bzl", "rules_js_dependencies")
+
+rules_js_dependencies()
+
+load("@rules_nodejs//nodejs:repositories.bzl", "DEFAULT_NODE_VERSION", "nodejs_register_toolchains")
+
+nodejs_register_toolchains(
+    name = "nodejs",
+    node_version = DEFAULT_NODE_VERSION,
+)
+
+load("@aspect_rules_js//npm:npm_import.bzl", "npm_translate_lock")
+
+npm_translate_lock(
+    name = "npm",
+    bins = {
+        # derived from "bin" attribute in node_modules/typescript/package.json
+        "typescript": {
+            "tsc": "./bin/tsc",
+            "tsserver": "./bin/tsserver",
+        },
+    },
+    pnpm_lock = "//bazel/workspace:pnpm-lock.yaml",
+    verify_node_modules_ignored = "//:.bazelignore",
+)
+
+load("@npm//:repositories.bzl", "npm_repositories")
+
+npm_repositories()
+
+##################
+# rules_ts setup #
+##################
+
+http_archive(
+    name = "aspect_rules_ts",
+    sha256 = "b491ff46f8d9167986033552bdd7b39106fac5a1cbc4d5ea44582d3d71557519",
+    strip_prefix = "rules_ts-1.0.0-rc2",
+    url = "https://github.com/aspect-build/rules_ts/archive/refs/tags/v1.0.0-rc2.tar.gz",
+)
+
+# Fetches the rules_ts dependencies.
+# If you want to have a different version of some dependency,
+# you should fetch it *before* calling this.
+# Alternatively, you can skip calling this function, so long as you've
+# already fetched all the dependencies.
+load("@aspect_rules_ts//ts:repositories.bzl", "rules_ts_dependencies", ts_latest_version = "LATEST_VERSION")
+
+rules_ts_dependencies(ts_version = ts_latest_version)
+
+#######################
+# rules_esbuild setup #
+#######################
+
+http_archive(
+    name = "aspect_rules_esbuild",
+    sha256 = "1e365451341ffb2490193292dfd9953f2ca009586c2381cb4dc08d01e48866b7",
+    strip_prefix = "rules_esbuild-0.12.0",
+    url = "https://github.com/aspect-build/rules_esbuild/archive/refs/tags/v0.12.0.tar.gz",
+)
+
+# Fetches the rules_esbuild dependencies.
+# If you want to have a different version of some dependency,
+# you should fetch it *before* calling this.
+# Alternatively, you can skip calling this function, so long as you've
+# already fetched all the dependencies.
+load("@aspect_rules_esbuild//esbuild:dependencies.bzl", "rules_esbuild_dependencies")
+
+rules_esbuild_dependencies()
+
+# Register a toolchain containing esbuild npm package and native bindings
+load("@aspect_rules_esbuild//esbuild:repositories.bzl", "esbuild_register_toolchains", esbuild_latest_version = "LATEST_VERSION")
+
+esbuild_register_toolchains(
+    name = "esbuild",
+    esbuild_version = esbuild_latest_version,
+)
+
+###################
+# rules_swc setup #
+###################
+
+http_archive(
+    name = "aspect_rules_swc",
+    sha256 = "55f84b06e8ea5ddce07077439c2197911acdf42c8416e464a7e77b9cf42f7184",
+    strip_prefix = "rules_swc-0.17.0",
+    url = "https://github.com/aspect-build/rules_swc/archive/refs/tags/v0.17.0.tar.gz",
+)
+
+# Fetches the rules_swc dependencies.
+# If you want to have a different version of some dependency,
+# you should fetch it *before* calling this.
+# Alternatively, you can skip calling this function, so long as you've
+# already fetched all the dependencies.
+load("@aspect_rules_swc//swc:dependencies.bzl", "rules_swc_dependencies")
+
+rules_swc_dependencies()
+
+# Fetches a pre-built Rust-node binding from
+# https://github.com/swc-project/swc/releases.
+# If you'd rather compile it from source, you can use rules_rust, fetch the project,
+# then register the toolchain yourself. (Note, this is not yet documented)
+load("@aspect_rules_swc//swc:repositories.bzl", "LATEST_VERSION", "swc_register_toolchains")
+
+swc_register_toolchains(
+    name = "swc",
+    swc_version = LATEST_VERSION,
+)
+
+####################
+# rules_jest setup #
+####################
+
+http_archive(
+    name = "aspect_rules_jest",
+    sha256 = "bb3226707f9872185865a6381eb3a19311ca7b46e8ed475aad50975906a6cb6a",
+    strip_prefix = "rules_jest-0.10.0",
+    url = "https://github.com/aspect-build/rules_jest/archive/refs/tags/v0.10.0.tar.gz",
+)
+
+# Fetches the rules_jest dependencies.
+# If you want to have a different version of some dependency,
+# you should fetch it *before* calling this.
+# Alternatively, you can skip calling this function, so long as you've
+# already fetched all the dependencies.
+load("@aspect_rules_jest//jest:dependencies.bzl", "rules_jest_dependencies")
+
+rules_jest_dependencies()
+
+# Fetches the npm packages for jest-cli.
+load("@aspect_rules_jest//jest:repositories.bzl", "jest_repositories", jest_latest_version = "LATEST_VERSION")
+
+jest_repositories(
+    name = "jest",
+    jest_version = jest_latest_version,
+)
