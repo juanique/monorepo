@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "es2015"
+    ],
+    "esModuleInterop": true,
+    "jsx": "react-jsx"
+  },
+}
