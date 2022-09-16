@@ -55,7 +55,7 @@ else
     docker run -d \
     --name=bazel-build \
     -e HOME=$HOME \
-    -e USER=$USER_ID \
+    -e USER=$USER \
     -u $(id -u ${USER_ID}):$(id -g ${USER_d}) \
     --privileged \
     -p 127.0.0.1:5678:5678 \
@@ -68,7 +68,7 @@ else
 fi
 
 if [ "$START_SHELL" = "true" ]; then
-    docker exec -it -e HOME=$HOME -e USER=$USER_ID -u=$USER_ID  -w $CURRENT_DIR bazel-build /bin/bash
+    docker exec -it -e HOME=$HOME -e USER=$USER -u=$USER_ID  -w $CURRENT_DIR bazel-build /bin/bash
 else
-    docker exec -it -e HOME=$HOME -e USER=$USER_ID -u=$USER_ID  -w $CURRENT_DIR bazel-build bazelisk $@
+    docker exec -it -e HOME=$HOME -e USER=$USER -u=$USER_ID  -w $CURRENT_DIR bazel-build bazelisk $@
 fi
