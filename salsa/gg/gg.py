@@ -1422,19 +1422,13 @@ class GitGud:
 
         return state
 
-    def _find_root(self, commit: GudCommit, visited: Optional[List] = None) -> GudCommit:
-        visited = visited or []
-
+    def _find_root(self, commit: GudCommit) -> GudCommit:
         if commit.parent_id is None:
             return commit
 
         try:
             parent = self.get_commit(commit.parent_id)
-            if parent.id in visited:
-                raise BadGitGudStateError("Loop found in %s", visited)
-            else:
-                visited.append(parent.id)
-            return self._find_root(parent, visited)
+            return self._find_root(parent)
         except ValueError:
             # Error will be captured in one of the bad states. We consider a
             # commit whose parent does not exist to be a root.
