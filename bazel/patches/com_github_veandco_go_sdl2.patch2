@@ -1,0 +1,21 @@
+diff --git a/home/juanique/.cache/bazel/_bazel_juanique/96bc1a38557b6269f9e349570d3b6790/external/com_github_veandco_go_sdl2/sdl/BUILD.bazel b/home/juanique/tmp/BUILD.bazel
+index e90acd7..696fcba 100644
+--- a/home/juanique/.cache/bazel/_bazel_juanique/96bc1a38557b6269f9e349570d3b6790/external/com_github_veandco_go_sdl2/sdl/BUILD.bazel
++++ b/home/juanique/tmp/BUILD.bazel
+@@ -60,9 +60,14 @@ go_library(
+         "video.go",
+         "vulkan.go",
+     ],
+-    copts = ["-D_REENTRANT", "-I/usr/include/SDL2", "-lSDL2"],
+     cgo = True,
+-    clinkopts = ["-lSDL2main", "-lSDL2"],
++    cdeps = ["@sdl2//:sdl2"],
++    clinkopts = select({
++        "@io_bazel_rules_go//go/platform:windows": [
++            "-lSDL2",
++        ],
++        "//conditions:default": [],
++    }),
+     importpath = "github.com/veandco/go-sdl2/sdl",
+     visibility = ["//visibility:public"],
+ )

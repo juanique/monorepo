@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "spinner_lib",
+    srcs = ["main.go"],
+    importpath = "examples/go/spinner",
+    visibility = ["//visibility:private"],
+    deps = ["@com_github_briandowns_spinner//:spinner"],
+)
+
+go_binary(
+    name = "spinner",
+    embed = [":spinner_lib"],
+    visibility = ["//visibility:public"],
+)

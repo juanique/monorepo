@@ -6,6 +6,12 @@ gazelle(
     name = "gazelle",
 )
 
+gazelle(
+    name = "gazelle-update-repos",
+    args = ["-from_file=bazel/workspace/go.mod"],
+    command = "update-repos",
+)
+
 py_runtime(
     name = "python-3.10.0",
     interpreter_path = "/usr/bin/python3.10",
