@@ -1,0 +1,20 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "taco_lib",
+    srcs = ["main.go"],
+    cdeps = ["@sdl2"],
+    cgo = True,
+    importpath = "taco",
+    visibility = ["//visibility:private"],
+    deps = [
+        "@com_github_briandowns_spinner//:spinner",
+        "@com_github_veandco_go_sdl2//sdl:go_default_library",
+    ],
+)
+
+go_binary(
+    name = "taco",
+    embed = [":taco_lib"],
+    visibility = ["//visibility:public"],
+)

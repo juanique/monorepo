@@ -1,0 +1,12 @@
+diff --git a/sdl/BUILD.bazel b/sdl/BUILD.bazel
+index 5f091a3..696fcba 100644
+--- a/sdl/BUILD.bazel
++++ b/sdl/BUILD.bazel
+@@ -61,6 +61,7 @@ go_library(
+         "vulkan.go",
+     ],
+     cgo = True,
++    cdeps = ["@sdl2//:sdl2"],
+     clinkopts = select({
+         "@io_bazel_rules_go//go/platform:windows": [
+             "-lSDL2",
