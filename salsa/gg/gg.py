@@ -23,7 +23,11 @@ import humanize
 
 from salsa.os.environ_ctx import modified_environ
 
-CONFIGS_ROOT = os.path.expanduser("~/.config/gg")
+class InternalError(Exception):
+    pass
+
+class GlobalConfig(BaseModel):
+    configs_root: str = os.path.expanduser("~/.config/gg")
 
 
 class Progress(RemoteProgress):
@@ -311,10 +315,17 @@ class GitGud:
     repo: Repo
     state: RepoState
 
-    def __init__(self, repo: Repo, state: RepoState, hosted_repo: Optional[HostedRepo] = None):
+    def __init__(
+            self,
+            repo: Repo,
+            state: RepoState,
+            hosted_repo: Optional[HostedRepo] = None,
+            global_config: Optional[GlobalConfig] = None
+    ):
         self.repo = repo
         self.state = state
         self.hosted_repo = hosted_repo
+        self.global_config = global_config or GlobalConfig()
 
         if self.state.config.verbose:
             logging.basicConfig(level=logging.INFO)
@@ -341,15 +352,16 @@ class GitGud:
         self.save_state()
 
     @staticmethod
-    def state_filename(directory: str) -> str:
+    def state_filename(directory: str, global_config: Optional[GlobalConfig] = None) -> str:
+        global_config = global_config or GlobalConfig()
         (_, dirname) = os.path.split(directory)
         hash = hashlib.sha1(bytes(directory, encoding="utf8")).hexdigest()
         filename = f"{dirname}_{hash}"
-        return os.path.join(CONFIGS_ROOT, filename)
+        return os.path.join(global_config.configs_root, filename)
 
     def save_state(self) -> None:
-        os.makedirs(CONFIGS_ROOT, exist_ok=True)
-        state_filename = GitGud.state_filename(self.state.repo_dir)
+        os.makedirs(self.global_config.configs_root, exist_ok=True)
+        state_filename = GitGud.state_filename(self.state.repo_dir, self.global_config)
         with open(state_filename, "w", encoding="utf-8") as out_file:
             out_file.write(self.state.json(indent=4))
 
@@ -386,6 +398,7 @@ class GitGud:
 
         if repo_metadata.github:
             if "GITHUB_GG_TOKEN" not in os.environ:
+                print(os.environ)
                 raise ValueError("Missing env variable GITHUB_GG_TOKEN")
 
             github_client = Github(os.environ["GITHUB_GG_TOKEN"])
@@ -395,9 +408,13 @@ class GitGud:
 
     @staticmethod
     def clone(
-        remote_repo_path: str, local_repo_path: str, hosted_repo: Optional[HostedRepo] = None
+        remote_repo_path: str,
+        local_repo_path: str,
+        hosted_repo: Optional[HostedRepo] = None,
+        global_config: Optional[GlobalConfig] = None,
     ) -> "GitGud":
         """Clone an external repo into the given path."""
+        global_config = global_config or GlobalConfig()
         repo_metadata = None
         if "github" in remote_repo_path:
             github_repo = GitHubRepoMetadata.from_github_url(remote_repo_path)
@@ -413,18 +430,23 @@ class GitGud:
             head=root.id,
             commits={root.id: root},
             repo_metadata=repo_metadata,
+            global_config=global_config,
         )
-        gg = GitGud(repo, state, hosted_repo)
+        gg = GitGud(repo, state, hosted_repo, global_config=global_config)
         gg.save_state()
         return gg
 
     @staticmethod
-    def load_state_for_directory(directory: str) -> RepoState:
+    def load_state_for_directory(
+        directory: str,
+        global_config: Optional[GlobalConfig] = None
+    ) -> RepoState:
         """Load GitGud repo state from the given directory."""
+        global_config = global_config or GlobalConfig()
         if not os.path.exists(directory):
             raise ConfigNotFoundError(f"No GitGud state for {directory}.")
 
-        state_file = GitGud.state_filename(directory)
+        state_file = GitGud.state_filename(directory, global_config)
         if not os.path.exists(state_file):
             raise ConfigNotFoundError(f"No GitGud state for {directory}.")
 
@@ -433,7 +455,7 @@ class GitGud:
             return RepoState(**obj)
 
     @staticmethod
-    def for_clean_repo(repo: Repo) -> "GitGud":
+    def for_clean_repo(repo: Repo, global_config: Optional[GlobalConfig] = None) -> "GitGud":
         commit_msg = "Initial commit"
         commit = repo.index.commit(commit_msg)
         branch_name = repo.active_branch.name
@@ -441,19 +463,19 @@ class GitGud:
         state = RepoState(
             repo_dir=repo.working_tree_dir, root=root.id, head=root.id, commits={root.id: root}
         )
-        return GitGud(repo, state)
+        return GitGud(repo, state, global_config=global_config)
 
     @staticmethod
-    def for_working_dir(working_dir: str) -> "GitGud":
+    def for_working_dir(working_dir: str, global_config: Optional[GlobalConfig] = None) -> "GitGud":
         """Resume a GitGud instance for a previously cloned directory."""
 
         if not os.path.exists(working_dir):
             raise ConfigNotFoundError(f"No GitGud state for {working_dir}.")
 
         repo = Repo(find_repo_root(Path(working_dir)))
-        repo_state = GitGud.load_state_for_directory(repo.working_tree_dir)
+        repo_state = GitGud.load_state_for_directory(repo.working_tree_dir, global_config)
         hosted_repo = GitGud.get_hosted_repo(repo_state.repo_metadata)
-        return GitGud(repo, repo_state, hosted_repo)
+        return GitGud(repo, repo_state, hosted_repo, global_config=global_config)
 
     def _checkout(self, branch_name: str) -> None:
         self.repo.git.checkout(branch_name, "--recurse-submodules")
@@ -1047,7 +1069,7 @@ class GitGud:
                 files.append(l.split(" ")[-1].replace("'", ""))
 
         if not files:
-            raise Exception(f"Unknown error: {error.stdout}") from error
+            raise InternalError(f"Unknown error: {error.stdout}") from error
 
         self.merge_conflict_begin(current, incoming, files)
         self.save_state()

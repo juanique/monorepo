@@ -239,3 +239,32 @@ rust_register_toolchains(
     edition = "2021",
     version = "1.61.0",
 )
+
+##############
+# Aspect GCC toolchain
+
+http_archive(
+	name = "aspect_gcc_toolchain",
+	strip_prefix = "gcc-toolchain-0.4.2",
+    sha256 = "3341394b1376fb96a87ac3ca01c582f7f18e7dc5e16e8cf40880a31dd7ac0e1e",
+	type = "tar.gz",
+	urls = [
+		"https://github.com/aspect-build/gcc-toolchain/archive/refs/tags/0.4.2.tar.gz",
+	],
+)
+
+load("@aspect_gcc_toolchain//toolchain:repositories.bzl", "gcc_toolchain_dependencies")
+
+gcc_toolchain_dependencies()
+
+load("@aspect_gcc_toolchain//toolchain:defs.bzl", "ARCHS", "gcc_register_toolchain")
+
+gcc_register_toolchain(
+	name = "gcc_toolchain_aarch64",
+	target_arch = ARCHS.aarch64,
+)
+
+gcc_register_toolchain(
+	name = "gcc_toolchain_x86",
+	target_arch = ARCHS.x86_64,
+)

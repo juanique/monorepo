@@ -21,11 +21,13 @@ from salsa.gg.gg import (
     HostedRepo,
     InvalidOperationForRemote,
     GudPullRequest,
+    GlobalConfig,
     get_branch_name,
 )
 from salsa.util.subsets import subset_diff
 
 REPO_DIR_NAME = "repo_dir"
+global_config = GlobalConfig(configs_root="/tmp/gg_testing/configs")
 
 
 def append(filename: str, contents: str) -> None:
@@ -132,6 +134,7 @@ class TestGitGud(unittest.TestCase):
         self.remote_repo = Repo.init(self.remote_repo_path)
         self.remote_repo.git.config("user.email", "test@example.com")
         self.remote_repo.git.config("user.name", "test_user")
+        self.remote_repo.git.set_persistent_git_options(c='protocol.file.allow=always')
         self.maxDiff = None
 
     def make_test_filename(self, root: str = None) -> str:
@@ -174,7 +177,12 @@ class TestGitGudWithRemote(TestGitGud):
         self.remote_repo.git.commit("-a", "-m", "Initial commit")
 
         self.hosted_repo = FakeHostedRepo(self.remote_repo)
-        gg = GitGud.clone(self.remote_repo_path, self.local_repo_path, self.hosted_repo)
+        gg = GitGud.clone(
+            self.remote_repo_path,
+            self.local_repo_path,
+            self.hosted_repo,
+            global_config=global_config,
+        )
         config = GitGudConfig(randomize_branches=False)
         gg.set_config(config)
         gg.repo.git.config("user.email", "test@example.com")
@@ -190,8 +198,9 @@ class TestGitGudWithRemote(TestGitGud):
 
     @property
     def gg(self) -> GitGud:
-        gg = GitGud.for_working_dir(self.local_repo_path)
+        gg = GitGud.for_working_dir(self.local_repo_path, global_config=global_config)
         gg.hosted_repo = self.hosted_repo
+        gg.repo.git.set_persistent_git_options(c='protocol.file.allow=always')
         return gg
 
     def reload(self, commit: GudCommit) -> GudCommit:
@@ -469,17 +478,17 @@ class TestGitGudWithRemoteNoSubmodules(TestGitGudWithRemote):
     def test_for_working_directory_repo_subdir(self) -> None:
         directory = os.path.join(self.local_repo_path, "subdir")
         make_directory(directory)
-        gg = GitGud.for_working_dir(directory)
+        gg = GitGud.for_working_dir(directory, global_config=global_config)
         state = gg.get_summary()
         self.assertEqual(state.commit_tree.description, "Initial commit")
 
     def test_for_working_directory_not_git_directory(self) -> None:
         with self.assertRaises(ConfigNotFoundError) as cm:
-            GitGud.for_working_dir("/tmp/i-dont-exist")
+            GitGud.for_working_dir("/tmp/i-dont-exist", global_config=global_config)
         self.assertEqual("No GitGud state for /tmp/i-dont-exist.", str(cm.exception))
 
     def test_for_working_directory(self) -> None:
-        gg = GitGud.for_working_dir(self.local_repo_path)
+        gg = GitGud.for_working_dir(self.local_repo_path, global_config=global_config)
         state = gg.get_summary()
         self.assertEqual(state.commit_tree.description, "Initial commit")
 
@@ -1285,13 +1294,13 @@ class TestGitGudLocalOnly(TestGitGud):
         self.repo.git.config("user.email", "test@example.com")
         self.repo.git.config("user.name", "test_user")
 
-        gg = GitGud.for_clean_repo(self.repo)
+        gg = GitGud.for_clean_repo(self.repo, global_config=global_config)
         config = GitGudConfig(randomize_branches=False)
         gg.set_config(config)
 
     @property
     def gg(self) -> GitGud:
-        gg = GitGud.for_working_dir(self.local_repo_path)
+        gg = GitGud.for_working_dir(self.local_repo_path, global_config=global_config)
         gg.check_state()
         return gg
 

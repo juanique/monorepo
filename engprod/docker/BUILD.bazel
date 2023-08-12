@@ -18,7 +18,7 @@ py_library(
         ":postgres_image.tar",
     ],
     deps = [
-        requirement("psycopg2"),
+        requirement("psycopg2-binary"),
         "//salsa/docker/testing:docker_service",
     ],
 )
