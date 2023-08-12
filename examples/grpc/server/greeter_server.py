@@ -8,12 +8,12 @@ import sys
 
 
 class Greeter(helloworld_pb2_grpc.GreeterServicer):
-    def SayHello(self, req, context):
+    def SayHello(self, req: helloworld_pb2.HelloRequest, context: grpc.ServicerContext) -> helloworld_pb2.HelloReply:
         logging.info("Got request %s", req)
         return helloworld_pb2.HelloReply(message="Hello %s!" % req.name)
 
 
-def serve():
+def serve() -> None:
     port = 50051
     logging.info(f"Server starting at port {port}")
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
