@@ -186,9 +186,11 @@ _py_image_repos()
 # mypy integration
 http_archive(
     name = "mypy_integration",
-    sha256 = "fc42524d636b138a1940780deb680cdbf318cda84b14b4b3e3ba3b715e2480cf",
-    strip_prefix = "bazel-mypy-integration-0.3.0",
-    url = "https://github.com/thundergolfer/bazel-mypy-integration/archive/refs/tags/0.3.0.tar.gz",
+    sha256 = "cf94c102fbaccb587eea8de5cf1cb7f55c5c74396a2468932c3a2a4df989aa1d",
+    strip_prefix = "bazel-mypy-integration-0.4.0",
+    url = "https://github.com/thundergolfer/bazel-mypy-integration/archive/refs/tags/0.4.0.tar.gz",
+    patch_args = ["-p1"],
+    patches = ["//bazel/patches:mypy_integration.patch"],
 )
 
 load(
@@ -269,3 +271,26 @@ gcc_register_toolchain(
 	name = "gcc_toolchain_x86",
 	target_arch = ARCHS.x86_64,
 )
+
+###############################
+## Buildifier
+http_archive(
+    name = "buildifier_prebuilt",
+    sha256 = "41d57362ee8f351b10d9313239bb4cbc6152fdc04aa86e63007a1b843ad33f4d",
+    strip_prefix = "buildifier-prebuilt-6.1.2.1",
+    urls = [
+        "http://github.com/keith/buildifier-prebuilt/archive/6.1.2.1.tar.gz",
+    ],
+)
+
+load("@buildifier_prebuilt//:deps.bzl", "buildifier_prebuilt_deps")
+
+buildifier_prebuilt_deps()
+
+load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
+
+bazel_skylib_workspace()
+
+load("@buildifier_prebuilt//:defs.bzl", "buildifier_prebuilt_register_toolchains")
+
+buildifier_prebuilt_register_toolchains()

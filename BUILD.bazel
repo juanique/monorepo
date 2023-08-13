@@ -1,6 +1,7 @@
 load("@bazel_gazelle//:def.bzl", "gazelle")
 load("@rules_python//python:defs.bzl", "py_runtime", "py_runtime_pair")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
+load("@buildifier_prebuilt//:rules.bzl", "buildifier")
 
 
 # gazelle:prefix
@@ -24,4 +25,14 @@ platform(
         "OSFamily": "Linux",
         "container-image": "docker://docker.io/juanzolotoochin/ubuntu-build:latest",
     },
+)
+
+
+buildifier(
+    name = "buildifier.check",
+    exclude_patterns = [
+        "./.git/*",
+    ],
+    lint_mode = "warn",
+    mode = "diff",
 )

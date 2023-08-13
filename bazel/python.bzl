@@ -1,5 +1,4 @@
 load("@pip_deps//:requirements.bzl", "requirement")
-load("@mypy_integration//:mypy.bzl", "mypy_test")
 
 FIRECRACKER_EXEC_PROPERTIES = {
     # Tell BuildBuddy to run this test using a Firecracker microVM.
@@ -33,14 +32,12 @@ def py_binary(name, **kwargs):
             fail("Missing main attribute for multi srcs target.")
 
     native.py_binary(name = name, **kwargs)
-    mypy_test(name = name + "_mypy", deps = [":" + name])
 
     # par_binary(name = name + "_par", imports = [""], **kwargs)
     pylint_test(name = name + "_pylint", **kwargs)
 
 def py_library(name, **kwargs):
     native.py_library(name = name, **kwargs)
-    mypy_test(name = name + "_mypy", deps = [":" + name])
     pylint_test(name = name + "_pylint", **kwargs)
 
 def py_test(name, firecracker = False, **kwargs):
@@ -55,7 +52,6 @@ def py_test(name, firecracker = False, **kwargs):
             name = name,
             **kwargs,
         )
-    mypy_test(name = name + "_mypy", deps = [":" + name])
     pylint_test(name = name + "_pylint", **kwargs)
     py_debug(name = name + "_debug", og_name = name, **kwargs)
 
@@ -99,7 +95,7 @@ def py_debug(name, og_name, srcs, deps = [], args = [], data = [], **kwargs):
 
 def _py_debug_wrapper_impl(ctx):
     path = str(ctx.label)
-    full_module = path.replace("//", "").replace("/", ".").replace(":", ".").replace("_debug_wrapper", "")
+    full_module = path.replace("//", "").replace("/", ".").replace(":", ".").replace("_debug_wrapper", "").replace("@", "")
 
     ctx.actions.expand_template(
         template = ctx.file._template,
