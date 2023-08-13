@@ -1362,7 +1362,7 @@ class GitGud:
 
     def get_tree(self, commit: GudCommit = None, tree: Tree = None, full: bool = False) -> Tree:
         """Return a tree representation of the local gitgud state for printing."""
-        
+
         commit = commit or self.root()
         color = "green" if commit == self.head() else "magenta"
 

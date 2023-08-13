@@ -15,7 +15,7 @@ class PostgresService(DockerService):
             port=5432,
         )
 
-    def connect(self) -> psycopg2.connection:
+    def connect(self) -> psycopg2.extensions.connection:
         """Connect with retries."""
 
         attempts = 0

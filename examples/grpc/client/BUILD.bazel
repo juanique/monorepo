@@ -1,4 +1,5 @@
 load("@pip_deps//:requirements.bzl", "requirement")
+load("//:bazel/python.bzl", "py_test")
 
 py_library(
     name = "greeter_client",
@@ -27,4 +28,5 @@ py_test(
         requirement("docker"),
         ":greeter_client",
     ],
+    firecracker = True,
 )
