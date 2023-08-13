@@ -19,7 +19,7 @@ index c25a0c6..79d21b8 100644
 +    visibility = ["//visibility:public"],
 +)
 diff --git a/mypy.bzl b/mypy.bzl
-index 5517e99..0a8f37c 100644
+index 5517e99..389394b 100644
 --- a/mypy.bzl
 +++ b/mypy.bzl
 @@ -2,6 +2,7 @@
@@ -114,7 +114,7 @@ index 5517e99..0a8f37c 100644
 +        out_path = out.path if out else "/dev/null"
 +        ctx.actions.write(
 +            output = exe,
-+            content = "echo 'No files to check' > %s" % out_path)
++            content = "#!/usr/bin/env bash\necho 'No files to check' > %s" % out_path)
  
      if is_aspect:
          return [

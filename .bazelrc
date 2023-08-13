@@ -9,7 +9,7 @@ build --experimental_profile_include_target_label
 build --experimental_profile_include_primary_output 
 
 ## Remote caching
-build --remote_download_toplevel # Helps remove network bottleneck if caching is enabled
+build --remote_download_outputs=minimal
 build --remote_cache=grpcs://remote.buildbuddy.io
 build --remote_header=x-buildbuddy-api-key=WIbWV8AieSxh4RlxUiRk
 build --experimental_remote_cache_compression
