@@ -15,7 +15,9 @@ build --remote_header=x-buildbuddy-api-key=WIbWV8AieSxh4RlxUiRk
 build --experimental_remote_cache_compression
 build --experimental_remote_build_event_upload=minimal 
 build --nolegacy_important_outputs
-# build --bes_upload_mode=fully_async
+build --noremote_upload_local_results
+build --bes_upload_mode=fully_async
+
 # We'll enable this someday and rely on MODULE.bazel
 # build --experimental_enable_bzlmod
 
