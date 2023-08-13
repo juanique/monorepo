@@ -2,17 +2,53 @@ workspace(name = "monorepo")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
+#########################
+## rules_ python
+
 http_archive(
     name = "rules_python",
-    sha256 = "954aa89b491be4a083304a2cb838019c8b8c3720a7abb9c4cb81ac7a24230cea",
-    urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_python/releases/download/0.4.0/rules_python-0.4.0.tar.gz",
-        "https://github.com/bazelbuild/rules_python/releases/download/0.4.0/rules_python-0.4.0.tar.gz",
-    ],
+    sha256 = "a644da969b6824cc87f8fe7b18101a8a6c57da5db39caa6566ec6109f37d2141",
+    strip_prefix = "rules_python-0.20.0",
+    url = "https://github.com/bazelbuild/rules_python/releases/download/0.20.0/rules_python-0.20.0.tar.gz",
 )
 
+load("@rules_python//python:repositories.bzl", "py_repositories", "python_register_toolchains")
+
+py_repositories()
+
 # pip dependencies
-load("@rules_python//python:pip.bzl", "pip_install")
+load("@rules_python//python:pip.bzl", "pip_parse")
+
+python_register_toolchains(
+    name = "python3_9",
+    # Available versions are listed in @rules_python//python:versions.bzl.
+    # We recommend using the same version your team is already standardized on.
+    python_version = "3.9",
+)
+
+load("@python3_9//:defs.bzl", "interpreter")
+
+pip_parse(
+    name = "pip_deps",
+    python_interpreter_target = interpreter,
+    requirements_lock = "//:requirements_lock.txt",
+)
+
+# mypy:
+pip_parse(
+    name = "mypy_integration_pip_deps",
+    python_interpreter_target = interpreter,
+    requirements_lock = "//bazel/workspace:mypy_version.txt",
+)
+load("@mypy_integration_pip_deps//:requirements.bzl", install_mypy_deps = "install_deps")
+install_mypy_deps()
+
+# Load the starlark macro which will define your dependencies.
+load("@pip_deps//:requirements.bzl", "install_deps")
+
+# Call it to define repos for your requirements.
+install_deps()
+
 
 # Golang support
 http_archive(
@@ -38,9 +74,16 @@ load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
 
 go_rules_dependencies()
 
-go_register_toolchains(go_version = "1.17")
+go_register_toolchains(go_version = "1.18")
 
 gazelle_dependencies()
+
+go_repository(
+    name = "org_golang_google_genproto_googleapis_rpc",
+    importpath = "google.golang.org/genproto/googleapis/rpc",
+    sum = "h1:eSaPbMR4T7WfH9FvABk36NBMacoTUKdWCvV0dx+KfOg=",
+    version = "v0.0.0-20230803162519-f966b187b2e5",
+)
 
 go_repository(
     name = "org_golang_google_grpc",
@@ -64,57 +107,40 @@ go_repository(
 )
 
 http_archive(
-    name = "rules_proto",
-    sha256 = "e017528fd1c91c5a33f15493e3a398181a9e821a804eb7ff5acdd1d2d6c2b18d",
-    strip_prefix = "rules_proto-4.0.0-3.20.0",
-    urls = [
-        "https://github.com/bazelbuild/rules_proto/archive/refs/tags/4.0.0-3.20.0.tar.gz",
-    ],
+    name = "com_google_protobuf",
+    strip_prefix = "protobuf-24.0",
+    urls = ["https://github.com/protocolbuffers/protobuf/archive/refs/tags/v24.0.zip"],
+    sha256 = "974409b1d6eb2b6508fd26bea2f9b327a4480f122a6fdf38e485321549308121",
 )
 
 http_archive(
-    name = "com_google_protobuf",
-    sha256 = "8b28fdd45bab62d15db232ec404248901842e5340299a57765e48abe8a80d930",
-    strip_prefix = "protobuf-3.20.1",
+    name = "rules_proto",
+    sha256 = "dc3fb206a2cb3441b485eb1e423165b231235a1ea9b031b4433cf7bc1fa460dd",
+    strip_prefix = "rules_proto-5.3.0-21.7",
     urls = [
-        "https://mirror.bazel.build/github.com/protocolbuffers/protobuf/archive/v3.20.1.tar.gz",
-        "https://github.com/protocolbuffers/protobuf/archive/v3.20.1.tar.gz",
+        "https://github.com/bazelbuild/rules_proto/archive/refs/tags/5.3.0-21.7.tar.gz",
     ],
 )
-
-load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
-
-protobuf_deps()
-
 load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
-
 rules_proto_dependencies()
-
 rules_proto_toolchains()
 
-pip_install(
-    name = "pip_deps",
-    python_interpreter = "python3.10",
-    requirements = "//bazel/workspace:requirements.txt",
-)
-
 # grpc
-_grpc_version = "1.45.0"
-
-_grpc_sha256 = "b47345c06716cec93605edb4480ecf8b9e08587b9418a144192b1d1b5b387150"
-
 http_archive(
     name = "com_github_grpc_grpc",
-    sha256 = _grpc_sha256,
-    strip_prefix = "grpc-%s" % _grpc_version,
-    urls = ["https://github.com/grpc/grpc/archive/v%s.zip" % _grpc_version],
+    sha256 = "8393767af531b2d0549a4c26cf8ba1f665b16c16fb6c9238a7755e45444881dd",
+    patch_args = ["-p1"],
+    patches = ["//bazel/patches:grpc.patch"],
+    strip_prefix = "grpc-1.57.0",
+    urls = ["https://github.com/grpc/grpc/archive/v1.57.0.tar.gz"],
 )
 
 load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
 
-grpc_deps()
+grpc_deps(
+    python_headers = "@python3_9//:python_headers",
+)
 
-# Not mentioned in official docs... mentioned here https://github.com/grpc/grpc/issues/20511
 load("@com_github_grpc_grpc//bazel:grpc_extra_deps.bzl", "grpc_extra_deps")
 
 grpc_extra_deps()
@@ -122,9 +148,8 @@ grpc_extra_deps()
 # Docker
 http_archive(
     name = "io_bazel_rules_docker",
-    sha256 = "1f4e59843b61981a96835dc4ac377ad4da9f8c334ebe5e0bb3f58f80c09735f4",
-    strip_prefix = "rules_docker-0.19.0",
-    urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.19.0/rules_docker-v0.19.0.tar.gz"],
+    sha256 = "b1e80761a8a8243d03ebca8845e9cc1ba6c82ce7c5179ce2b295cd36f7e394bf",
+    urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.25.0/rules_docker-v0.25.0.tar.gz"],
 )
 
 load(
@@ -180,12 +205,6 @@ mypy_configuration("//bazel/workspace:mypy.ini")
 
 load("@mypy_integration//repositories:deps.bzl", mypy_integration_deps = "deps")
 
-mypy_integration_deps(
-    mypy_requirements_file = "//bazel/workspace:mypy_version.txt",
-)
-
-register_toolchains("//:my_py_toolchain")
-
 container_pull(
     name = "ubuntu",
     registry = "docker.io",
@@ -221,24 +240,6 @@ buildbuddy_deps()
 load("@io_buildbuddy_buildbuddy_toolchain//:rules.bzl", "buildbuddy")
 
 buildbuddy(name = "buildbuddy_toolchain")
-
-http_archive(
-    name = "rules_rust",
-    sha256 = "872b04538ca20dad94791c348623f079ba93daf274c1d57ae6bfe0930ec77f0d",
-    urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_rust/releases/download/0.6.0/rules_rust-v0.6.0.tar.gz",
-        "https://github.com/bazelbuild/rules_rust/releases/download/0.6.0/rules_rust-v0.6.0.tar.gz",
-    ],
-)
-
-load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains")
-
-rules_rust_dependencies()
-
-rust_register_toolchains(
-    edition = "2021",
-    version = "1.61.0",
-)
 
 ##############
 # Aspect GCC toolchain

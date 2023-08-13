@@ -818,7 +818,7 @@ class GitGud:
         self.repo.git.add("-A")
 
     def commit(
-        self, commit_msg: str, all: bool = True, use_existing_history_branch: str | None = None
+        self, commit_msg: str, all: bool = True, use_existing_history_branch: Optional[str] = None
     ) -> GudCommit:
         """Create a new commit that includes all local changes."""
 

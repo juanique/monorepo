@@ -8,7 +8,7 @@ import docker
 
 from bazel_tools.tools.python.runfiles import runfiles
 
-DEFAULT_NETWORK = os.environ.get("TESTING_DOCKER_SERVICES_NETWORK") or "bazel-dev-network"
+DEFAULT_NETWORK = os.environ.get("TESTING_DOCKER_SERVICES_NETWORK") or "host"
 
 logger = logging.getLogger(__name__)
 

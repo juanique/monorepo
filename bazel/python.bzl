@@ -1,6 +1,17 @@
 load("@pip_deps//:requirements.bzl", "requirement")
 load("@mypy_integration//:mypy.bzl", "mypy_test")
 
+FIRECRACKER_EXEC_PROPERTIES = {
+    # Tell BuildBuddy to run this test using a Firecracker microVM.
+    "test.workload-isolation-type": "firecracker",
+    # Tell BuildBuddy to ensure that the Docker daemon is started
+    # inside the microVM before the test starts, so that we don't
+    # have to worry about starting it ourselves.
+    "test.init-dockerd": "true",
+    # Tell BuildBuddy to preserve the microVM state across test runs.
+    "test.recycle-runner": "true",
+}
+
 def py_binary(name, **kwargs):
     """ Wrapper for py_binary rule that adds additional functionality.
 
@@ -32,8 +43,18 @@ def py_library(name, **kwargs):
     mypy_test(name = name + "_mypy", deps = [":" + name])
     pylint_test(name = name + "_pylint", **kwargs)
 
-def py_test(name, **kwargs):
-    native.py_test(name = name, **kwargs)
+def py_test(name, firecracker = False, **kwargs):
+    if firecracker:
+        native.py_test(
+            name = name,
+            exec_properties = FIRECRACKER_EXEC_PROPERTIES,
+            **kwargs,
+        )
+    else:
+        native.py_test(
+            name = name,
+            **kwargs,
+        )
     mypy_test(name = name + "_mypy", deps = [":" + name])
     pylint_test(name = name + "_pylint", **kwargs)
     py_debug(name = name + "_debug", og_name = name, **kwargs)

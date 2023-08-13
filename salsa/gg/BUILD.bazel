@@ -10,12 +10,12 @@ py_library(
     ],
     deps = [
         "//salsa/os:environ_ctx",
-        requirement("rich"),
-        requirement("GitPython"),
-        requirement("pydantic"),
-        requirement("PyGithub"),
-        requirement("Unidecode"),
-        requirement("humanize"),
+        "@pip_deps_rich//:pkg",
+        "@pip_deps_gitpython//:pkg",
+        "@pip_deps_pydantic//:pkg",
+        "@pip_deps_pygithub//:pkg",
+        "@pip_deps_unidecode//:pkg",
+        "@pip_deps_humanize//:pkg",
     ],
 )
 
@@ -25,7 +25,7 @@ py_test(
     deps = [
         ":gg",
         "//salsa/util:subsets",
-        requirement("GitPython"),
+        "@pip_deps_gitpython//:pkg",
     ],
 )
 
@@ -36,9 +36,9 @@ py_binary(
     ],
     deps = [
         ":gg",
-        requirement("GitPython"),
-        requirement("rich"),
-        requirement("click"),
+        "@pip_deps_gitpython//:pkg",
+        "@pip_deps_rich//:pkg",
+        "@pip_deps_click//:pkg",
     ],
 )
 
@@ -47,7 +47,7 @@ py_binary(
     srcs = ["gg_example.py"],
     deps = [
         ":gg",
-        requirement("GitPython"),
+        "@pip_deps_gitpython//:pkg",
     ],
 )
 
