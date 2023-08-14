@@ -1,5 +1,6 @@
 actions:
   - name: "Test all targets"
+    user: "buildbuddy"
     triggers:
       push:
         branches:
