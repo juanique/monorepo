@@ -1,5 +1,4 @@
-name: Continuous Integration
-
+name: Fucking github wont let me delete this workflow
 on:
   push:
     branches:
