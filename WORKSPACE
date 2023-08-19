@@ -220,13 +220,15 @@ container_pull(
     name = "ubuntu",
     registry = "docker.io",
     repository = "juanzolotoochin/ubuntu-base",
-    tag = "latest",
+    digest = "sha256:eea2c875bb135db3a5d5c959a4161eecce3f6a988cf054125d7f4e836e93e020"
 )
+
 
 container_pull(
     name = "build",
     registry = "docker.io",
     repository = "juanzolotoochin/ubuntu-build",
+    digest = "sha256:2a669a950ee7941bf0e308372aa9ab1a38dc5491f75e3d6acf7b5e941a3bc32f",
     tag = "latest",
 )
 
@@ -235,6 +237,7 @@ container_pull(
     registry = "docker.io",
     repository = "postgres",
     tag = "11.3-alpine",
+    digest = "sha256:cd116dbc6ac97b18f8e1ad07aa94399117863731ec99f06ae1270937a98119bf",
 )
 
 http_archive(
