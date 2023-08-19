@@ -7,27 +7,10 @@ on:
   pull_request:
     branches:
     - master
-
 jobs:
   ci-job:
     runs-on: ubuntu-latest
-    container:
-      image: juanzolotoochin/ubuntu-ci:latest
-
     steps:
-    - name: Debug Info
-      run: |
-        echo "USER=$USER"
-        echo "HOME=$HOME"
-        echo "Git Version=`git --version`"
-    - name: Checkout
-      run: |
-        git config user.name mrGitHub
-        git config user.email soemthing@mail.com
-        git config github.token ${{ secrets.GITHUB_TOKEN }}
-        git pull origin ${{ github.head_ref}}
-      working-directory: /workdir/monorepo
-    - name: Build and Test
-      working-directory: /workdir/monorepo
+    - name: "Fuck you github"
       run: >
         echo "Github sucks"
