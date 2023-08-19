@@ -1064,9 +1064,9 @@ class GitGud:
         logging.info("Merge conflict")
         lines = error.stdout.split("\n")
         files = []
-        for l in lines:
-            if "CONFLICT" in l:
-                files.append(l.split(" ")[-1].replace("'", ""))
+        for line in lines:
+            if "CONFLICT" in line:
+                files.append(line.split(" ")[-1].replace("'", ""))
 
         if not files:
             raise InternalError(f"Unknown error: {error.stdout}") from error

@@ -3,10 +3,20 @@ load("@rules_python//python:defs.bzl", "py_runtime", "py_runtime_pair")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
 load("@buildifier_prebuilt//:rules.bzl", "buildifier")
 
+exports_files(["pyproject.toml"])
 
 # gazelle:prefix
 gazelle(
     name = "gazelle",
+)
+
+gazelle(
+    name = "gazelle-update-repos",
+    args = [
+        "--from_file=go.mod",
+        "--to_macro=deps.bzl%go_repositories",
+    ],
+    command = "update-repos",
 )
 
 compile_pip_requirements(
@@ -26,7 +36,6 @@ platform(
         "container-image": "docker://docker.io/juanzolotoochin/ubuntu-build:latest",
     },
 )
-
 
 buildifier(
     name = "buildifier.check",

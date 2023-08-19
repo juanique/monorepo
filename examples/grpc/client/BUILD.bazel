@@ -23,10 +23,10 @@ py_test(
     data = [
         "//examples/grpc/server:greeter_server_docker.tar",
     ],
+    firecracker = True,
     deps = [
         "//salsa/docker/testing:docker_service",
         requirement("docker"),
         ":greeter_client",
     ],
-    firecracker = True,
 )

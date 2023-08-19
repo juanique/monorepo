@@ -16,7 +16,6 @@ build --experimental_remote_cache_compression
 build --experimental_remote_build_event_upload=minimal 
 build --nolegacy_important_outputs
 build --noremote_upload_local_results
-build --bes_upload_mode=fully_async
 
 # We'll enable this someday and rely on MODULE.bazel
 # build --experimental_enable_bzlmod
@@ -30,7 +29,7 @@ build:remote --remote_timeout=1800
 build:remote --jobs=50
 
 # mypy not working yet
-build --aspects @mypy_integration//:mypy.bzl%mypy_aspect
+# build --aspects @mypy_integration//:mypy.bzl%mypy_aspect
 build --output_groups=+mypy
 build --@mypy_integration//:mypy_config=//bazel/workspace:mypy.ini
 build --@mypy_integration//:exclude_contains="_pb2"
@@ -42,3 +41,9 @@ build --incompatible_enable_cc_toolchain_resolution
 build --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
 build --cxxopt='-std=c++14'
 build --host_cxxopt=-std=c++14
+
+
+# fully local build
+build:full_local --bes_backend=""
+build:full_local --bes_results_url=""
+build:full_local --remote_cache=""

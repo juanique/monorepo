@@ -27,9 +27,9 @@ py_library(
 py_test(
     name = "postgres_image_test",
     srcs = ["postgres_image_test.py"],
+    firecracker = True,
     deps = [
         ":postgres_service",
         requirement("docker"),
     ],
-    firecracker = True,
 )

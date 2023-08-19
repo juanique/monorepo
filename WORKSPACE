@@ -40,7 +40,9 @@ pip_parse(
     python_interpreter_target = interpreter,
     requirements_lock = "//bazel/workspace:mypy_version.txt",
 )
+
 load("@mypy_integration_pip_deps//:requirements.bzl", install_mypy_deps = "install_deps")
+
 install_mypy_deps()
 
 # Load the starlark macro which will define your dependencies.
@@ -49,23 +51,22 @@ load("@pip_deps//:requirements.bzl", "install_deps")
 # Call it to define repos for your requirements.
 install_deps()
 
-
 # Golang support
 http_archive(
     name = "io_bazel_rules_go",
-    sha256 = "8e968b5fcea1d2d64071872b12737bbb5514524ee5f0a4f54f5920266c261acb",
+    sha256 = "6b65cb7917b4d1709f9410ffe00ecf3e160edf674b78c54a894471320862184f",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.28.0/rules_go-v0.28.0.zip",
-        "https://github.com/bazelbuild/rules_go/releases/download/v0.28.0/rules_go-v0.28.0.zip",
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.39.0/rules_go-v0.39.0.zip",
+        "https://github.com/bazelbuild/rules_go/releases/download/v0.39.0/rules_go-v0.39.0.zip",
     ],
 )
 
 http_archive(
     name = "bazel_gazelle",
-    sha256 = "62ca106be173579c0a167deb23358fdfe71ffa1e4cfdddf5582af26520f1c66f",
+    sha256 = "727f3e4edd96ea20c29e8c2ca9e8d2af724d8c7778e7923a854b2c80952bc405",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.23.0/bazel-gazelle-v0.23.0.tar.gz",
-        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.23.0/bazel-gazelle-v0.23.0.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.30.0/bazel-gazelle-v0.30.0.tar.gz",
+        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.30.0/bazel-gazelle-v0.30.0.tar.gz",
     ],
 )
 
@@ -74,7 +75,7 @@ load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
 
 go_rules_dependencies()
 
-go_register_toolchains(go_version = "1.18")
+go_register_toolchains(go_version = "1.20.2")
 
 gazelle_dependencies()
 
@@ -89,28 +90,29 @@ go_repository(
     name = "org_golang_google_grpc",
     build_file_proto_mode = "disable_global",
     importpath = "google.golang.org/grpc",
-    tag = "v1.33.2",
+    sum = "h1:fPVVDxY9w++VjTZsYvXWqEf9Rqar/e+9zYfxKK+W+YU=",
+    version = "v1.50.0",
 )
 
 go_repository(
     name = "org_golang_x_net",
     importpath = "golang.org/x/net",
-    sum = "h1:oWX7TPOiFAMXLq8o0ikBYfCJVlRHBcsciT5bXOrH628=",
-    version = "v0.0.0-20190311183353-d8887717615a",
+    sum = "h1:4nGaVu0QrbjT/AK2PRLuQfQuh6DJve+pELhqTdAj3x0=",
+    version = "v0.0.0-20210405180319-a5a99cb37ef4",
 )
 
 go_repository(
     name = "org_golang_x_text",
     importpath = "golang.org/x/text",
-    sum = "h1:g61tztE5qeGQ89tm6NTjjM9VPIm088od1l6aSorWRWg=",
-    version = "v0.3.0",
+    sum = "h1:cokOdA+Jmi5PJGXLlLllQSgYigAEfHXJAERHVMaCc2k=",
+    version = "v0.3.3",
 )
 
 http_archive(
     name = "com_google_protobuf",
+    sha256 = "974409b1d6eb2b6508fd26bea2f9b327a4480f122a6fdf38e485321549308121",
     strip_prefix = "protobuf-24.0",
     urls = ["https://github.com/protocolbuffers/protobuf/archive/refs/tags/v24.0.zip"],
-    sha256 = "974409b1d6eb2b6508fd26bea2f9b327a4480f122a6fdf38e485321549308121",
 )
 
 http_archive(
@@ -121,16 +123,23 @@ http_archive(
         "https://github.com/bazelbuild/rules_proto/archive/refs/tags/5.3.0-21.7.tar.gz",
     ],
 )
+
 load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
+load("//:deps.bzl", "go_repositories")
+
+# gazelle:repository_macro deps.bzl%go_repositories
+go_repositories()
+
 rules_proto_dependencies()
+
 rules_proto_toolchains()
 
 # grpc
 http_archive(
     name = "com_github_grpc_grpc",
-    sha256 = "8393767af531b2d0549a4c26cf8ba1f665b16c16fb6c9238a7755e45444881dd",
     patch_args = ["-p1"],
     patches = ["//bazel/patches:grpc.patch"],
+    sha256 = "8393767af531b2d0549a4c26cf8ba1f665b16c16fb6c9238a7755e45444881dd",
     strip_prefix = "grpc-1.57.0",
     urls = ["https://github.com/grpc/grpc/archive/v1.57.0.tar.gz"],
 )
@@ -186,11 +195,11 @@ _py_image_repos()
 # mypy integration
 http_archive(
     name = "mypy_integration",
+    patch_args = ["-p1"],
+    patches = ["//bazel/patches:mypy_integration.patch"],
     sha256 = "cf94c102fbaccb587eea8de5cf1cb7f55c5c74396a2468932c3a2a4df989aa1d",
     strip_prefix = "bazel-mypy-integration-0.4.0",
     url = "https://github.com/thundergolfer/bazel-mypy-integration/archive/refs/tags/0.4.0.tar.gz",
-    patch_args = ["-p1"],
-    patches = ["//bazel/patches:mypy_integration.patch"],
 )
 
 load(
@@ -247,13 +256,13 @@ buildbuddy(name = "buildbuddy_toolchain")
 # Aspect GCC toolchain
 
 http_archive(
-	name = "aspect_gcc_toolchain",
-	strip_prefix = "gcc-toolchain-0.4.2",
+    name = "aspect_gcc_toolchain",
     sha256 = "3341394b1376fb96a87ac3ca01c582f7f18e7dc5e16e8cf40880a31dd7ac0e1e",
-	type = "tar.gz",
-	urls = [
-		"https://github.com/aspect-build/gcc-toolchain/archive/refs/tags/0.4.2.tar.gz",
-	],
+    strip_prefix = "gcc-toolchain-0.4.2",
+    type = "tar.gz",
+    urls = [
+        "https://github.com/aspect-build/gcc-toolchain/archive/refs/tags/0.4.2.tar.gz",
+    ],
 )
 
 load("@aspect_gcc_toolchain//toolchain:repositories.bzl", "gcc_toolchain_dependencies")
@@ -263,13 +272,13 @@ gcc_toolchain_dependencies()
 load("@aspect_gcc_toolchain//toolchain:defs.bzl", "ARCHS", "gcc_register_toolchain")
 
 gcc_register_toolchain(
-	name = "gcc_toolchain_aarch64",
-	target_arch = ARCHS.aarch64,
+    name = "gcc_toolchain_aarch64",
+    target_arch = ARCHS.aarch64,
 )
 
 gcc_register_toolchain(
-	name = "gcc_toolchain_x86",
-	target_arch = ARCHS.x86_64,
+    name = "gcc_toolchain_x86",
+    target_arch = ARCHS.x86_64,
 )
 
 ###############################
@@ -294,3 +303,22 @@ bazel_skylib_workspace()
 load("@buildifier_prebuilt//:defs.bzl", "buildifier_prebuilt_register_toolchains")
 
 buildifier_prebuilt_register_toolchains()
+
+###################
+## ruff
+http_archive(
+    name = "ruff",
+    build_file_content = """
+load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
+
+package(default_visibility = ["//visibility:public"])
+
+native_binary(
+    name = "ruff-bin",
+    src = "ruff",
+    out = "ruff",
+)
+    """,
+    sha256 = "bb8219885d858979270790d52932f53444006f36b2736d453ae590b833f00476",
+    urls = ["https://github.com/astral-sh/ruff/releases/download/v0.0.285/ruff-x86_64-unknown-linux-gnu.tar.gz"],
+)
