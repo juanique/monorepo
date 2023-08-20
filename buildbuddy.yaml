@@ -1,5 +1,6 @@
 actions:
   - name: "Test all targets"
+    user: "buildbuddy"
     triggers:
       push:
         branches:
@@ -8,4 +9,4 @@ actions:
         branches:
           - "master"
     bazel_commands:
-      - "test --config=remote //... --build_metadata=ROLE=CI"
+      - "test --config=remote //..."

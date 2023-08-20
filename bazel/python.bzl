@@ -1,7 +1,17 @@
 load("@pip_deps//:requirements.bzl", "requirement")
-load("@mypy_integration//:mypy.bzl", "mypy_test")
 
-def py_binary(name, **kwargs):
+FIRECRACKER_EXEC_PROPERTIES = {
+    # Tell BuildBuddy to run this test using a Firecracker microVM.
+    "test.workload-isolation-type": "firecracker",
+    # Tell BuildBuddy to ensure that the Docker daemon is started
+    # inside the microVM before the test starts, so that we don't
+    # have to worry about starting it ourselves.
+    "test.init-dockerd": "true",
+    # Tell BuildBuddy to preserve the microVM state across test runs.
+    "test.recycle-runner": "true",
+}
+
+def py_binary(name, srcs, **kwargs):
     """ Wrapper for py_binary rule that adds additional functionality.
 
     Two additional targets are added, one for .par target and one for mypy check
@@ -12,31 +22,37 @@ def py_binary(name, **kwargs):
      **kwargs: All other target args.
     """
 
-    if "srcs" not in kwargs:
-        fail("Missing srcs.")
-
     if "main" not in kwargs:
-        if len(kwargs.get("srcs")) == 1:
-            kwargs["main"] = kwargs["srcs"][0]
+        if len(srcs) == 1:
+            kwargs["main"] = srcs[0]
         else:
             fail("Missing main attribute for multi srcs target.")
 
-    native.py_binary(name = name, **kwargs)
-    mypy_test(name = name + "_mypy", deps = [":" + name])
+    native.py_binary(name = name, srcs=srcs, **kwargs)
 
-    # par_binary(name = name + "_par", imports = [""], **kwargs)
-    pylint_test(name = name + "_pylint", **kwargs)
+    py_ruff_test(name = name + "_pylint", srcs=srcs)
 
-def py_library(name, **kwargs):
-    native.py_library(name = name, **kwargs)
-    mypy_test(name = name + "_mypy", deps = [":" + name])
-    pylint_test(name = name + "_pylint", **kwargs)
+def py_library(name, srcs, **kwargs):
+    print(srcs)
+    native.py_library(name = name, srcs=srcs, **kwargs)
+    py_ruff_test(name = name + "_pylint", srcs=srcs)
 
-def py_test(name, **kwargs):
-    native.py_test(name = name, **kwargs)
-    mypy_test(name = name + "_mypy", deps = [":" + name])
-    pylint_test(name = name + "_pylint", **kwargs)
-    py_debug(name = name + "_debug", og_name = name, **kwargs)
+def py_test(name, srcs, firecracker = False, **kwargs):
+    if firecracker:
+        native.py_test(
+            name = name,
+            exec_properties = FIRECRACKER_EXEC_PROPERTIES,
+            srcs=srcs, 
+            **kwargs,
+        )
+    else:
+        native.py_test(
+            name = name,
+            srcs=srcs, 
+            **kwargs,
+        )
+    py_ruff_test(name = name + "_pylint", srcs=srcs)
+    py_debug(name = name + "_debug", srcs=srcs, og_name = name, **kwargs)
 
 def pylint_test(name, srcs, deps = [], args = [], data = [], **kwargs):
     kwargs["main"] = "pylint_test_wrapper.py"
@@ -78,7 +94,7 @@ def py_debug(name, og_name, srcs, deps = [], args = [], data = [], **kwargs):
 
 def _py_debug_wrapper_impl(ctx):
     path = str(ctx.label)
-    full_module = path.replace("//", "").replace("/", ".").replace(":", ".").replace("_debug_wrapper", "")
+    full_module = path.replace("//", "").replace("/", ".").replace(":", ".").replace("_debug_wrapper", "").replace("@", "")
 
     ctx.actions.expand_template(
         template = ctx.file._template,
@@ -145,4 +161,39 @@ _py_executable_wrapper = rule(
     attrs = {
         "binary": attr.label(allow_single_file = True, mandatory = True),
     },
+)
+
+def _py_ruff_test_impl(ctx):
+    file_list = " ".join([file.short_path for file in ctx.files.srcs])
+    srcs_hash = hash(file_list)
+    script = "{runner} {file_list}".format(runner = ctx.executable._ruff_runner.short_path, file_list = file_list)
+    script_file = ctx.actions.declare_file("ruff_check_" + str(srcs_hash) + ".sh")
+    ctx.actions.write(output = script_file, content = script)
+
+    runfiles = ctx.runfiles(files = ctx.files.srcs)
+    runfiles = runfiles.merge(ctx.attr._ruff_runner[DefaultInfo].default_runfiles)
+    runfiles = runfiles.merge(ctx.attr._config_file[DefaultInfo].default_runfiles)
+    return DefaultInfo(files=depset([script_file]), executable=script_file, runfiles=runfiles)
+
+py_ruff_test = rule(
+    implementation = _py_ruff_test_impl,
+    attrs = {
+        "srcs": attr.label_list(
+            allow_files = True,
+            mandatory = True,
+            doc = "*.py files to check with ruff"
+        ),
+        "_ruff_runner": attr.label(
+            default = "//bazel/workspace/tools/ruff",
+            allow_single_file = True,
+            executable = True,
+            cfg = "exec",
+        ),
+        "_config_file": attr.label(
+            default = "//:pyproject.toml",
+            allow_single_file = True,
+        )
+    },
+    doc = "Wrapper for running ruff checks on python files.",
+    test = True,
 )

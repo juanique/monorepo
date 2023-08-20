@@ -15,10 +15,11 @@ class PostgresService(DockerService):
             port=5432,
         )
 
-    def connect(self):
+    def connect(self) -> psycopg2.extensions.connection:
         """Connect with retries."""
 
         attempts = 0
+        last_error = Exception("Unknown error")
         while attempts < 30:
             try:
                 return psycopg2.connect(
@@ -30,8 +31,9 @@ class PostgresService(DockerService):
                 )
             except psycopg2.OperationalError as error:
                 time.sleep(1)
+                last_error = error
 
-        raise error
+        raise last_error
 
     def wait_until_ready(self) -> None:
         """When we can establish a connection, the service is ready."""

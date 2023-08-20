@@ -1,4 +1,5 @@
 load("@pip_deps//:requirements.bzl", "requirement")
+load("//:bazel/python.bzl", "py_test")
 load("@io_bazel_rules_docker//container:container.bzl", "container_image")
 
 container_image(
@@ -18,7 +19,7 @@ py_library(
         ":postgres_image.tar",
     ],
     deps = [
-        requirement("psycopg2"),
+        requirement("psycopg2-binary"),
         "//salsa/docker/testing:docker_service",
     ],
 )
@@ -26,6 +27,7 @@ py_library(
 py_test(
     name = "postgres_image_test",
     srcs = ["postgres_image_test.py"],
+    firecracker = True,
     deps = [
         ":postgres_service",
         requirement("docker"),
