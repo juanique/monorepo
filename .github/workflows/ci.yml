@@ -1,0 +1,15 @@
+name: Fucking github wont let me delete this workflow
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+jobs:
+  ci-job:
+    runs-on: ubuntu-latest
+    steps:
+    - name: "Fuck you github"
+      run: >
+        echo "Github sucks"
