@@ -16,6 +16,6 @@ go_binary(
 go_library(
     name = "go_lib",
     srcs = ["helloworld.go"],
-    importpath = "examples/go",
+    importpath = "github.com/juanique/monorepo/examples/go",
     visibility = ["//visibility:private"],
 )
