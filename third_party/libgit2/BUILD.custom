@@ -28,7 +28,7 @@ cc_library(
     ],
     deps = [
         ":headers",
-        "@monorepo//external_patches/libgit2/pcre:config",
+        "@monorepo//third_party/libgit2/pcre:config",
     ],
 )
 
@@ -95,7 +95,7 @@ cc_library(
         ":http_parser",
         ":zlib",
         ":pcre",
-        "@monorepo//external_patches/libgit2:features",
+        "@monorepo//third_party/libgit2:features",
     ],
 )
 

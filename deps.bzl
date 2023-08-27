@@ -29,7 +29,7 @@ def go_repositories():
         name = "com_github_libgit2_git2go_v34",
         importpath = "github.com/libgit2/git2go/v34",
         sum = "h1:UKoUaKLmiCRbOCD3PtUi2hD6hESSXzME/9OUZrGcgu8=",
-        patches = ["//external_patches:com_github_libgit2_git2go_v34/com_github_libgit2_git2go_v34.patch"],
+        patches = ["//third_party:com_github_libgit2_git2go_v34/com_github_libgit2_git2go_v34.patch"],
         patch_args = ["-p1"],
         version = "v34.0.0",
     )
