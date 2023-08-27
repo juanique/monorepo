@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	git "github.com/libgit2/git2go/v31"
+	git "github.com/libgit2/git2go/v27"
 )
 
 func main() {
@@ -15,10 +15,7 @@ func main() {
 	}
 
 	// Get the status options
-	opts, err := git.DefaultStatusOptions()
-	if err != nil {
-		log.Fatalf("Could not get default status options: %s", err)
-	}
+	opts := git.StatusOptions{}
 
 	// Fetch the status list
 	statusList, err := repo.StatusList(&opts)

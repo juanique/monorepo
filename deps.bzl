@@ -26,11 +26,18 @@ def go_repositories():
         version = "v0.0.0-20191202100458-e7afc7fbc510",
     )
     go_repository(
+        name = "com_github_libgit2_git2go_v27",
+        importpath = "github.com/libgit2/git2go/v27",
+        patch_args = ["-p1"],
+        patches = ["//third_party:com_github_libgit2_git2go_v27/com_github_libgit2_git2go_v27.patch"],
+        sum = "h1:HFHtjduzJ/aIb9T/7eriHCvItbRLT67Hdev6ZHfZ368=",
+        version = "v27.14.7",
+    )
+
+    go_repository(
         name = "com_github_libgit2_git2go_v34",
         importpath = "github.com/libgit2/git2go/v34",
         sum = "h1:UKoUaKLmiCRbOCD3PtUi2hD6hESSXzME/9OUZrGcgu8=",
-        patches = ["//third_party:com_github_libgit2_git2go_v34/com_github_libgit2_git2go_v34.patch"],
-        patch_args = ["-p1"],
         version = "v34.0.0",
     )
 

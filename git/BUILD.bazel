@@ -5,7 +5,7 @@ go_library(
     srcs = ["git.go"],
     importpath = "git",
     visibility = ["//visibility:private"],
-    deps = ["@com_github_libgit2_git2go_v34//:git2go"],
+    deps = ["@com_github_libgit2_git2go_v27//:git2go"],
 )
 
 go_binary(
