@@ -7,7 +7,7 @@ exports_files([
     "mypy.ignore",
 ])
 
-# gazelle:prefix
+# gazelle:prefix github.com/juanique/monorepo
 gazelle(
     name = "gazelle",
 )

@@ -3,7 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 go_library(
     name = "ruff_lib",
     srcs = ["ruff.go"],
-    importpath = "bazel/workspace/tools/ruff",
+    importpath = "github.com/juanique/monorepo/bazel/workspace/tools/ruff",
     visibility = ["//visibility:private"],
     deps = ["@io_bazel_rules_go//go/runfiles:go_default_library"],
 )
