@@ -6,14 +6,14 @@ build --keep_backend_build_event_connections_alive=false
 # Detailed timing profile
 build --noslim_profile
 build --experimental_profile_include_target_label
-build --experimental_profile_include_primary_output 
+build --experimental_profile_include_primary_output
 
 ## Remote caching
 build --remote_download_outputs=minimal
 build --remote_cache=grpcs://remote.buildbuddy.io
 build --remote_header=x-buildbuddy-api-key=WIbWV8AieSxh4RlxUiRk
 build --experimental_remote_cache_compression
-build --experimental_remote_build_event_upload=minimal 
+build --experimental_remote_build_event_upload=minimal
 build --nolegacy_important_outputs
 build --noremote_upload_local_results
 
@@ -30,9 +30,9 @@ build:remote --jobs=50
 
 # mypy not working yet
 # build --aspects @mypy_integration//:mypy.bzl%mypy_aspect
-build --output_groups=+mypy
-build --@mypy_integration//:mypy_config=//bazel/workspace:mypy.ini
-build --@mypy_integration//:exclude_contains="_pb2"
+# build --output_groups=+mypy
+# build --@mypy_integration//:mypy_config=//bazel/workspace:mypy.ini
+# build --@mypy_integration//:exclude_contains="_pb2"
 
 test --test_output=errors
 

@@ -11,8 +11,8 @@ go_library(
 go_binary(
     name = "ruff",
     data = [
-        "@ruff//:ruff-bin",
         "//:pyproject.toml",
+        "@ruff//:ruff-bin",
     ],
     embed = [":ruff_lib"],
     visibility = ["//visibility:public"],

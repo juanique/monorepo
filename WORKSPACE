@@ -214,30 +214,27 @@ load("@mypy_integration//:config.bzl", "mypy_configuration")
 # Optionally pass a MyPy config file, otherwise pass no argument.
 mypy_configuration("//bazel/workspace:mypy.ini")
 
-load("@mypy_integration//repositories:deps.bzl", mypy_integration_deps = "deps")
-
 container_pull(
     name = "ubuntu",
+    digest = "sha256:eea2c875bb135db3a5d5c959a4161eecce3f6a988cf054125d7f4e836e93e020",
     registry = "docker.io",
     repository = "juanzolotoochin/ubuntu-base",
-    digest = "sha256:eea2c875bb135db3a5d5c959a4161eecce3f6a988cf054125d7f4e836e93e020"
 )
-
 
 container_pull(
     name = "build",
+    digest = "sha256:2a669a950ee7941bf0e308372aa9ab1a38dc5491f75e3d6acf7b5e941a3bc32f",
     registry = "docker.io",
     repository = "juanzolotoochin/ubuntu-build",
-    digest = "sha256:2a669a950ee7941bf0e308372aa9ab1a38dc5491f75e3d6acf7b5e941a3bc32f",
     tag = "latest",
 )
 
 container_pull(
     name = "postgres",
+    digest = "sha256:cd116dbc6ac97b18f8e1ad07aa94399117863731ec99f06ae1270937a98119bf",
     registry = "docker.io",
     repository = "postgres",
     tag = "11.3-alpine",
-    digest = "sha256:cd116dbc6ac97b18f8e1ad07aa94399117863731ec99f06ae1270937a98119bf",
 )
 
 http_archive(
@@ -324,4 +321,15 @@ native_binary(
     """,
     sha256 = "bb8219885d858979270790d52932f53444006f36b2736d453ae590b833f00476",
     urls = ["https://github.com/astral-sh/ruff/releases/download/v0.0.285/ruff-x86_64-unknown-linux-gnu.tar.gz"],
+)
+
+#############
+## libgit2
+
+http_archive(
+    name = "com_github_libgit2",
+    build_file = "//external_patches:libgit2/BUILD.custom",
+    sha256 = "7074f1e2697992b82402501182db254fe62d64877b12f6e4c64656516f4cde88",
+    strip_prefix = "libgit2-1.5.1",
+    urls = ["https://github.com/libgit2/libgit2/archive/refs/tags/v1.5.1.tar.gz"],
 )
