@@ -17,6 +17,22 @@ cc_library(
 )
 
 cc_library(
+    name = "pcre",
+    srcs = glob(["deps/pcre/*.c"]),
+    hdrs = glob(["deps/pcre/*.h"]),
+    copts = [
+        "-DSTDC=1",
+    ],
+    includes = [
+        "deps/pcre",
+    ],
+    deps = [
+        ":headers",
+        "@monorepo//external_patches/libgit2/pcre:config",
+    ],
+)
+
+cc_library(
     name = "zlib",
     srcs = glob(["deps/zlib/*.c"]),
     hdrs = glob(["deps/zlib/*.h"]),
@@ -78,6 +94,7 @@ cc_library(
         ":headers",
         ":http_parser",
         ":zlib",
+        ":pcre",
         "@monorepo//external_patches/libgit2:features",
     ],
 )
