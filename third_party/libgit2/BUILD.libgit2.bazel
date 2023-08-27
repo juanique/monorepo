@@ -55,7 +55,7 @@ cc_library(
     ],
     hdrs = glob(["include/**/*.h"]),
     copts = [
-        "-Iexternal/com_github_libgit2/src",
+        "-Iexternal/libgit2/src",
         "-Wno-unused-function",
     ],
     visibility = ["//visibility:public"],
