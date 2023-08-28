@@ -29,7 +29,7 @@ build:remote --remote_timeout=1800
 build:remote --jobs=50
 
 # mypy not working yet
-build --aspects @mypy_integration//:mypy.bzl%mypy_aspect
+# build --aspects @mypy_integration//:mypy.bzl%mypy_aspect
 build --output_groups=+mypy
 build --@mypy_integration//:mypy_config=//bazel/workspace:mypy.ini
 build --@mypy_integration//:exclude_contains="_pb2"
