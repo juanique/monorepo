@@ -98,15 +98,15 @@ go_repository(
 go_repository(
     name = "org_golang_x_net",
     importpath = "golang.org/x/net",
-    sum = "h1:4nGaVu0QrbjT/AK2PRLuQfQuh6DJve+pELhqTdAj3x0=",
-    version = "v0.0.0-20210405180319-a5a99cb37ef4",
+    sum = "h1:BONx9s002vGdD9umnlX1Po8vOZmrgH34qlHcD1MfK14=",
+    version = "v0.14.0",
 )
 
 go_repository(
     name = "org_golang_x_text",
     importpath = "golang.org/x/text",
-    sum = "h1:cokOdA+Jmi5PJGXLlLllQSgYigAEfHXJAERHVMaCc2k=",
-    version = "v0.3.3",
+    sum = "h1:k+n5B8goJNdU7hSvEtMUz3d1Q6D/XW4COJSJR6fN0mc=",
+    version = "v0.12.0",
 )
 
 http_archive(
