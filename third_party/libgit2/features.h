@@ -17,7 +17,7 @@
 #undef GIT_USE_FUTIMENS
 #undef GIT_USE_REGCOMP_L
 
-#undef GIT_SSH
+#define GIT_SSH 1
 #undef GIT_SSH_MEMORY_CREDENTIALS
 
 #undef GIT_GSSAPI

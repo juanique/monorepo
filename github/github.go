@@ -7,13 +7,13 @@ import (
 	"golang.org/x/oauth2"
 )
 
-type GitHubClient struct {
+type Client struct {
 	client *gh.Client
 	owner  string
 	repo   string
 }
 
-func NewClient(token, owner, repo string) (*GitHubClient, error) {
+func NewClient(token, owner, repo string) (*Client, error) {
 	if token == "" {
 		return nil, &ErrMissingToken{}
 	}
@@ -24,14 +24,14 @@ func NewClient(token, owner, repo string) (*GitHubClient, error) {
 	)
 	tc := oauth2.NewClient(ctx, ts)
 
-	return &GitHubClient{
+	return &Client{
 		client: gh.NewClient(tc),
 		owner:  owner,
 		repo:   repo,
 	}, nil
 }
 
-func (g *GitHubClient) CreatePullRequest(remoteBranchName, title, baseBranch string) (*gh.PullRequest, error) {
+func (g *Client) CreatePullRequest(remoteBranchName, title, baseBranch string) (*gh.PullRequest, error) {
 	ctx := context.Background()
 
 	newPR := &gh.NewPullRequest{

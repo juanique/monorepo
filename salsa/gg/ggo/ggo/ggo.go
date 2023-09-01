@@ -49,7 +49,7 @@ type GudPullRequest struct{}
 
 // Interface to interact with a remotely hosted repo such as GitHub
 type HostedRepo interface {
-	CreatePullRequest(title string, remote_branch string, remote_base_branch string) GudPullRequest
+	CreatePullRequest(title string, remote_branch string, remote_base_branch string) (GudPullRequest, error)
 }
 
 // Optional settings for Clone()
@@ -184,12 +184,21 @@ func initRemoteCommit(repo *git.Repo) (GudCommit, error) {
 	commit.UpstreamBranch = remoteBranch
 	commit.Date = head.Date
 
-	newBranch, err := repo.CreateBranch(commit.ID)
+	err = repo.CreateBranch(commit.ID)
 	if err != nil {
 		return commit, fmt.Errorf("Could not create branch: %w", err)
 	}
 
 	return commit, nil
+}
+
+type GitHubHostedRepo struct {
+	metadata GitHubRepoMetadata
+	client   *github.Client
+}
+
+func (gh *GitHubHostedRepo) CreatePullRequest(title string, remote_branch string, remote_base_branch string) (GudPullRequest, error) {
+	panic("not implemented")
 }
 
 func MakeHostedRepo(repoMetadata RepoMetadata) (HostedRepo, error) {
@@ -199,11 +208,14 @@ func MakeHostedRepo(repoMetadata RepoMetadata) (HostedRepo, error) {
 			return nil, fmt.Errorf("Missing env variable GITHUB_GG_TOKEN")
 		}
 
-		ghClient, err := github.NewClient(token, repoMetadata.Owner, repoMetadata.Name)
+		ghClient, err := github.NewClient(token, repoMetadata.GitHub.Owner, repoMetadata.GitHub.Name)
 		if err != nil {
 			return nil, fmt.Errorf("Could not create github client: %w", err)
 		}
-		return GitHubHostedRepo(repoMetadata.FullRepoName(), ghClient), nil
+		return &GitHubHostedRepo{
+			metadata: repoMetadata.GitHub,
+			client:   ghClient,
+		}, nil
 	}
 
 	return nil, fmt.Errorf("Unknown repo type: %s", repoMetadata.Type)
@@ -222,7 +234,7 @@ func Clone(remotePath string, localPath string, opts CloneOpts) (*GitGud, error)
 		}
 		repoState.RepoMetadata = RepoMetadata{Type: "github", GitHub: githubMetadata}
 	}
-	repo, err := git.Clone(remotePath, localPath)
+	repo, err := git.LongClone(remotePath, localPath, "master")
 	if err != nil {
 		return nil, fmt.Errorf("Could not clone repo: %w", err)
 	}
