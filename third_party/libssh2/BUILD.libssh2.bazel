@@ -1,9 +1,0 @@
-cc_library(
-    name = "libssh2",
-    srcs = glob([
-        "src/**/*.c",
-        "src/**/*.h",
-    ]),
-    hdrs = glob(["include/**/*.h"]),
-    visibility = ["//visibility:public"],
-)
