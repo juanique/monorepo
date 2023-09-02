@@ -1,10 +1,11 @@
 load("@bazel_gazelle//:def.bzl", "gazelle")
+load("@rules_python//python:defs.bzl", "py_runtime", "py_runtime_pair")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
 load("@buildifier_prebuilt//:rules.bzl", "buildifier")
 
 exports_files(["pyproject.toml"])
 
-# gazelle:prefix github.com/juanique/monorepo
+# gazelle:prefix
 gazelle(
     name = "gazelle",
 )
