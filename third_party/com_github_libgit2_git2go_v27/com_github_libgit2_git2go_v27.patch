@@ -1,0 +1,12 @@
+--- a/BUILD.bazel	2023-08-26 22:03:37.411957244 -0700
++++ b/BUILD.bazel	2023-08-26 22:32:37.651731510 -0700
+@@ -2,6 +2,9 @@
+ 
+ go_library(
+     name = "git2go",
++    cdeps = [
++        "@libgit2//:libgit2",
++    ],
+     srcs = [
+         "Build_system_dynamic.go",
+         "blame.go",
