@@ -1,6 +1,8 @@
 load("@pip_deps//:requirements.bzl", "requirement")
 load("//:bazel/python.bzl", "pytest_test")
 
+exports_files(["version.py"])
+
 py_binary(
     name = "version",
     srcs = ["version.py"],

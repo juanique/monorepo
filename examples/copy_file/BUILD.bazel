@@ -1,0 +1,14 @@
+load("//:bazel/python.bzl", "py_binary")
+load("//:bazel/files.bzl", "copy_file")
+
+copy_file(
+    name = "copy",
+    src = "//examples/python:version.py",
+    to = "copy.py",
+)
+
+py_binary(
+    name = "version",
+    srcs = [":copy"],
+    main = "copy.py",
+)
