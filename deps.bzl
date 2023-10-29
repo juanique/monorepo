@@ -78,6 +78,8 @@ def go_repositories():
     go_repository(
         name = "com_github_libgit2_git2go_v34",
         importpath = "github.com/libgit2/git2go/v34",
+        patch_args = ["-p1"],
+        patches = ["//third_party:com_github_libgit2_git2go_v34/com_github_libgit2_git2go_v34.patch"],
         sum = "h1:UKoUaKLmiCRbOCD3PtUi2hD6hESSXzME/9OUZrGcgu8=",
         version = "v34.0.0",
     )
