@@ -37,6 +37,7 @@ var cloneCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
+		fmt.Println("Clonning... ", args[0])
 		_, err := ggo.Clone(args[0], resultPath, ggo.CloneOpts{})
 		if err != nil {
 			fmt.Println(err)

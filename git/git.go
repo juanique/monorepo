@@ -3,13 +3,12 @@ package git
 import (
 	"fmt"
 	"log"
-	"os"
 	"os/user"
 	"path/filepath"
 	"strings"
 	"time"
 
-	libgit "github.com/libgit2/git2go/v27"
+	libgit "github.com/libgit2/git2go/v33"
 )
 
 type Repo struct {
@@ -24,7 +23,7 @@ type CommitMetadata struct {
 	Date        time.Time
 }
 
-func credentialsCallback(url string, usernameFromURL string, allowedTypes libgit.CredType) (libgit.ErrorCode, *libgit.Cred) {
+func credentialsCallback(url string, usernameFromURL string, allowedTypes libgit.CredType) (*libgit.Cred, error) {
 	// You might want to update the path according to your system's setup or obtain it from an environment variable.
 	usr, err := user.Current()
 	if err != nil {
@@ -34,15 +33,15 @@ func credentialsCallback(url string, usernameFromURL string, allowedTypes libgit
 	sshPublicKey := filepath.Join(usr.HomeDir, ".ssh", "id_rsa.pub")
 	sshPrivateKey := filepath.Join(usr.HomeDir, ".ssh", "id_rsa")
 
-	retVal, cred := libgit.NewCredSshKey(usernameFromURL, sshPublicKey, sshPrivateKey, "")
-	if retVal != 0 {
-		return libgit.ErrorCode(retVal), nil
+	cred, err := libgit.NewCredSshKey(usernameFromURL, sshPublicKey, sshPrivateKey, "")
+	if err != nil {
+		return nil, fmt.Errorf("Could not create ssh credentials: %w", err)
 	}
-	return libgit.ErrorCode(retVal), &cred
+	return cred, err
 }
 
-func certificateCheckCallback(cert *libgit.Certificate, valid bool, hostname string) libgit.ErrorCode {
-	return libgit.ErrOk
+func certificateCheckCallback(cert *libgit.Certificate, valid bool, hostname string) error {
+	return nil
 }
 
 func (repo *Repo) CreateBranch(branchName string) error {
@@ -124,20 +123,30 @@ func LongClone(repoURL string, localPath, branch string) (*Repo, error) {
 		fmt.Println("libgit2 does not have SSH support.")
 	}
 
-	if strings.HasPrefix(repoURL, "git@github") {
-		repoURL = convertSSHUrl(repoURL)
-	}
+	// if strings.HasPrefix(repoURL, "git@github") {
+	// repoURL = convertSSHUrl(repoURL)
+	// }
 	// 1. Create the directory
-	if err := os.MkdirAll(localPath, 0755); err != nil {
-		return nil, fmt.Errorf("error creating directory: %w", err)
+	// if err := os.MkdirAll(localPath+"/.git/objects", 0755); err != nil {
+	// return nil, fmt.Errorf("error creating directory: %w", err)
+	// }
+
+	fetchOptions := &libgit.FetchOptions{
+		RemoteCallbacks: libgit.RemoteCallbacks{
+			CredentialsCallback:      credentialsCallback,
+			CertificateCheckCallback: certificateCheckCallback,
+		},
 	}
 
-	// 2. Initialize it as a git repository
-	repo, err := libgit.InitRepository(localPath, false)
+	repo, err := libgit.Clone(repoURL, localPath, &libgit.CloneOptions{
+		FetchOptions: *fetchOptions,
+	})
 	if err != nil {
-		return nil, fmt.Errorf("error initializing repository: %w", err)
+		return nil, fmt.Errorf("error cloning repository %s to %s: %w", repoURL, localPath, err)
 	}
 	defer repo.Free()
+
+	return &Repo{RemotePath: repoURL, LocalPath: localPath, repo: repo}, nil
 
 	// 3. Add the repository URL as a remote
 	remote, err := repo.Remotes.Create("origin", repoURL)
@@ -147,13 +156,6 @@ func LongClone(repoURL string, localPath, branch string) (*Repo, error) {
 
 	// Set up fetch options with a callback for credentials if needed.
 	// Here's a simple example without authentication. Modify as required.
-	fetchOptions := &libgit.FetchOptions{
-		RemoteCallbacks: libgit.RemoteCallbacks{
-			CredentialsCallback:      credentialsCallback,
-			CertificateCheckCallback: certificateCheckCallback,
-		},
-	}
-
 	// 4. Fetch the remote branch
 	if err := remote.Fetch([]string{branch}, fetchOptions, ""); err != nil {
 		return nil, fmt.Errorf("error fetching remote branch: %w", err)
@@ -198,9 +200,8 @@ func LongClone(repoURL string, localPath, branch string) (*Repo, error) {
 
 func Clone(remotePath string, localPath string) (*Repo, error) {
 	log.Println("Clonning", remotePath, "to", localPath)
-	panic("wtf")
 	cloneOpts := &libgit.CloneOptions{
-		FetchOptions: &libgit.FetchOptions{
+		FetchOptions: libgit.FetchOptions{
 			RemoteCallbacks: libgit.RemoteCallbacks{
 				CredentialsCallback:      credentialsCallback,
 				CertificateCheckCallback: certificateCheckCallback,

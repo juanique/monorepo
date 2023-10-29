@@ -66,6 +66,14 @@ def go_repositories():
         sum = "h1:HFHtjduzJ/aIb9T/7eriHCvItbRLT67Hdev6ZHfZ368=",
         version = "v27.14.7",
     )
+    go_repository(
+        name = "com_github_libgit2_git2go_v33",
+        importpath = "github.com/libgit2/git2go/v33",
+        patch_args = ["-p1"],
+        patches = ["//third_party:com_github_libgit2_git2go_v33/com_github_libgit2_git2go_v33.patch"],
+        sum = "h1:4ch2DJed6IhJO28BEohkUoGvxLsRzUjxljoNFJ6/O78=",
+        version = "v33.0.9",
+    )
 
     go_repository(
         name = "com_github_libgit2_git2go_v34",
