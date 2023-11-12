@@ -25,6 +25,7 @@ python_register_toolchains(
     # Available versions are listed in @rules_python//python:versions.bzl.
     # We recommend using the same version your team is already standardized on.
     python_version = "3.9",
+    ignore_root_user_error = True,
 )
 
 load("@python3_9//:defs.bzl", "interpreter")
