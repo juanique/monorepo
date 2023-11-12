@@ -13,3 +13,8 @@ def libgit2_repositories():
             "https://github.com/libgit2/libgit2/archive/refs/tags/v1.3.0.tar.gz",
         ],
     )
+    native.new_local_repository(
+        name = "libgit2-local",
+        build_file = "third_party/libgit2/BUILD.libgit2.bazel",
+        path = "third_party/libgit2-1.3.0-local",
+    )
