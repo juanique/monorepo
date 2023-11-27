@@ -3,6 +3,12 @@ workspace(name = "monorepo")
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
+###############
+# Third party
+load("//third_party:repositories.bzl", "third_party_repositories")
+
+third_party_repositories()
+
 #########################
 ## rules_ python
 
@@ -22,10 +28,10 @@ load("@rules_python//python:pip.bzl", "pip_parse")
 
 python_register_toolchains(
     name = "python3_9",
+    ignore_root_user_error = True,
     # Available versions are listed in @rules_python//python:versions.bzl.
     # We recommend using the same version your team is already standardized on.
     python_version = "3.9",
-    ignore_root_user_error = True,
 )
 
 load("@python3_9//:defs.bzl", "interpreter")
@@ -271,7 +277,7 @@ http_archive(
 load("@hermetic_cc_toolchain//toolchain:defs.bzl", zig_toolchains = "toolchains")
 
 register_toolchains(
-    "@zig_sdk//toolchain:linux_amd64_gnu.2.28",
+    "@zig_sdk//toolchain:linux_amd64_musl",
     "@zig_sdk//toolchain:linux_arm64_gnu.2.28",
     "@zig_sdk//toolchain:darwin_amd64",
     "@zig_sdk//toolchain:darwin_arm64",
@@ -325,12 +331,6 @@ native_binary(
     sha256 = "bb8219885d858979270790d52932f53444006f36b2736d453ae590b833f00476",
     urls = ["https://github.com/astral-sh/ruff/releases/download/v0.0.285/ruff-x86_64-unknown-linux-gnu.tar.gz"],
 )
-
-###############
-# Third party
-load("//third_party:repositories.bzl", "third_party_repositories")
-
-third_party_repositories()
 
 ############
 # Rules foreign

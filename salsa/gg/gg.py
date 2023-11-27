@@ -412,6 +412,7 @@ class GitGud:
         local_repo_path: str,
         hosted_repo: Optional[HostedRepo] = None,
         global_config: Optional[GlobalConfig] = None,
+        master_branch: str = "master",
     ) -> "GitGud":
         """Clone an external repo into the given path."""
         global_config = global_config or GlobalConfig()
@@ -431,6 +432,7 @@ class GitGud:
             commits={root.id: root},
             repo_metadata=repo_metadata,
             global_config=global_config,
+            master_branch=master_branch,
         )
         gg = GitGud(repo, state, hosted_repo, global_config=global_config)
         gg.save_state()

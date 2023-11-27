@@ -141,10 +141,11 @@ def set_config(key: str, value: str) -> None:
 
 @click.command()
 @click.argument("path")
-def clone(path: str) -> None:
+@click.argument("branch")
+def clone(path: str, branch: str) -> None:
     # extract the repo name from the URL
     subdir = path.split("/")[-1].split(".")[-2]
-    GitGud.clone(path, os.path.join(os.getcwd(), subdir))
+    GitGud.clone(path, os.path.join(os.getcwd(), subdir), master_branch=branch)
 
 
 @click.command()
