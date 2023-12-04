@@ -2,7 +2,10 @@ load("@bazel_gazelle//:def.bzl", "gazelle")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
 load("@buildifier_prebuilt//:rules.bzl", "buildifier")
 
-exports_files(["pyproject.toml"])
+exports_files([
+    "pyproject.toml",
+    "mypy.ignore",
+])
 
 # gazelle:prefix github.com/juanique/monorepo
 gazelle(
