@@ -220,7 +220,10 @@ mypy_integration_repositories()
 load("@mypy_integration//:config.bzl", "mypy_configuration")
 
 # Optionally pass a MyPy config file, otherwise pass no argument.
-mypy_configuration("//bazel/workspace:mypy.ini")
+mypy_configuration(
+    "//bazel/workspace:mypy.ini",
+    mypy_exclude_list = "//:mypy.ignore",
+)
 
 container_pull(
     name = "ubuntu",
