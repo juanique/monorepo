@@ -19,10 +19,10 @@ index c25a0c6..79d21b8 100644
 +    visibility = ["//visibility:public"],
 +)
 diff --git a/config.bzl b/config.bzl
-index f6d24f3..686e25c 100644
+index f6d24f3..6b1b9e9 100644
 --- a/config.bzl
 +++ b/config.bzl
-@@ -20,6 +20,27 @@ def _create_config_impl(ctx):
+@@ -20,6 +20,24 @@ def _create_config_impl(ctx):
          executable = False,
      )
  
@@ -30,9 +30,6 @@ index f6d24f3..686e25c 100644
 +        mypy_exclude_list_contents = ctx.read(ctx.attr.mypy_exclude_list)
 +    else:
 +        mypy_exclude_list_contents = ""
-+
-+    print("====")
-+    print(mypy_exclude_list_contents)
 +
 +    lines = []
 +    lines.append("def get_excluded():")
@@ -50,7 +47,7 @@ index f6d24f3..686e25c 100644
  create_config = repository_rule(
      implementation = _create_config_impl,
      attrs = {
-@@ -28,10 +49,15 @@ create_config = repository_rule(
+@@ -28,10 +46,15 @@ create_config = repository_rule(
              allow_single_file = True,
              doc = "The path to the mypy.ini, if one is used..",
          ),
@@ -67,7 +64,7 @@ index f6d24f3..686e25c 100644
      """**Deprecated**: Instead, see https://github.com/bazel-contrib/bazel-mypy-integration/blob/main/README.md#configuration
  
      Args:
-@@ -40,4 +66,5 @@ def mypy_configuration(mypy_config_file = None):
+@@ -40,4 +63,5 @@ def mypy_configuration(mypy_config_file = None):
      create_config(
          name = "mypy_integration_config",
          config_filepath = mypy_config_file,
