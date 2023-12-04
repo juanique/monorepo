@@ -1,5 +1,5 @@
 # Can't upgrade past this until https://github.com/bazel-contrib/bazel-mypy-integration/issues/70 is fixed
-mypy==0.910
+mypy==1.7.1
 typing_extensions==4.4.0
 mypy_extensions==0.4.3
 tomli==2.0.1

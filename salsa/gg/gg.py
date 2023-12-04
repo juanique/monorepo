@@ -1360,7 +1360,7 @@ class GitGud:
             for state in bad_states:
                 print(f"[red]!! {state.message}[/red]")
 
-    def get_tree(self, commit: GudCommit = None, tree: Tree = None, full: bool = False) -> Tree:
+    def get_tree(self, commit: Optional[GudCommit] = None, tree: Optional[Tree] = None, full: bool = False) -> Tree:
         """Return a tree representation of the local gitgud state for printing."""
 
         commit = commit or self.root()
