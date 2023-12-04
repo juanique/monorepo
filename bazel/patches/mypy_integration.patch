@@ -18,37 +18,101 @@ index c25a0c6..79d21b8 100644
 +    build_setting_default = "",
 +    visibility = ["//visibility:public"],
 +)
+diff --git a/config.bzl b/config.bzl
+index f6d24f3..6b1b9e9 100644
+--- a/config.bzl
++++ b/config.bzl
+@@ -20,6 +20,24 @@ def _create_config_impl(ctx):
+         executable = False,
+     )
+ 
++    if ctx.attr.mypy_exclude_list:
++        mypy_exclude_list_contents = ctx.read(ctx.attr.mypy_exclude_list)
++    else:
++        mypy_exclude_list_contents = ""
++
++    lines = []
++    lines.append("def get_excluded():")
++    lines.append("  return[")
++    for line in  mypy_exclude_list_contents.split("\n"):
++        if line:
++            lines.append("  '" + line + "',")
++    lines.append("  ]")
++
++    ctx.file(
++        "mypy_exclude.bzl",
++        content = "\n".join(lines)
++    )
++
+ create_config = repository_rule(
+     implementation = _create_config_impl,
+     attrs = {
+@@ -28,10 +46,15 @@ create_config = repository_rule(
+             allow_single_file = True,
+             doc = "The path to the mypy.ini, if one is used..",
+         ),
++        "mypy_exclude_list": attr.label(
++            mandatory = False,
++            allow_single_file = True,
++            doc = "The path to the list of paths to ignore.",
++        ),
+     },
+ )
+ 
+-def mypy_configuration(mypy_config_file = None):
++def mypy_configuration(mypy_config_file = None, mypy_exclude_list = []):
+     """**Deprecated**: Instead, see https://github.com/bazel-contrib/bazel-mypy-integration/blob/main/README.md#configuration
+ 
+     Args:
+@@ -40,4 +63,5 @@ def mypy_configuration(mypy_config_file = None):
+     create_config(
+         name = "mypy_integration_config",
+         config_filepath = mypy_config_file,
++        mypy_exclude_list = mypy_exclude_list,
+     )
 diff --git a/mypy.bzl b/mypy.bzl
-index 5517e99..389394b 100644
+index 5517e99..fc368ce 100644
 --- a/mypy.bzl
 +++ b/mypy.bzl
-@@ -2,6 +2,7 @@
+@@ -2,7 +2,9 @@
  
  load("@bazel_skylib//lib:shell.bzl", "shell")
  load("@bazel_skylib//lib:sets.bzl", "sets")
 +load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
  load("//:rules.bzl", "MyPyStubsInfo")
++load("@mypy_integration_config//:mypy_exclude.bzl", "get_excluded")
  
  MyPyAspectInfo = provider(
-@@ -32,6 +33,9 @@ DEFAULT_ATTRS = {
-         default = Label("//:mypy_config"),
-         allow_single_file = True,
-     ),
-+    "_exclude_contains": attr.label(
-+        default = "//:exclude_contains",
-+    ),
- }
+     "TODO: documentation",
+@@ -98,6 +100,18 @@ def _extract_imports(imports, label):
+             mypypath_parts.append("{}/{}".format(label.package, import_))
+     return mypypath_parts
  
- def _sources_to_cache_map_triples(srcs, is_aspect):
-@@ -104,6 +108,7 @@ def _mypy_rule_impl(ctx, is_aspect = False):
-         base_rule = ctx.rule
++def _should_exclude(filename, exclude_list):
++    for item in exclude_list:
++      is_suffix = item.startswith("*")
++      if is_suffix:
++        item = item[1:]
++        if filename.endswith(item):
++          return item
++      else:
++        if filename.startswith(item):
++          return item
++    return ""
++
+ def _mypy_rule_impl(ctx, is_aspect = False):
+     base_rule = ctx
+     if is_aspect:
+@@ -105,6 +119,8 @@ def _mypy_rule_impl(ctx, is_aspect = False):
  
      mypy_config_file = ctx.file._mypy_config
-+    exclude_contains = ctx.attr._exclude_contains[BuildSettingInfo].value
  
++    exclusion_list = get_excluded()
++
      mypypath_parts = []
      direct_src_files = []
-@@ -157,29 +162,46 @@ def _mypy_rule_impl(ctx, is_aspect = False):
+     transitive_srcs_depsets = []
+@@ -157,29 +173,41 @@ def _mypy_rule_impl(ctx, is_aspect = False):
          sets.make([f.root.path for f in src_files]),
      )
  
@@ -75,16 +139,11 @@ index 5517e99..389394b 100644
 -        },
 -        is_executable = True,
 -    )
-+    if exclude_contains:
-+        filtered_src_files = []
-+        for x in src_files:
-+            if exclude_contains in x.short_path:
-+                pass
-+                print("Skipped mypy check for %s per config exclude: %s" % (x.short_path, exclude_contains))
-+            else:
-+                filtered_src_files.append(x)
-+    else:
-+        filtered_src_files = src_files
++    filtered_src_files = []
++    for x in src_files:
++        exclusion_rule = _should_exclude(x.short_path, exclusion_list)
++        if not exclusion_rule:
++            filtered_src_files.append(x)
 +
 +    if filtered_src_files:
 +        ctx.actions.expand_template(
