@@ -198,9 +198,9 @@ http_archive(
     name = "mypy_integration",
     patch_args = ["-p1"],
     patches = ["//bazel/patches:mypy_integration.patch"],
-    sha256 = "cf94c102fbaccb587eea8de5cf1cb7f55c5c74396a2468932c3a2a4df989aa1d",
-    strip_prefix = "bazel-mypy-integration-0.4.0",
-    url = "https://github.com/thundergolfer/bazel-mypy-integration/archive/refs/tags/0.4.0.tar.gz",
+    sha256 = "ffb9b0813e03f7147b1e182ab59cdd2e662c9566d91a4f97361e6db39185beaa",
+    strip_prefix = "bazel-mypy-integration-863fde2e91d9b4e3d9ba1c6b3a84d0a1fee2d1b5",
+    url = "https://github.com/bazel-contrib/bazel-mypy-integration/archive/863fde2e91d9b4e3d9ba1c6b3a84d0a1fee2d1b5.zip",
 )
 
 load(
@@ -212,9 +212,7 @@ mypy_integration_repositories()
 
 load("@mypy_integration//:config.bzl", "mypy_configuration")
 
-# Optionally pass a MyPy config file, otherwise pass no argument.
 mypy_configuration(
-    "//bazel/workspace:mypy.ini",
     mypy_exclude_list = "//:mypy.ignore",
 )
 

@@ -4,7 +4,7 @@ import logging
 import os
 import shutil
 import unittest
-from typing import Dict, Iterator, List, Any, Tuple
+from typing import Dict, Iterator, List, Any, Tuple, Optional
 
 import dataclasses
 
@@ -137,7 +137,7 @@ class TestGitGud(unittest.TestCase):
         self.remote_repo.git.set_persistent_git_options(c='protocol.file.allow=always')
         self.maxDiff = None
 
-    def make_test_filename(self, root: str = None) -> str:
+    def make_test_filename(self, root: Optional[str] = None) -> str:
         root = root or self.local_repo_path
         self.last_index += 1
         return os.path.join(root, f"file{self.last_index}.txt")
