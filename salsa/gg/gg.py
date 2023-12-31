@@ -23,8 +23,10 @@ import humanize
 
 from salsa.os.environ_ctx import modified_environ
 
+
 class InternalError(Exception):
     pass
+
 
 class GlobalConfig(BaseModel):
     configs_root: str = os.path.expanduser("~/.config/gg")
@@ -316,11 +318,11 @@ class GitGud:
     state: RepoState
 
     def __init__(
-            self,
-            repo: Repo,
-            state: RepoState,
-            hosted_repo: Optional[HostedRepo] = None,
-            global_config: Optional[GlobalConfig] = None
+        self,
+        repo: Repo,
+        state: RepoState,
+        hosted_repo: Optional[HostedRepo] = None,
+        global_config: Optional[GlobalConfig] = None,
     ):
         self.repo = repo
         self.state = state
@@ -438,8 +440,7 @@ class GitGud:
 
     @staticmethod
     def load_state_for_directory(
-        directory: str,
-        global_config: Optional[GlobalConfig] = None
+        directory: str, global_config: Optional[GlobalConfig] = None
     ) -> RepoState:
         """Load GitGud repo state from the given directory."""
         global_config = global_config or GlobalConfig()
@@ -740,7 +741,6 @@ class GitGud:
 
             for commit_id, commit in self.state.commits.items():
                 if commit.parent_id == commit_to_prune_id:
-
                     if not self.state.root == commit_to_prune.id:
                         assert commit_to_prune.parent_id is not None
                         parent_of_prunned = self.get_commit(commit_to_prune.parent_id)
@@ -1360,7 +1360,9 @@ class GitGud:
             for state in bad_states:
                 print(f"[red]!! {state.message}[/red]")
 
-    def get_tree(self, commit: GudCommit = None, tree: Tree = None, full: bool = False) -> Tree:
+    def get_tree(
+        self, commit: Optional[GudCommit] = None, tree: Optional[Tree] = None, full: bool = False
+    ) -> Tree:
         """Return a tree representation of the local gitgud state for printing."""
 
         commit = commit or self.root()
