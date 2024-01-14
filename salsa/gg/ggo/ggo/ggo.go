@@ -234,7 +234,7 @@ func Clone(remotePath string, localPath string, opts CloneOpts) (*GitGud, error)
 		}
 		repoState.RepoMetadata = RepoMetadata{Type: "github", GitHub: githubMetadata}
 	}
-	repo, err := git.LongClone(remotePath, localPath, "master")
+	repo, err := git.Clone(remotePath, localPath)
 	if err != nil {
 		return nil, fmt.Errorf("Could not clone repo: %w", err)
 	}
