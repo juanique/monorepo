@@ -1,0 +1,17 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "must",
+    srcs = ["must.go"],
+    importpath = "github.com/juanique/monorepo/salsa/go/must",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "must_test",
+    srcs = ["must_test.go"],
+    deps = [
+        ":must",
+        "@com_github_stretchr_testify//suite",
+    ],
+)

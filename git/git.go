@@ -25,18 +25,22 @@ type CommitMetadata struct {
 
 func credentialsCallback(url string, usernameFromURL string, allowedTypes libgit.CredType) (*libgit.Cred, error) {
 	// You might want to update the path according to your system's setup or obtain it from an environment variable.
+	fmt.Println("This is the creds callback.")
 	usr, err := user.Current()
 	if err != nil {
 		log.Fatalf("Failed to get current user: %v", err)
 	}
 
-	sshPublicKey := filepath.Join(usr.HomeDir, ".ssh", "id_rsa.pub")
-	sshPrivateKey := filepath.Join(usr.HomeDir, ".ssh", "id_rsa")
+	sshPublicKey := filepath.Join(usr.HomeDir, ".ssh", "id_ed25519.pub")
+	sshPrivateKey := filepath.Join(usr.HomeDir, ".ssh", "id_ed25519")
 
-	cred, err := libgit.NewCredSshKey(usernameFromURL, sshPublicKey, sshPrivateKey, "")
+	cred, err := libgit.NewCredentialSSHKey(usernameFromURL, sshPublicKey, sshPrivateKey, "")
 	if err != nil {
 		return nil, fmt.Errorf("Could not create ssh credentials: %w", err)
 	}
+	fmt.Println("sshPublicKey: ", sshPublicKey)
+	fmt.Println("sshPrivateKey: ", sshPrivateKey)
+	fmt.Println("cred:", cred)
 	return cred, err
 }
 
@@ -116,20 +120,12 @@ func convertSSHUrl(url string) string {
 	return url
 }
 
-func LongClone(repoURL string, localPath, branch string) (*Repo, error) {
+func Clone(repoURL string, localPath string) (*Repo, error) {
 	if libgit.Features()&libgit.FeatureSSH != 0 {
 		fmt.Println("libgit2 has SSH support!")
 	} else {
 		fmt.Println("libgit2 does not have SSH support.")
 	}
-
-	// if strings.HasPrefix(repoURL, "git@github") {
-	// repoURL = convertSSHUrl(repoURL)
-	// }
-	// 1. Create the directory
-	// if err := os.MkdirAll(localPath+"/.git/objects", 0755); err != nil {
-	// return nil, fmt.Errorf("error creating directory: %w", err)
-	// }
 
 	fetchOptions := &libgit.FetchOptions{
 		RemoteCallbacks: libgit.RemoteCallbacks{
@@ -139,7 +135,8 @@ func LongClone(repoURL string, localPath, branch string) (*Repo, error) {
 	}
 
 	repo, err := libgit.Clone(repoURL, localPath, &libgit.CloneOptions{
-		FetchOptions: *fetchOptions,
+		FetchOptions:    *fetchOptions,
+		CheckoutOptions: libgit.CheckoutOptions{Strategy: libgit.CheckoutForce},
 	})
 	if err != nil {
 		return nil, fmt.Errorf("error cloning repository %s to %s: %w", repoURL, localPath, err)
@@ -147,73 +144,6 @@ func LongClone(repoURL string, localPath, branch string) (*Repo, error) {
 	defer repo.Free()
 
 	return &Repo{RemotePath: repoURL, LocalPath: localPath, repo: repo}, nil
-
-	// 3. Add the repository URL as a remote
-	remote, err := repo.Remotes.Create("origin", repoURL)
-	if err != nil {
-		return nil, fmt.Errorf("error adding remote: %w", err)
-	}
-
-	// Set up fetch options with a callback for credentials if needed.
-	// Here's a simple example without authentication. Modify as required.
-	// 4. Fetch the remote branch
-	if err := remote.Fetch([]string{branch}, fetchOptions, ""); err != nil {
-		return nil, fmt.Errorf("error fetching remote branch: %w", err)
-	}
-
-	// 5. Checkout the fetched branch
-	fetchedBranch, err := repo.LookupBranch("origin/"+branch, libgit.BranchRemote)
-	if err != nil {
-		return nil, fmt.Errorf("error looking up fetched branch: %w", err)
-	}
-	defer fetchedBranch.Free()
-
-	commit, err := repo.LookupCommit(fetchedBranch.Target())
-	if err != nil {
-		return nil, fmt.Errorf("error looking up commit from fetched branch: %w", err)
-	}
-
-	localBranch, err := repo.CreateBranch(branch, commit, false)
-	if err != nil {
-		return nil, fmt.Errorf("error creating local branch: %w", err)
-	}
-	defer localBranch.Free()
-
-	tree, err := repo.LookupTree(localBranch.Target())
-	if err != nil {
-		return nil, fmt.Errorf("error looking up tree for local branch: %w", err)
-	}
-
-	if err := repo.CheckoutTree(tree, &libgit.CheckoutOpts{
-		Strategy: libgit.CheckoutSafe | libgit.CheckoutRecreateMissing,
-	}); err != nil {
-		return nil, fmt.Errorf("error checking out tree: %w", err)
-	}
-
-	// Point HEAD to the new branch
-	if err := repo.SetHead("refs/heads/" + branch); err != nil {
-		return nil, fmt.Errorf("error setting HEAD to new branch: %w", err)
-	}
-
-	return &Repo{RemotePath: repoURL, LocalPath: localPath, repo: repo}, nil
-}
-
-func Clone(remotePath string, localPath string) (*Repo, error) {
-	log.Println("Clonning", remotePath, "to", localPath)
-	cloneOpts := &libgit.CloneOptions{
-		FetchOptions: libgit.FetchOptions{
-			RemoteCallbacks: libgit.RemoteCallbacks{
-				CredentialsCallback:      credentialsCallback,
-				CertificateCheckCallback: certificateCheckCallback,
-			},
-		},
-	}
-	repo, err := libgit.Clone(remotePath, localPath, cloneOpts)
-	if err != nil {
-		return nil, fmt.Errorf("Failed to clone repo: %w", err)
-	}
-
-	return &Repo{RemotePath: remotePath, LocalPath: localPath, repo: repo}, nil
 }
 
 func Status() {
