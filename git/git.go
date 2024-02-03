@@ -34,6 +34,11 @@ type CommitMetadata struct {
 	Date        time.Time
 }
 
+func transferProgressCallback(stats libgit.TransferProgress) error {
+	log.Println("Received ", stats.ReceivedBytes)
+	return nil
+}
+
 func credentialsCallback(url string, usernameFromURL string, allowedTypes libgit.CredType) (*libgit.Cred, error) {
 	// You might want to update the path according to your system's setup or obtain it from an environment variable.
 	fmt.Println("This is the creds callback.")
@@ -177,15 +182,16 @@ func convertSSHUrl(url string) string {
 
 func Clone(repoURL string, localPath string) (*repoImpl, error) {
 	if libgit.Features()&libgit.FeatureSSH != 0 {
-		fmt.Println("libgit2 has SSH support!")
+		log.Println("libgit2 has SSH support!")
 	} else {
-		fmt.Println("libgit2 does not have SSH support.")
+		log.Println("libgit2 does not have SSH support.")
 	}
 
 	fetchOptions := &libgit.FetchOptions{
 		RemoteCallbacks: libgit.RemoteCallbacks{
 			CredentialsCallback:      credentialsCallback,
 			CertificateCheckCallback: certificateCheckCallback,
+			TransferProgressCallback: transferProgressCallback,
 		},
 	}
 
