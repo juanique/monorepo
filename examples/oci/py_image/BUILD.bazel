@@ -1,0 +1,13 @@
+load("//:bazel/python.bzl", "py_binary")
+load("//bazel/oci:defs.bzl", "image")
+
+py_binary(
+    name = "main",
+    srcs = ["main.py"],
+)
+
+image(
+    name = "image",
+    base = "@ubuntu22",
+    binary = ":main",
+)
