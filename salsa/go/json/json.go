@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"os"
 )
 
@@ -47,5 +48,21 @@ func FromFile(filename string, v any) error {
 		return fmt.Errorf("failed to unmarshal JSON: %w", err)
 	}
 
+	return nil
+}
+
+func MustToJSON(v any) string {
+	jsonData, err := json.MarshalIndent(v, "", " ")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(jsonData)
+}
+
+func FromJSON(jsonData string, v any) error {
+	err := json.Unmarshal([]byte(jsonData), v)
+	if err != nil {
+		return err
+	}
 	return nil
 }

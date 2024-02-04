@@ -16,5 +16,6 @@ go_binary(
 
 image(
     name = "image",
+    base = "@ubuntu22",
     binary = ":go_image",
 )

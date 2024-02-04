@@ -3,6 +3,16 @@ workspace(name = "monorepo")
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
+###########
+# Aspect bazel lib
+
+http_archive(
+    name = "aspect_bazel_lib",
+    sha256 = "bda4a69fa50411b5feef473b423719d88992514d259dadba7d8218a1d02c7883",
+    strip_prefix = "bazel-lib-2.3.0",
+    url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.3.0/bazel-lib-v2.3.0.tar.gz",
+)
+
 #########################
 ## rules_ python
 
@@ -395,3 +405,13 @@ oci_register_toolchains(
 load("//third_party:oci_containers.bzl", "load_oci_images")
 
 load_oci_images()
+
+load("@aspect_bazel_lib//lib:repositories.bzl", "aspect_bazel_lib_dependencies", "aspect_bazel_lib_register_toolchains")
+
+# Required bazel-lib dependencies
+
+aspect_bazel_lib_dependencies()
+
+# Register bazel-lib toolchains
+
+aspect_bazel_lib_register_toolchains()

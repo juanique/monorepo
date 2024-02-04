@@ -29,7 +29,7 @@ type DockerLoadAction struct {
 
 // JSON returns the JSON representation of the DockerLoadAction
 func (d DockerLoadAction) JSON() string {
-	return json.ToJSON(d)
+	return json.MustToJSON(d)
 }
 
 // DockerLoader holds a Docker client and provides methods to interact with Docker.

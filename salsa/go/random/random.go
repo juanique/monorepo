@@ -7,8 +7,8 @@ import (
 
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
-// RandomString generates a random string of the specified length.
-func RandomString(length int) string {
+// String generates a random string of the specified length.
+func String(length int) string {
 	// Seed the random number generator to ensure different output each time
 	rand.Seed(time.Now().UnixNano())
 
