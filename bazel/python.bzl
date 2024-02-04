@@ -66,8 +66,6 @@ def pylint_test(name, srcs, deps = [], args = [], data = [], **kwargs):
         name = name,
         srcs = ["//bazel/workspace/tools/pylint:pylint_test_wrapper.py"] + srcs,
         args = ["--pylint-rcfile=$(location //bazel/workspace/tools/pylint:.pylintrc)"] + args + ["$(location :%s)" % x for x in srcs],
-        python_version = "PY3",
-        srcs_version = "PY3",
         deps = deps + [
             requirement("pytest"),
             requirement("pytest-pylint"),
@@ -88,8 +86,6 @@ def py_debug(name, og_name, srcs, deps = [], args = [], data = [], **kwargs):
         name = name,
         srcs = [wrapper_filename] + srcs,
         main = wrapper_filename,
-        python_version = "PY3",
-        srcs_version = "PY3",
         deps = deps + [
             requirement("pytest"),
             requirement("debugpy"),
@@ -132,8 +128,6 @@ def pytest_test(name, srcs, deps = [], args = [], **kwargs):
         args = [
             "--capture=no",
         ] + args + ["$(location :%s)" % x for x in srcs],
-        python_version = "PY3",
-        srcs_version = "PY3",
         deps = deps + [
             requirement("pytest"),
         ],
