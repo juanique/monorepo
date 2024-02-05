@@ -81,13 +81,13 @@ _py_gazelle_deps()
 load("@rules_python//python:pip.bzl", "pip_parse")
 
 python_register_toolchains(
-    name = "python3_9",
+    name = "python3_10",
     # Available versions are listed in @rules_python//python:versions.bzl.
     # We recommend using the same version your team is already standardized on.
-    python_version = "3.9",
+    python_version = "3.10",
 )
 
-load("@python3_9//:defs.bzl", "interpreter")
+load("@python3_10//:defs.bzl", "interpreter")
 
 pip_parse(
     name = "pip_deps",
@@ -180,7 +180,7 @@ http_archive(
 load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
 
 grpc_deps(
-    python_headers = "@python3_9//:python_headers",
+    python_headers = "@python3_10//:python_headers",
 )
 
 load("@com_github_grpc_grpc//bazel:grpc_extra_deps.bzl", "grpc_extra_deps")

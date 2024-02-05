@@ -1,0 +1,11 @@
+load("//:bazel/python.bzl", "py_binary")
+
+py_binary(
+    name = "main",
+    srcs = ["main.py"],
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "@pip_deps//diffusers",
+        "@pip_deps//torch",
+    ],
+)
