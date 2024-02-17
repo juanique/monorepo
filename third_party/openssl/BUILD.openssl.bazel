@@ -112,6 +112,11 @@ configure_make(
             "libcrypto.so.1.1",
         ],
     }),
+    out_static_libs = [
+        # libssl must come first as correct linking order is `-lssl -lcrypto`
+        "libssl.a",
+        "libcrypto.a",
+    ],
     targets = MAKE_TARGETS,
     toolchains = ["@rules_perl//:current_toolchain"],
 )
