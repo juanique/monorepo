@@ -8,8 +8,5 @@ go_library(
     ],
     importpath = "github.com/juanique/monorepo/salsa/gg/ggo/commands",
     visibility = ["//visibility:public"],
-    deps = [
-        "//salsa/gg/ggo/ggo",
-        "@com_github_spf13_cobra//:cobra",
-    ],
+    deps = ["@com_github_spf13_cobra//:cobra"],
 )

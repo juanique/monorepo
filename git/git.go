@@ -11,18 +11,7 @@ import (
 	libgit "github.com/libgit2/git2go/v33"
 )
 
-type Repo interface {
-	// Equivalent to `git checkout -b <branchName>`
-	CreateBranch(branchName string) error
-	// Commit metadata of the current HEAD
-	Head() (CommitMetadata, error)
-	// Name of the current active branch
-	ActiveBranch() (string, error)
-	// Equivalent to `git commit -A -m <message>`
-	Commit(message string) (string, error)
-}
-
-type repoImpl struct {
+type Repo struct {
 	RemotePath string
 	LocalPath  string
 	repo       *libgit.Repository
@@ -34,29 +23,20 @@ type CommitMetadata struct {
 	Date        time.Time
 }
 
-func transferProgressCallback(stats libgit.TransferProgress) error {
-	log.Println("Received ", stats.ReceivedBytes)
-	return nil
-}
-
 func credentialsCallback(url string, usernameFromURL string, allowedTypes libgit.CredType) (*libgit.Cred, error) {
 	// You might want to update the path according to your system's setup or obtain it from an environment variable.
-	fmt.Println("This is the creds callback.")
 	usr, err := user.Current()
 	if err != nil {
 		log.Fatalf("Failed to get current user: %v", err)
 	}
 
-	sshPublicKey := filepath.Join(usr.HomeDir, ".ssh", "id_ed25519.pub")
-	sshPrivateKey := filepath.Join(usr.HomeDir, ".ssh", "id_ed25519")
+	sshPublicKey := filepath.Join(usr.HomeDir, ".ssh", "id_rsa.pub")
+	sshPrivateKey := filepath.Join(usr.HomeDir, ".ssh", "id_rsa")
 
-	cred, err := libgit.NewCredentialSSHKey(usernameFromURL, sshPublicKey, sshPrivateKey, "")
+	cred, err := libgit.NewCredSshKey(usernameFromURL, sshPublicKey, sshPrivateKey, "")
 	if err != nil {
 		return nil, fmt.Errorf("Could not create ssh credentials: %w", err)
 	}
-	fmt.Println("sshPublicKey: ", sshPublicKey)
-	fmt.Println("sshPrivateKey: ", sshPrivateKey)
-	fmt.Println("cred:", cred)
 	return cred, err
 }
 
@@ -64,10 +44,10 @@ func certificateCheckCallback(cert *libgit.Certificate, valid bool, hostname str
 	return nil
 }
 
-func (repo *repoImpl) CreateBranch(branchName string) error {
+func (repo *Repo) CreateBranch(branchName string) error {
 	oid, err := repo.repo.RevparseSingle("HEAD")
 	if err != nil {
-		return fmt.Errorf("could not find HEAD %w", err)
+		return fmt.Errorf("Could not find HEAD %w", err)
 	}
 	commit, err := repo.repo.LookupCommit(oid.Id())
 	if err != nil {
@@ -82,7 +62,7 @@ func (repo *repoImpl) CreateBranch(branchName string) error {
 	return nil
 }
 
-func (repo *repoImpl) Head() (CommitMetadata, error) {
+func (repo *Repo) Head() (CommitMetadata, error) {
 	var commitMetadata CommitMetadata
 
 	headRef, err := repo.repo.Head()
@@ -104,10 +84,15 @@ func (repo *repoImpl) Head() (CommitMetadata, error) {
 	return commitMetadata, nil
 }
 
-func (repo *repoImpl) ActiveBranch() (string, error) {
+func (repo *Repo) ActiveBranch() (string, error) {
 	headRef, err := repo.repo.Head()
 	if err != nil {
 		return "", fmt.Errorf("Failed to get HEAD reference: %w", err)
+	}
+
+	// Ensure the reference is a branch
+	if headRef.Type() != libgit.ReferenceSymbolic {
+		return "", fmt.Errorf("HEAD is not a symbolic reference")
 	}
 
 	branch, err := repo.repo.LookupBranch(headRef.Shorthand(), libgit.BranchLocal)
@@ -124,55 +109,6 @@ func (repo *repoImpl) ActiveBranch() (string, error) {
 	return branchName, nil
 }
 
-func (repo *repoImpl) Commit(message string) (string, error) {
-	// Load the index
-	index, err := repo.repo.Index()
-	if err != nil {
-		return "", fmt.Errorf("failed to load repository index: %w", err)
-	}
-
-	// Add all changes to the index
-	err = index.AddAll([]string{"."}, libgit.IndexAddDefault, nil)
-	if err != nil {
-		return "", fmt.Errorf("failed to stage changes: %w", err)
-	}
-
-	// Write the index to a tree
-	treeId, err := index.WriteTree()
-	if err != nil {
-		return "", fmt.Errorf("failed to write tree: %w", err)
-	}
-
-	tree, err := repo.repo.LookupTree(treeId)
-	if err != nil {
-		return "", fmt.Errorf("failed to lookup tree: %w", err)
-	}
-
-	// Create the commit signature
-	sig, err := repo.repo.DefaultSignature()
-	if err != nil {
-		return "", fmt.Errorf("failed to create signature: %w", err)
-	}
-
-	// Get HEAD as the parent commit
-	parentCommit, err := repo.repo.Head()
-	if err != nil {
-		return "", fmt.Errorf("failed to get HEAD: %w", err)
-	}
-	parent, err := repo.repo.LookupCommit(parentCommit.Target())
-	if err != nil {
-		return "", fmt.Errorf("failed to lookup parent commit: %w", err)
-	}
-
-	// Commit
-	commitId, err := repo.repo.CreateCommit("HEAD", sig, sig, message, tree, parent)
-	if err != nil {
-		return "", fmt.Errorf("failed to create commit: %w", err)
-	}
-
-	return commitId.String(), nil
-}
-
 func convertSSHUrl(url string) string {
 	if strings.HasPrefix(url, "git@") {
 		return strings.Replace(url, ":", "/", 1)
@@ -180,88 +116,104 @@ func convertSSHUrl(url string) string {
 	return url
 }
 
-func Clone(repoURL string, localPath string) (*repoImpl, error) {
+func LongClone(repoURL string, localPath, branch string) (*Repo, error) {
 	if libgit.Features()&libgit.FeatureSSH != 0 {
-		log.Println("libgit2 has SSH support!")
+		fmt.Println("libgit2 has SSH support!")
 	} else {
-		log.Println("libgit2 does not have SSH support.")
+		fmt.Println("libgit2 does not have SSH support.")
 	}
+
+	// if strings.HasPrefix(repoURL, "git@github") {
+	// repoURL = convertSSHUrl(repoURL)
+	// }
+	// 1. Create the directory
+	// if err := os.MkdirAll(localPath+"/.git/objects", 0755); err != nil {
+	// return nil, fmt.Errorf("error creating directory: %w", err)
+	// }
 
 	fetchOptions := &libgit.FetchOptions{
 		RemoteCallbacks: libgit.RemoteCallbacks{
 			CredentialsCallback:      credentialsCallback,
 			CertificateCheckCallback: certificateCheckCallback,
-			TransferProgressCallback: transferProgressCallback,
 		},
 	}
 
 	repo, err := libgit.Clone(repoURL, localPath, &libgit.CloneOptions{
-		FetchOptions:    *fetchOptions,
-		CheckoutOptions: libgit.CheckoutOptions{Strategy: libgit.CheckoutForce},
+		FetchOptions: *fetchOptions,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("error cloning repository %s to %s: %w", repoURL, localPath, err)
 	}
+	defer repo.Free()
 
-	return &repoImpl{RemotePath: repoURL, LocalPath: localPath, repo: repo}, nil
+	return &Repo{RemotePath: repoURL, LocalPath: localPath, repo: repo}, nil
+
+	// 3. Add the repository URL as a remote
+	remote, err := repo.Remotes.Create("origin", repoURL)
+	if err != nil {
+		return nil, fmt.Errorf("error adding remote: %w", err)
+	}
+
+	// Set up fetch options with a callback for credentials if needed.
+	// Here's a simple example without authentication. Modify as required.
+	// 4. Fetch the remote branch
+	if err := remote.Fetch([]string{branch}, fetchOptions, ""); err != nil {
+		return nil, fmt.Errorf("error fetching remote branch: %w", err)
+	}
+
+	// 5. Checkout the fetched branch
+	fetchedBranch, err := repo.LookupBranch("origin/"+branch, libgit.BranchRemote)
+	if err != nil {
+		return nil, fmt.Errorf("error looking up fetched branch: %w", err)
+	}
+	defer fetchedBranch.Free()
+
+	commit, err := repo.LookupCommit(fetchedBranch.Target())
+	if err != nil {
+		return nil, fmt.Errorf("error looking up commit from fetched branch: %w", err)
+	}
+
+	localBranch, err := repo.CreateBranch(branch, commit, false)
+	if err != nil {
+		return nil, fmt.Errorf("error creating local branch: %w", err)
+	}
+	defer localBranch.Free()
+
+	tree, err := repo.LookupTree(localBranch.Target())
+	if err != nil {
+		return nil, fmt.Errorf("error looking up tree for local branch: %w", err)
+	}
+
+	if err := repo.CheckoutTree(tree, &libgit.CheckoutOpts{
+		Strategy: libgit.CheckoutSafe | libgit.CheckoutRecreateMissing,
+	}); err != nil {
+		return nil, fmt.Errorf("error checking out tree: %w", err)
+	}
+
+	// Point HEAD to the new branch
+	if err := repo.SetHead("refs/heads/" + branch); err != nil {
+		return nil, fmt.Errorf("error setting HEAD to new branch: %w", err)
+	}
+
+	return &Repo{RemotePath: repoURL, LocalPath: localPath, repo: repo}, nil
 }
 
-type InitOpts struct {
-	ConfigFile string
-}
-
-func Init(localPath string, opts InitOpts) (*repoImpl, error) {
-	repo, err := libgit.InitRepository(localPath, false /*isbare*/)
+func Clone(remotePath string, localPath string) (*Repo, error) {
+	log.Println("Clonning", remotePath, "to", localPath)
+	cloneOpts := &libgit.CloneOptions{
+		FetchOptions: libgit.FetchOptions{
+			RemoteCallbacks: libgit.RemoteCallbacks{
+				CredentialsCallback:      credentialsCallback,
+				CertificateCheckCallback: certificateCheckCallback,
+			},
+		},
+	}
+	repo, err := libgit.Clone(remotePath, localPath, cloneOpts)
 	if err != nil {
-		return nil, fmt.Errorf("could not init git repo: %w", err)
+		return nil, fmt.Errorf("Failed to clone repo: %w", err)
 	}
 
-	if opts.ConfigFile != "" {
-		c, err := libgit.NewConfig()
-		if err != nil {
-			return nil, fmt.Errorf("could not create config: %w", err)
-		}
-
-		// No idea what are good defaults for the arguments
-		c.AddFile(opts.ConfigFile, libgit.ConfigLevelGlobal, true)
-		if err = repo.SetConfig(c); err != nil {
-			return nil, fmt.Errorf("could not set config: %w", err)
-		}
-	}
-
-	// Create an empty tree
-	treeBuilder, err := repo.TreeBuilder()
-	if err != nil {
-		return nil, fmt.Errorf("could not create repo tree: %w", err)
-	}
-	defer treeBuilder.Free()
-
-	treeId, err := treeBuilder.Write()
-	if err != nil {
-		return nil, fmt.Errorf("could not build repo tree: %w", err)
-	}
-
-	tree, err := repo.LookupTree(treeId)
-	if err != nil {
-		return nil, fmt.Errorf("could not lookup repo tree: %w", err)
-	}
-	defer tree.Free()
-
-	// Create the commit signature
-	sig, err := repo.DefaultSignature()
-	if err != nil {
-		return nil, fmt.Errorf("failed to create signature: %w", err)
-	}
-
-	// Create an initial empty commit
-	_, err = repo.CreateCommit("HEAD", sig, sig, "Initial commit", tree)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	newRepo := &repoImpl{LocalPath: localPath, repo: repo}
-
-	return newRepo, nil
+	return &Repo{RemotePath: remotePath, LocalPath: localPath, repo: repo}, nil
 }
 
 func Status() {

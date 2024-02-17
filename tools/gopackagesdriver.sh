@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
 echo "$@" >> /tmp/gopackagesdriver.log
 
-# To debug use a command like this:
-# echo {} | ./tools/gopackagesdriver.sh file=examples/go/helloworld.go
-#
-# You can also inspect
-# tail -f /tmp/gopackagesdriver.log
-
 # We ignore requests to process ./... because it would build the entire monorepo.
 TARGET="./..."
 NEW_ARGS=()

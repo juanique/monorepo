@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -7,15 +7,4 @@ go_library(
     srcs = ["git.go"],
     importpath = "github.com/juanique/monorepo/git",
     deps = ["@com_github_libgit2_git2go_v33//:git2go"],
-)
-
-go_test(
-    name = "git_test",
-    srcs = ["git_test.go"],
-    deps = [
-        ":git_lib",
-        "//engprod/testfs",
-        "//salsa/go/must",
-        "@com_github_stretchr_testify//suite",
-    ],
 )
