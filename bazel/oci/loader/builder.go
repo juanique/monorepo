@@ -261,7 +261,7 @@ func (b *ImageBuilder) Build(i Image, opts BuildOpts) (string, error) {
 	}
 
 	for _, layer := range i.GetLayerBlobPaths() {
-		output := b.AddLayerBlob(layer, opts.SkipLayers)
+		output := b.AddLayerBlob(layer, layersToSkip)
 		b.outputManifest.Layers = append(b.outputManifest.Layers, output.rel)
 	}
 
