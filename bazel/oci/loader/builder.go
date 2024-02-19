@@ -10,7 +10,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	encodingjson "encoding/json"
 
@@ -242,28 +241,39 @@ type BuildOpts struct {
 
 // Build creates an OCI image tar from an OCI image directory.
 func (b *ImageBuilder) Build(i Image, opts BuildOpts) (string, error) {
-	startTime := time.Now()
 	configOutput := b.AddBlob(b.configPath)
 	b.outputManifest.Config = configOutput.rel
-	log.Println("added config blob, time since starting build:", time.Since(startTime))
+	layersToSkip := []string{}
+
+	for _, layerPath := range i.GetLayerBlobPaths() {
+		skipped := false
+		for _, skipLayer := range opts.SkipLayers {
+			if filepath.Base(layerPath) == skipLayer {
+				skipped = true
+				layersToSkip = append(layersToSkip, skipLayer)
+			}
+		}
+
+		if !skipped {
+			// Once we need a layer, we need every other layer on top.
+			break
+		}
+	}
+
 	for _, layer := range i.GetLayerBlobPaths() {
 		output := b.AddLayerBlob(layer, opts.SkipLayers)
 		b.outputManifest.Layers = append(b.outputManifest.Layers, output.rel)
 	}
-	log.Println("added layers, time since starting build:", time.Since(startTime))
 
 	tarInputs := []string{}
 	for _, file := range b.filesToCopy {
-		startCopy := time.Now()
 		if file.src != file.dst {
 			if err := files.CreateSymLink(file.src, file.dst); err != nil && file.src != file.dst {
 				return "", err
 			}
 		}
-		log.Printf("copied %s in %s\n", file.src, time.Since(startCopy))
 		tarInputs = append(tarInputs, file.rel)
 	}
-	log.Println("gathered files to copy, time since starting build:", time.Since(startTime))
 
 	outputManifest := []OutputManifest{b.outputManifest}
 	err := json.ToFile(b.GetOutputPath("manifest.json"), outputManifest)
@@ -276,17 +286,13 @@ func (b *ImageBuilder) Build(i Image, opts BuildOpts) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to create tar builder: %w", err)
 	}
-	log.Println("Before adding inputs, time since starting build:", time.Since(startTime))
 	if err := tarb.Add(tarInputs); err != nil {
-		log.Println("oh oh", err.Error())
 		return "", fmt.Errorf("failed to add files to tar: %w", err)
 	}
 
-	log.Println("After inputs, before tarb.Write(), time since starting build:", time.Since(startTime))
 	if err := tarb.Write(); err != nil {
 		return "", fmt.Errorf("failed to write tar: %w", err)
 	}
-	log.Println("After tarb.Write(), time since starting build:", time.Since(startTime))
 	return b.GetOutputPath("image.tar"), nil
 }
 
