@@ -18,3 +18,9 @@ def load_oci_images():
         digest = "sha256:b492494d8e0113c4ad3fe4528a4b5ff89faa5331f7d52c5c138196f69ce176a6",
         image = "index.docker.io/library/ubuntu",
     )
+
+    oci_pull(
+        name = "build",
+        digest = "sha256:2a669a950ee7941bf0e308372aa9ab1a38dc5491f75e3d6acf7b5e941a3bc32f",
+        image = "index.docker.io/juanzolotoochin/ubuntu-build",
+    )
