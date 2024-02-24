@@ -1,4 +1,4 @@
-load("@pip_deps//:requirements.bzl", "requirement")
+load("//:bazel/python.bzl", "py_binary")
 load("//:bazel/docker.bzl", "py_image")
 load("@io_bazel_rules_docker//container:container.bzl", "container_push")
 
@@ -7,19 +7,12 @@ package(default_visibility = ["//examples:__subpackages__"])
 py_binary(
     name = "greeter_server",
     srcs = ["greeter_server.py"],
+    visibility = ["//:__subpackages__"],
     deps = [
-        ":greeter_server_lib",
-    ],
-)
-
-py_library(
-    name = "greeter_server_lib",
-    srcs = [],
-    deps = [
-        requirement("grpcio"),
-        requirement("grpcio-reflection"),
         "//examples/grpc/protos:helloworld_py_grpc",
         "//examples/grpc/protos:helloworld_py_proto",
+        "@pip_deps//grpcio",
+        "@pip_deps//grpcio_reflection",
     ],
 )
 
