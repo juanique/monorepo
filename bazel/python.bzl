@@ -1,10 +1,4 @@
 load("@pip_deps//:requirements.bzl", "requirement")
-load(
-    "@aspect_rules_py//py:defs.bzl",
-    _py_binary = "py_binary",
-    _py_library = "py_library",
-    _py_test = "py_test",
-)
 
 FIRECRACKER_EXEC_PROPERTIES = {
     # Tell BuildBuddy to run this test using a Firecracker microVM.
@@ -24,7 +18,7 @@ def py_binary(name, srcs, **kwargs):
     test.
 
     Args:
-     name: Name that will be used for the _py_binary target.
+     name: Name that will be used for the native py_binary target.
      **kwargs: All other target args.
     """
 
@@ -34,38 +28,40 @@ def py_binary(name, srcs, **kwargs):
         else:
             fail("Missing main attribute for multi srcs target.")
 
-    _py_binary(name = name, srcs = srcs, **kwargs)
+    native.py_binary(name = name, srcs=srcs, **kwargs)
 
-    py_ruff_test(name = name + "_pylint", srcs = srcs)
+    py_ruff_test(name = name + "_pylint", srcs=srcs)
 
 def py_library(name, srcs, **kwargs):
     print(srcs)
-    _py_library(name = name, srcs = srcs, **kwargs)
-    py_ruff_test(name = name + "_pylint", srcs = srcs)
+    native.py_library(name = name, srcs=srcs, **kwargs)
+    py_ruff_test(name = name + "_pylint", srcs=srcs)
 
 def py_test(name, srcs, firecracker = False, **kwargs):
     if firecracker:
-        _py_test(
+        native.py_test(
             name = name,
             exec_properties = FIRECRACKER_EXEC_PROPERTIES,
-            srcs = srcs,
-            **kwargs
+            srcs=srcs, 
+            **kwargs,
         )
     else:
-        _py_test(
+        native.py_test(
             name = name,
-            srcs = srcs,
-            **kwargs
+            srcs=srcs, 
+            **kwargs,
         )
-    py_ruff_test(name = name + "_pylint", srcs = srcs)
-    py_debug(name = name + "_debug", srcs = srcs, og_name = name, **kwargs)
+    py_ruff_test(name = name + "_pylint", srcs=srcs)
+    py_debug(name = name + "_debug", srcs=srcs, og_name = name, **kwargs)
 
 def pylint_test(name, srcs, deps = [], args = [], data = [], **kwargs):
     kwargs["main"] = "pylint_test_wrapper.py"
-    _py_test(
+    native.py_test(
         name = name,
         srcs = ["//bazel/workspace/tools/pylint:pylint_test_wrapper.py"] + srcs,
         args = ["--pylint-rcfile=$(location //bazel/workspace/tools/pylint:.pylintrc)"] + args + ["$(location :%s)" % x for x in srcs],
+        python_version = "PY3",
+        srcs_version = "PY3",
         deps = deps + [
             requirement("pytest"),
             requirement("pytest-pylint"),
@@ -82,10 +78,12 @@ def py_debug(name, og_name, srcs, deps = [], args = [], data = [], **kwargs):
 
     py_debug_wrapper(name = wrapper_dep_name, out = wrapper_filename)
 
-    _py_binary(
+    native.py_binary(
         name = name,
         srcs = [wrapper_filename] + srcs,
         main = wrapper_filename,
+        python_version = "PY3",
+        srcs_version = "PY3",
         deps = deps + [
             requirement("pytest"),
             requirement("debugpy"),
@@ -119,7 +117,7 @@ py_debug_wrapper = rule(
 )
 
 def pytest_test(name, srcs, deps = [], args = [], **kwargs):
-    _py_test(
+    native.py_test(
         name = name,
         srcs = [
             "//bazel/workspace/tools/pytest:pytest_wrapper.py",
@@ -128,6 +126,8 @@ def pytest_test(name, srcs, deps = [], args = [], **kwargs):
         args = [
             "--capture=no",
         ] + args + ["$(location :%s)" % x for x in srcs],
+        python_version = "PY3",
+        srcs_version = "PY3",
         deps = deps + [
             requirement("pytest"),
         ],
@@ -173,7 +173,7 @@ def _py_ruff_test_impl(ctx):
     runfiles = ctx.runfiles(files = ctx.files.srcs)
     runfiles = runfiles.merge(ctx.attr._ruff_runner[DefaultInfo].default_runfiles)
     runfiles = runfiles.merge(ctx.attr._config_file[DefaultInfo].default_runfiles)
-    return DefaultInfo(files = depset([script_file]), executable = script_file, runfiles = runfiles)
+    return DefaultInfo(files=depset([script_file]), executable=script_file, runfiles=runfiles)
 
 py_ruff_test = rule(
     implementation = _py_ruff_test_impl,
@@ -181,7 +181,7 @@ py_ruff_test = rule(
         "srcs": attr.label_list(
             allow_files = True,
             mandatory = True,
-            doc = "*.py files to check with ruff",
+            doc = "*.py files to check with ruff"
         ),
         "_ruff_runner": attr.label(
             default = "//bazel/workspace/tools/ruff",
@@ -192,7 +192,7 @@ py_ruff_test = rule(
         "_config_file": attr.label(
             default = "//:pyproject.toml",
             allow_single_file = True,
-        ),
+        )
     },
     doc = "Wrapper for running ruff checks on python files.",
     test = True,

@@ -1,4 +1,5 @@
-load("//:bazel/python.bzl", "py_binary", "py_executable", "py_library", "py_test")
+load("@pip_deps//:requirements.bzl", "requirement")
+load("//:bazel/python.bzl", "py_binary", "py_executable", "py_library", "py_ruff_test", "py_test")
 load("@io_bazel_rules_docker//container:container.bzl", "container_push")
 load("@io_bazel_rules_docker//lang:image.bzl", "app_layer")
 
@@ -7,15 +8,14 @@ py_library(
     srcs = [
         "gg.py",
     ],
-    visibility = ["//:__subpackages__"],
     deps = [
         "//salsa/os:environ_ctx",
-        "@pip_deps//gitpython",
-        "@pip_deps//humanize",
-        "@pip_deps//pydantic",
-        "@pip_deps//pygithub",
-        "@pip_deps//rich",
-        "@pip_deps//unidecode",
+        "@pip_deps_gitpython//:pkg",
+        "@pip_deps_humanize//:pkg",
+        "@pip_deps_pydantic//:pkg",
+        "@pip_deps_pygithub//:pkg",
+        "@pip_deps_rich//:pkg",
+        "@pip_deps_unidecode//:pkg",
     ],
 )
 
@@ -25,7 +25,7 @@ py_test(
     deps = [
         ":gg",
         "//salsa/util:subsets",
-        "@pip_deps//gitpython",
+        "@pip_deps_gitpython//:pkg",
     ],
 )
 
@@ -34,22 +34,20 @@ py_binary(
     srcs = [
         "gg_cli.py",
     ],
-    visibility = ["//:__subpackages__"],
     deps = [
         ":gg",
-        "@pip_deps//click",
-        "@pip_deps//gitpython",
-        "@pip_deps//rich",
+        "@pip_deps_click//:pkg",
+        "@pip_deps_gitpython//:pkg",
+        "@pip_deps_rich//:pkg",
     ],
 )
 
 py_binary(
     name = "gg_example",
     srcs = ["gg_example.py"],
-    visibility = ["//:__subpackages__"],
     deps = [
         ":gg",
-        "@pip_deps//gitpython",
+        "@pip_deps_gitpython//:pkg",
     ],
 )
 

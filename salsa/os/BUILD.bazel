@@ -9,7 +9,8 @@ py_library(
     srcs = [
         "environ_ctx.py",
     ],
-    visibility = ["//:__subpackages__"],
+    deps = [
+    ],
 )
 
 py_test(

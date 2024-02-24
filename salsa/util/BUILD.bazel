@@ -5,7 +5,6 @@ package(default_visibility = ["//salsa:__subpackages__"])
 py_library(
     name = "subsets",
     srcs = ["subsets.py"],
-    visibility = ["//:__subpackages__"],
 )
 
 py_test(
