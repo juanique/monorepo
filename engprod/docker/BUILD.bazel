@@ -1,4 +1,3 @@
-load("@pip_deps//:requirements.bzl", "requirement")
 load("//:bazel/python.bzl", "py_library", "py_test")
 load("@io_bazel_rules_docker//container:container.bzl", "container_image")
 
