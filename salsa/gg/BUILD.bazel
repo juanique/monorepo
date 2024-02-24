@@ -1,7 +1,6 @@
-load("@pip_deps//:requirements.bzl", "requirement")
-load("//:bazel/python.bzl", "py_binary", "py_executable", "py_library", "py_ruff_test", "py_test")
-load("@io_bazel_rules_docker//container:container.bzl", "container_push")
-load("@io_bazel_rules_docker//lang:image.bzl", "app_layer")
+load("//:bazel/python.bzl", "py_binary", "py_executable", "py_library", "py_test")
+load("@rules_oci//oci:defs.bzl", "oci_push")
+load("//bazel/oci:defs.bzl", "image")
 
 py_library(
     name = "gg",
@@ -54,20 +53,17 @@ py_binary(
     ],
 )
 
-app_layer(
-    name = "gg_docker",
-    base = "@build//image",
+image(
+    name = "gg_image",
+    base = "@build",
     binary = ":gg_cli",
-    create_empty_workspace_dir = True,
 )
 
-container_push(
-    name = "gg_docker_push",
-    format = "Docker",
-    image = ":gg_docker",
-    registry = "docker.io",
-    repository = "juanzolotoochin/gg_cli",
-    tag = "latest",
+oci_push(
+    name = "gg_image_push",
+    image = ":gg_image",
+    remote_tags = ["latest"],
+    repository = "index.docker.io/juanzolotoochin/ubuntu-build",
 )
 
 py_executable(

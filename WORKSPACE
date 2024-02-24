@@ -256,14 +256,6 @@ container_pull(
 )
 
 container_pull(
-    name = "build",
-    digest = "sha256:2a669a950ee7941bf0e308372aa9ab1a38dc5491f75e3d6acf7b5e941a3bc32f",
-    registry = "docker.io",
-    repository = "juanzolotoochin/ubuntu-build",
-    tag = "latest",
-)
-
-container_pull(
     name = "postgres",
     digest = "sha256:cd116dbc6ac97b18f8e1ad07aa94399117863731ec99f06ae1270937a98119bf",
     registry = "docker.io",
