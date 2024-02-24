@@ -794,11 +794,11 @@ manifest:
     functorch.dim.reference: torch
     functorch.dim.tree_map: torch
     functorch.dim.wrap_type: torch
-    functorch.einops: torch
-    functorch.einops.rearrange: torch
     functorch.experimental: torch
-    functorch.experimental.control_flow: torch
+    functorch.experimental.batch_norm_replacement: torch
+    functorch.experimental.cond: torch
     functorch.experimental.ops: torch
+    functorch.setup: torch
     git: GitPython
     git.cmd: GitPython
     git.compat: GitPython
@@ -1136,30 +1136,6 @@ manifest:
     isort.utils: isort
     isort.wrap: isort
     isort.wrap_modes: isort
-    isympy: sympy
-    jinja2: Jinja2
-    jinja2.async_utils: Jinja2
-    jinja2.bccache: Jinja2
-    jinja2.compiler: Jinja2
-    jinja2.constants: Jinja2
-    jinja2.debug: Jinja2
-    jinja2.defaults: Jinja2
-    jinja2.environment: Jinja2
-    jinja2.exceptions: Jinja2
-    jinja2.ext: Jinja2
-    jinja2.filters: Jinja2
-    jinja2.idtracking: Jinja2
-    jinja2.lexer: Jinja2
-    jinja2.loaders: Jinja2
-    jinja2.meta: Jinja2
-    jinja2.nativetypes: Jinja2
-    jinja2.nodes: Jinja2
-    jinja2.optimizer: Jinja2
-    jinja2.parser: Jinja2
-    jinja2.runtime: Jinja2
-    jinja2.sandbox: Jinja2
-    jinja2.utils: Jinja2
-    jinja2.visitor: Jinja2
     jwt: PyJWT
     jwt.algorithms: PyJWT
     jwt.api_jwk: PyJWT
@@ -1172,59 +1148,7 @@ manifest:
     jwt.types: PyJWT
     jwt.utils: PyJWT
     jwt.warnings: PyJWT
-    markupsafe: MarkupSafe
     mccabe: mccabe
-    mpmath: mpmath
-    mpmath.calculus: mpmath
-    mpmath.calculus.approximation: mpmath
-    mpmath.calculus.calculus: mpmath
-    mpmath.calculus.differentiation: mpmath
-    mpmath.calculus.extrapolation: mpmath
-    mpmath.calculus.inverselaplace: mpmath
-    mpmath.calculus.odes: mpmath
-    mpmath.calculus.optimization: mpmath
-    mpmath.calculus.polynomials: mpmath
-    mpmath.calculus.quadrature: mpmath
-    mpmath.ctx_base: mpmath
-    mpmath.ctx_fp: mpmath
-    mpmath.ctx_iv: mpmath
-    mpmath.ctx_mp: mpmath
-    mpmath.ctx_mp_python: mpmath
-    mpmath.function_docs: mpmath
-    mpmath.functions: mpmath
-    mpmath.functions.bessel: mpmath
-    mpmath.functions.elliptic: mpmath
-    mpmath.functions.expintegrals: mpmath
-    mpmath.functions.factorials: mpmath
-    mpmath.functions.functions: mpmath
-    mpmath.functions.hypergeometric: mpmath
-    mpmath.functions.orthogonal: mpmath
-    mpmath.functions.qfunctions: mpmath
-    mpmath.functions.rszeta: mpmath
-    mpmath.functions.signals: mpmath
-    mpmath.functions.theta: mpmath
-    mpmath.functions.zeta: mpmath
-    mpmath.functions.zetazeros: mpmath
-    mpmath.identification: mpmath
-    mpmath.libmp: mpmath
-    mpmath.libmp.backend: mpmath
-    mpmath.libmp.gammazeta: mpmath
-    mpmath.libmp.libelefun: mpmath
-    mpmath.libmp.libhyper: mpmath
-    mpmath.libmp.libintmath: mpmath
-    mpmath.libmp.libmpc: mpmath
-    mpmath.libmp.libmpf: mpmath
-    mpmath.libmp.libmpi: mpmath
-    mpmath.math2: mpmath
-    mpmath.matrices: mpmath
-    mpmath.matrices.calculus: mpmath
-    mpmath.matrices.eigen: mpmath
-    mpmath.matrices.eigen_symmetric: mpmath
-    mpmath.matrices.linalg: mpmath
-    mpmath.matrices.matrices: mpmath
-    mpmath.rational: mpmath
-    mpmath.usertools: mpmath
-    mpmath.visualization: mpmath
     nacl: PyNaCl
     nacl.bindings: PyNaCl
     nacl.bindings.crypto_aead: PyNaCl
@@ -1254,285 +1178,6 @@ manifest:
     nacl.secret: PyNaCl
     nacl.signing: PyNaCl
     nacl.utils: PyNaCl
-    networkx: networkx
-    networkx.algorithms: networkx
-    networkx.algorithms.approximation: networkx
-    networkx.algorithms.approximation.clique: networkx
-    networkx.algorithms.approximation.clustering_coefficient: networkx
-    networkx.algorithms.approximation.connectivity: networkx
-    networkx.algorithms.approximation.distance_measures: networkx
-    networkx.algorithms.approximation.dominating_set: networkx
-    networkx.algorithms.approximation.kcomponents: networkx
-    networkx.algorithms.approximation.matching: networkx
-    networkx.algorithms.approximation.maxcut: networkx
-    networkx.algorithms.approximation.ramsey: networkx
-    networkx.algorithms.approximation.steinertree: networkx
-    networkx.algorithms.approximation.traveling_salesman: networkx
-    networkx.algorithms.approximation.treewidth: networkx
-    networkx.algorithms.approximation.vertex_cover: networkx
-    networkx.algorithms.assortativity: networkx
-    networkx.algorithms.assortativity.connectivity: networkx
-    networkx.algorithms.assortativity.correlation: networkx
-    networkx.algorithms.assortativity.mixing: networkx
-    networkx.algorithms.assortativity.neighbor_degree: networkx
-    networkx.algorithms.assortativity.pairs: networkx
-    networkx.algorithms.asteroidal: networkx
-    networkx.algorithms.bipartite: networkx
-    networkx.algorithms.bipartite.basic: networkx
-    networkx.algorithms.bipartite.centrality: networkx
-    networkx.algorithms.bipartite.cluster: networkx
-    networkx.algorithms.bipartite.covering: networkx
-    networkx.algorithms.bipartite.edgelist: networkx
-    networkx.algorithms.bipartite.extendability: networkx
-    networkx.algorithms.bipartite.generators: networkx
-    networkx.algorithms.bipartite.matching: networkx
-    networkx.algorithms.bipartite.matrix: networkx
-    networkx.algorithms.bipartite.projection: networkx
-    networkx.algorithms.bipartite.redundancy: networkx
-    networkx.algorithms.bipartite.spectral: networkx
-    networkx.algorithms.boundary: networkx
-    networkx.algorithms.bridges: networkx
-    networkx.algorithms.centrality: networkx
-    networkx.algorithms.centrality.betweenness: networkx
-    networkx.algorithms.centrality.betweenness_subset: networkx
-    networkx.algorithms.centrality.closeness: networkx
-    networkx.algorithms.centrality.current_flow_betweenness: networkx
-    networkx.algorithms.centrality.current_flow_betweenness_subset: networkx
-    networkx.algorithms.centrality.current_flow_closeness: networkx
-    networkx.algorithms.centrality.degree_alg: networkx
-    networkx.algorithms.centrality.dispersion: networkx
-    networkx.algorithms.centrality.eigenvector: networkx
-    networkx.algorithms.centrality.flow_matrix: networkx
-    networkx.algorithms.centrality.group: networkx
-    networkx.algorithms.centrality.harmonic: networkx
-    networkx.algorithms.centrality.katz: networkx
-    networkx.algorithms.centrality.laplacian: networkx
-    networkx.algorithms.centrality.load: networkx
-    networkx.algorithms.centrality.percolation: networkx
-    networkx.algorithms.centrality.reaching: networkx
-    networkx.algorithms.centrality.second_order: networkx
-    networkx.algorithms.centrality.subgraph_alg: networkx
-    networkx.algorithms.centrality.trophic: networkx
-    networkx.algorithms.centrality.voterank_alg: networkx
-    networkx.algorithms.chains: networkx
-    networkx.algorithms.chordal: networkx
-    networkx.algorithms.clique: networkx
-    networkx.algorithms.cluster: networkx
-    networkx.algorithms.coloring: networkx
-    networkx.algorithms.coloring.equitable_coloring: networkx
-    networkx.algorithms.coloring.greedy_coloring: networkx
-    networkx.algorithms.communicability_alg: networkx
-    networkx.algorithms.community: networkx
-    networkx.algorithms.community.asyn_fluid: networkx
-    networkx.algorithms.community.centrality: networkx
-    networkx.algorithms.community.community_utils: networkx
-    networkx.algorithms.community.kclique: networkx
-    networkx.algorithms.community.kernighan_lin: networkx
-    networkx.algorithms.community.label_propagation: networkx
-    networkx.algorithms.community.louvain: networkx
-    networkx.algorithms.community.lukes: networkx
-    networkx.algorithms.community.modularity_max: networkx
-    networkx.algorithms.community.quality: networkx
-    networkx.algorithms.components: networkx
-    networkx.algorithms.components.attracting: networkx
-    networkx.algorithms.components.biconnected: networkx
-    networkx.algorithms.components.connected: networkx
-    networkx.algorithms.components.semiconnected: networkx
-    networkx.algorithms.components.strongly_connected: networkx
-    networkx.algorithms.components.weakly_connected: networkx
-    networkx.algorithms.connectivity: networkx
-    networkx.algorithms.connectivity.connectivity: networkx
-    networkx.algorithms.connectivity.cuts: networkx
-    networkx.algorithms.connectivity.disjoint_paths: networkx
-    networkx.algorithms.connectivity.edge_augmentation: networkx
-    networkx.algorithms.connectivity.edge_kcomponents: networkx
-    networkx.algorithms.connectivity.kcomponents: networkx
-    networkx.algorithms.connectivity.kcutsets: networkx
-    networkx.algorithms.connectivity.stoerwagner: networkx
-    networkx.algorithms.connectivity.utils: networkx
-    networkx.algorithms.core: networkx
-    networkx.algorithms.covering: networkx
-    networkx.algorithms.cuts: networkx
-    networkx.algorithms.cycles: networkx
-    networkx.algorithms.d_separation: networkx
-    networkx.algorithms.dag: networkx
-    networkx.algorithms.distance_measures: networkx
-    networkx.algorithms.distance_regular: networkx
-    networkx.algorithms.dominance: networkx
-    networkx.algorithms.dominating: networkx
-    networkx.algorithms.efficiency_measures: networkx
-    networkx.algorithms.euler: networkx
-    networkx.algorithms.flow: networkx
-    networkx.algorithms.flow.boykovkolmogorov: networkx
-    networkx.algorithms.flow.capacityscaling: networkx
-    networkx.algorithms.flow.dinitz_alg: networkx
-    networkx.algorithms.flow.edmondskarp: networkx
-    networkx.algorithms.flow.gomory_hu: networkx
-    networkx.algorithms.flow.maxflow: networkx
-    networkx.algorithms.flow.mincost: networkx
-    networkx.algorithms.flow.networksimplex: networkx
-    networkx.algorithms.flow.preflowpush: networkx
-    networkx.algorithms.flow.shortestaugmentingpath: networkx
-    networkx.algorithms.flow.utils: networkx
-    networkx.algorithms.graph_hashing: networkx
-    networkx.algorithms.graphical: networkx
-    networkx.algorithms.hierarchy: networkx
-    networkx.algorithms.hybrid: networkx
-    networkx.algorithms.isolate: networkx
-    networkx.algorithms.isomorphism: networkx
-    networkx.algorithms.isomorphism.ismags: networkx
-    networkx.algorithms.isomorphism.isomorph: networkx
-    networkx.algorithms.isomorphism.isomorphvf2: networkx
-    networkx.algorithms.isomorphism.matchhelpers: networkx
-    networkx.algorithms.isomorphism.temporalisomorphvf2: networkx
-    networkx.algorithms.isomorphism.tree_isomorphism: networkx
-    networkx.algorithms.isomorphism.vf2pp: networkx
-    networkx.algorithms.isomorphism.vf2userfunc: networkx
-    networkx.algorithms.link_analysis: networkx
-    networkx.algorithms.link_analysis.hits_alg: networkx
-    networkx.algorithms.link_analysis.pagerank_alg: networkx
-    networkx.algorithms.link_prediction: networkx
-    networkx.algorithms.lowest_common_ancestors: networkx
-    networkx.algorithms.matching: networkx
-    networkx.algorithms.minors: networkx
-    networkx.algorithms.minors.contraction: networkx
-    networkx.algorithms.mis: networkx
-    networkx.algorithms.moral: networkx
-    networkx.algorithms.node_classification: networkx
-    networkx.algorithms.non_randomness: networkx
-    networkx.algorithms.operators: networkx
-    networkx.algorithms.operators.all: networkx
-    networkx.algorithms.operators.binary: networkx
-    networkx.algorithms.operators.product: networkx
-    networkx.algorithms.operators.unary: networkx
-    networkx.algorithms.planar_drawing: networkx
-    networkx.algorithms.planarity: networkx
-    networkx.algorithms.polynomials: networkx
-    networkx.algorithms.reciprocity: networkx
-    networkx.algorithms.regular: networkx
-    networkx.algorithms.richclub: networkx
-    networkx.algorithms.shortest_paths: networkx
-    networkx.algorithms.shortest_paths.astar: networkx
-    networkx.algorithms.shortest_paths.dense: networkx
-    networkx.algorithms.shortest_paths.generic: networkx
-    networkx.algorithms.shortest_paths.unweighted: networkx
-    networkx.algorithms.shortest_paths.weighted: networkx
-    networkx.algorithms.similarity: networkx
-    networkx.algorithms.simple_paths: networkx
-    networkx.algorithms.smallworld: networkx
-    networkx.algorithms.smetric: networkx
-    networkx.algorithms.sparsifiers: networkx
-    networkx.algorithms.structuralholes: networkx
-    networkx.algorithms.summarization: networkx
-    networkx.algorithms.swap: networkx
-    networkx.algorithms.threshold: networkx
-    networkx.algorithms.time_dependent: networkx
-    networkx.algorithms.tournament: networkx
-    networkx.algorithms.traversal: networkx
-    networkx.algorithms.traversal.beamsearch: networkx
-    networkx.algorithms.traversal.breadth_first_search: networkx
-    networkx.algorithms.traversal.depth_first_search: networkx
-    networkx.algorithms.traversal.edgebfs: networkx
-    networkx.algorithms.traversal.edgedfs: networkx
-    networkx.algorithms.tree: networkx
-    networkx.algorithms.tree.branchings: networkx
-    networkx.algorithms.tree.coding: networkx
-    networkx.algorithms.tree.decomposition: networkx
-    networkx.algorithms.tree.mst: networkx
-    networkx.algorithms.tree.operations: networkx
-    networkx.algorithms.tree.recognition: networkx
-    networkx.algorithms.triads: networkx
-    networkx.algorithms.vitality: networkx
-    networkx.algorithms.voronoi: networkx
-    networkx.algorithms.walks: networkx
-    networkx.algorithms.wiener: networkx
-    networkx.classes: networkx
-    networkx.classes.coreviews: networkx
-    networkx.classes.digraph: networkx
-    networkx.classes.filters: networkx
-    networkx.classes.function: networkx
-    networkx.classes.graph: networkx
-    networkx.classes.graphviews: networkx
-    networkx.classes.multidigraph: networkx
-    networkx.classes.multigraph: networkx
-    networkx.classes.reportviews: networkx
-    networkx.conftest: networkx
-    networkx.convert: networkx
-    networkx.convert_matrix: networkx
-    networkx.drawing: networkx
-    networkx.drawing.layout: networkx
-    networkx.drawing.nx_agraph: networkx
-    networkx.drawing.nx_latex: networkx
-    networkx.drawing.nx_pydot: networkx
-    networkx.drawing.nx_pylab: networkx
-    networkx.exception: networkx
-    networkx.generators: networkx
-    networkx.generators.atlas: networkx
-    networkx.generators.classic: networkx
-    networkx.generators.cographs: networkx
-    networkx.generators.community: networkx
-    networkx.generators.degree_seq: networkx
-    networkx.generators.directed: networkx
-    networkx.generators.duplication: networkx
-    networkx.generators.ego: networkx
-    networkx.generators.expanders: networkx
-    networkx.generators.geometric: networkx
-    networkx.generators.harary_graph: networkx
-    networkx.generators.internet_as_graphs: networkx
-    networkx.generators.intersection: networkx
-    networkx.generators.interval_graph: networkx
-    networkx.generators.joint_degree_seq: networkx
-    networkx.generators.lattice: networkx
-    networkx.generators.line: networkx
-    networkx.generators.mycielski: networkx
-    networkx.generators.nonisomorphic_trees: networkx
-    networkx.generators.random_clustered: networkx
-    networkx.generators.random_graphs: networkx
-    networkx.generators.small: networkx
-    networkx.generators.social: networkx
-    networkx.generators.spectral_graph_forge: networkx
-    networkx.generators.stochastic: networkx
-    networkx.generators.sudoku: networkx
-    networkx.generators.time_series: networkx
-    networkx.generators.trees: networkx
-    networkx.generators.triads: networkx
-    networkx.lazy_imports: networkx
-    networkx.linalg: networkx
-    networkx.linalg.algebraicconnectivity: networkx
-    networkx.linalg.attrmatrix: networkx
-    networkx.linalg.bethehessianmatrix: networkx
-    networkx.linalg.graphmatrix: networkx
-    networkx.linalg.laplacianmatrix: networkx
-    networkx.linalg.modularitymatrix: networkx
-    networkx.linalg.spectrum: networkx
-    networkx.readwrite: networkx
-    networkx.readwrite.adjlist: networkx
-    networkx.readwrite.edgelist: networkx
-    networkx.readwrite.gexf: networkx
-    networkx.readwrite.gml: networkx
-    networkx.readwrite.graph6: networkx
-    networkx.readwrite.graphml: networkx
-    networkx.readwrite.json_graph: networkx
-    networkx.readwrite.json_graph.adjacency: networkx
-    networkx.readwrite.json_graph.cytoscape: networkx
-    networkx.readwrite.json_graph.node_link: networkx
-    networkx.readwrite.json_graph.tree: networkx
-    networkx.readwrite.leda: networkx
-    networkx.readwrite.multiline_adjlist: networkx
-    networkx.readwrite.p2g: networkx
-    networkx.readwrite.pajek: networkx
-    networkx.readwrite.sparse6: networkx
-    networkx.readwrite.text: networkx
-    networkx.relabel: networkx
-    networkx.utils: networkx
-    networkx.utils.backends: networkx
-    networkx.utils.decorators: networkx
-    networkx.utils.heaps: networkx
-    networkx.utils.mapped_queue: networkx
-    networkx.utils.misc: networkx
-    networkx.utils.random_sequence: networkx
-    networkx.utils.rcm: networkx
-    networkx.utils.union_find: networkx
     numpy: numpy
     numpy.array_api: numpy
     numpy.array_api.linalg: numpy
@@ -1701,47 +1346,20 @@ manifest:
     numpy.typing.mypy_plugin: numpy
     numpy.typing.setup: numpy
     numpy.version: numpy
-    nvidia: nvidia_nvtx_cu12
-    nvidia.cublas: nvidia_cublas_cu12
-    nvidia.cublas.include: nvidia_cublas_cu12
-    nvidia.cublas.lib: nvidia_cublas_cu12
-    nvidia.cuda_cupti: nvidia_cuda_cupti_cu12
-    nvidia.cuda_cupti.include: nvidia_cuda_cupti_cu12
-    nvidia.cuda_cupti.lib: nvidia_cuda_cupti_cu12
-    nvidia.cuda_cupti.lib.libcheckpoint: nvidia_cuda_cupti_cu12
-    nvidia.cuda_cupti.lib.libnvperf_host: nvidia_cuda_cupti_cu12
-    nvidia.cuda_cupti.lib.libnvperf_target: nvidia_cuda_cupti_cu12
-    nvidia.cuda_cupti.lib.libpcsamplingutil: nvidia_cuda_cupti_cu12
-    nvidia.cuda_nvrtc: nvidia_cuda_nvrtc_cu12
-    nvidia.cuda_nvrtc.include: nvidia_cuda_nvrtc_cu12
-    nvidia.cuda_nvrtc.lib: nvidia_cuda_nvrtc_cu12
-    nvidia.cuda_runtime: nvidia_cuda_runtime_cu12
-    nvidia.cuda_runtime.include: nvidia_cuda_runtime_cu12
-    nvidia.cuda_runtime.lib: nvidia_cuda_runtime_cu12
-    nvidia.cudnn: nvidia_cudnn_cu12
-    nvidia.cudnn.include: nvidia_cudnn_cu12
-    nvidia.cudnn.lib: nvidia_cudnn_cu12
-    nvidia.cufft: nvidia_cufft_cu12
-    nvidia.cufft.include: nvidia_cufft_cu12
-    nvidia.cufft.lib: nvidia_cufft_cu12
-    nvidia.curand: nvidia_curand_cu12
-    nvidia.curand.include: nvidia_curand_cu12
-    nvidia.curand.lib: nvidia_curand_cu12
-    nvidia.cusolver: nvidia_cusolver_cu12
-    nvidia.cusolver.include: nvidia_cusolver_cu12
-    nvidia.cusolver.lib: nvidia_cusolver_cu12
-    nvidia.cusparse: nvidia_cusparse_cu12
-    nvidia.cusparse.include: nvidia_cusparse_cu12
-    nvidia.cusparse.lib: nvidia_cusparse_cu12
-    nvidia.nccl: nvidia_nccl_cu12
-    nvidia.nccl.include: nvidia_nccl_cu12
-    nvidia.nccl.lib: nvidia_nccl_cu12
-    nvidia.nvjitlink: nvidia_nvjitlink_cu12
-    nvidia.nvjitlink.include: nvidia_nvjitlink_cu12
-    nvidia.nvjitlink.lib: nvidia_nvjitlink_cu12
-    nvidia.nvtx: nvidia_nvtx_cu12
-    nvidia.nvtx.include: nvidia_nvtx_cu12
-    nvidia.nvtx.lib: nvidia_nvtx_cu12
+    nvidia: nvidia_cudnn_cu11
+    nvidia.cuda_cupti: nvidia_cuda_cupti_cu11
+    nvidia.cuda_cupti.include: nvidia_cuda_cupti_cu11
+    nvidia.cuda_cupti.lib: nvidia_cuda_cupti_cu11
+    nvidia.cuda_cupti.lib.libcheckpoint: nvidia_cuda_cupti_cu11
+    nvidia.cuda_cupti.lib.libnvperf_host: nvidia_cuda_cupti_cu11
+    nvidia.cuda_cupti.lib.libnvperf_target: nvidia_cuda_cupti_cu11
+    nvidia.cuda_cupti.lib.libpcsamplingutil: nvidia_cuda_cupti_cu11
+    nvidia.cuda_nvrtc: nvidia_cuda_nvrtc_cu11
+    nvidia.cuda_nvrtc.include: nvidia_cuda_nvrtc_cu11
+    nvidia.cuda_nvrtc.lib: nvidia_cuda_nvrtc_cu11
+    nvidia.cudnn: nvidia_cudnn_cu11
+    nvidia.cudnn.include: nvidia_cudnn_cu11
+    nvidia.cudnn.lib: nvidia_cudnn_cu11
     packaging: packaging
     packaging.markers: packaging
     packaging.metadata: packaging
@@ -1750,6 +1368,8 @@ manifest:
     packaging.tags: packaging
     packaging.utils: packaging
     packaging.version: packaging
+    pkg_resources: setuptools
+    pkg_resources.extern: setuptools
     platformdirs: platformdirs
     platformdirs.android: platformdirs
     platformdirs.api: platformdirs
@@ -2499,6 +2119,63 @@ manifest:
     scipy.stats.sampling: scipy
     scipy.stats.stats: scipy
     scipy.version: scipy
+    setuptools: setuptools
+    setuptools.archive_util: setuptools
+    setuptools.build_meta: setuptools
+    setuptools.command: setuptools
+    setuptools.command.alias: setuptools
+    setuptools.command.bdist_egg: setuptools
+    setuptools.command.bdist_rpm: setuptools
+    setuptools.command.build: setuptools
+    setuptools.command.build_clib: setuptools
+    setuptools.command.build_ext: setuptools
+    setuptools.command.build_py: setuptools
+    setuptools.command.develop: setuptools
+    setuptools.command.dist_info: setuptools
+    setuptools.command.easy_install: setuptools
+    setuptools.command.editable_wheel: setuptools
+    setuptools.command.egg_info: setuptools
+    setuptools.command.install: setuptools
+    setuptools.command.install_egg_info: setuptools
+    setuptools.command.install_lib: setuptools
+    setuptools.command.install_scripts: setuptools
+    setuptools.command.register: setuptools
+    setuptools.command.rotate: setuptools
+    setuptools.command.saveopts: setuptools
+    setuptools.command.sdist: setuptools
+    setuptools.command.setopt: setuptools
+    setuptools.command.test: setuptools
+    setuptools.command.upload: setuptools
+    setuptools.command.upload_docs: setuptools
+    setuptools.compat: setuptools
+    setuptools.compat.py310: setuptools
+    setuptools.compat.py311: setuptools
+    setuptools.config: setuptools
+    setuptools.config.expand: setuptools
+    setuptools.config.pyprojecttoml: setuptools
+    setuptools.config.setupcfg: setuptools
+    setuptools.dep_util: setuptools
+    setuptools.depends: setuptools
+    setuptools.discovery: setuptools
+    setuptools.dist: setuptools
+    setuptools.errors: setuptools
+    setuptools.extension: setuptools
+    setuptools.extern: setuptools
+    setuptools.glob: setuptools
+    setuptools.installer: setuptools
+    setuptools.launch: setuptools
+    setuptools.logging: setuptools
+    setuptools.modified: setuptools
+    setuptools.monkey: setuptools
+    setuptools.msvc: setuptools
+    setuptools.namespaces: setuptools
+    setuptools.package_index: setuptools
+    setuptools.sandbox: setuptools
+    setuptools.unicode_utils: setuptools
+    setuptools.version: setuptools
+    setuptools.warnings: setuptools
+    setuptools.wheel: setuptools
+    setuptools.windows_support: setuptools
     six: six
     smmap: smmap
     smmap.buf: smmap
@@ -2510,794 +2187,6 @@ manifest:
     smmap.test.test_tutorial: smmap
     smmap.test.test_util: smmap
     smmap.util: smmap
-    sympy: sympy
-    sympy.abc: sympy
-    sympy.algebras: sympy
-    sympy.algebras.quaternion: sympy
-    sympy.assumptions: sympy
-    sympy.assumptions.ask: sympy
-    sympy.assumptions.ask_generated: sympy
-    sympy.assumptions.assume: sympy
-    sympy.assumptions.cnf: sympy
-    sympy.assumptions.facts: sympy
-    sympy.assumptions.handlers: sympy
-    sympy.assumptions.handlers.calculus: sympy
-    sympy.assumptions.handlers.common: sympy
-    sympy.assumptions.handlers.matrices: sympy
-    sympy.assumptions.handlers.ntheory: sympy
-    sympy.assumptions.handlers.order: sympy
-    sympy.assumptions.handlers.sets: sympy
-    sympy.assumptions.predicates: sympy
-    sympy.assumptions.predicates.calculus: sympy
-    sympy.assumptions.predicates.common: sympy
-    sympy.assumptions.predicates.matrices: sympy
-    sympy.assumptions.predicates.ntheory: sympy
-    sympy.assumptions.predicates.order: sympy
-    sympy.assumptions.predicates.sets: sympy
-    sympy.assumptions.refine: sympy
-    sympy.assumptions.relation: sympy
-    sympy.assumptions.relation.binrel: sympy
-    sympy.assumptions.relation.equality: sympy
-    sympy.assumptions.satask: sympy
-    sympy.assumptions.sathandlers: sympy
-    sympy.assumptions.wrapper: sympy
-    sympy.benchmarks: sympy
-    sympy.benchmarks.bench_discrete_log: sympy
-    sympy.benchmarks.bench_meijerint: sympy
-    sympy.benchmarks.bench_symbench: sympy
-    sympy.calculus: sympy
-    sympy.calculus.accumulationbounds: sympy
-    sympy.calculus.euler: sympy
-    sympy.calculus.finite_diff: sympy
-    sympy.calculus.singularities: sympy
-    sympy.calculus.util: sympy
-    sympy.categories: sympy
-    sympy.categories.baseclasses: sympy
-    sympy.categories.diagram_drawing: sympy
-    sympy.codegen: sympy
-    sympy.codegen.abstract_nodes: sympy
-    sympy.codegen.algorithms: sympy
-    sympy.codegen.approximations: sympy
-    sympy.codegen.ast: sympy
-    sympy.codegen.cfunctions: sympy
-    sympy.codegen.cnodes: sympy
-    sympy.codegen.cutils: sympy
-    sympy.codegen.cxxnodes: sympy
-    sympy.codegen.fnodes: sympy
-    sympy.codegen.futils: sympy
-    sympy.codegen.matrix_nodes: sympy
-    sympy.codegen.numpy_nodes: sympy
-    sympy.codegen.pynodes: sympy
-    sympy.codegen.pyutils: sympy
-    sympy.codegen.rewriting: sympy
-    sympy.codegen.scipy_nodes: sympy
-    sympy.combinatorics: sympy
-    sympy.combinatorics.coset_table: sympy
-    sympy.combinatorics.fp_groups: sympy
-    sympy.combinatorics.free_groups: sympy
-    sympy.combinatorics.galois: sympy
-    sympy.combinatorics.generators: sympy
-    sympy.combinatorics.graycode: sympy
-    sympy.combinatorics.group_constructs: sympy
-    sympy.combinatorics.group_numbers: sympy
-    sympy.combinatorics.homomorphisms: sympy
-    sympy.combinatorics.named_groups: sympy
-    sympy.combinatorics.partitions: sympy
-    sympy.combinatorics.pc_groups: sympy
-    sympy.combinatorics.perm_groups: sympy
-    sympy.combinatorics.permutations: sympy
-    sympy.combinatorics.polyhedron: sympy
-    sympy.combinatorics.prufer: sympy
-    sympy.combinatorics.rewritingsystem: sympy
-    sympy.combinatorics.rewritingsystem_fsm: sympy
-    sympy.combinatorics.schur_number: sympy
-    sympy.combinatorics.subsets: sympy
-    sympy.combinatorics.tensor_can: sympy
-    sympy.combinatorics.testutil: sympy
-    sympy.combinatorics.util: sympy
-    sympy.concrete: sympy
-    sympy.concrete.delta: sympy
-    sympy.concrete.expr_with_intlimits: sympy
-    sympy.concrete.expr_with_limits: sympy
-    sympy.concrete.gosper: sympy
-    sympy.concrete.guess: sympy
-    sympy.concrete.products: sympy
-    sympy.concrete.summations: sympy
-    sympy.conftest: sympy
-    sympy.core: sympy
-    sympy.core.add: sympy
-    sympy.core.alphabets: sympy
-    sympy.core.assumptions: sympy
-    sympy.core.assumptions_generated: sympy
-    sympy.core.backend: sympy
-    sympy.core.basic: sympy
-    sympy.core.benchmarks: sympy
-    sympy.core.benchmarks.bench_arit: sympy
-    sympy.core.benchmarks.bench_assumptions: sympy
-    sympy.core.benchmarks.bench_basic: sympy
-    sympy.core.benchmarks.bench_expand: sympy
-    sympy.core.benchmarks.bench_numbers: sympy
-    sympy.core.benchmarks.bench_sympify: sympy
-    sympy.core.cache: sympy
-    sympy.core.compatibility: sympy
-    sympy.core.containers: sympy
-    sympy.core.core: sympy
-    sympy.core.coreerrors: sympy
-    sympy.core.decorators: sympy
-    sympy.core.evalf: sympy
-    sympy.core.expr: sympy
-    sympy.core.exprtools: sympy
-    sympy.core.facts: sympy
-    sympy.core.function: sympy
-    sympy.core.kind: sympy
-    sympy.core.logic: sympy
-    sympy.core.mod: sympy
-    sympy.core.mul: sympy
-    sympy.core.multidimensional: sympy
-    sympy.core.numbers: sympy
-    sympy.core.operations: sympy
-    sympy.core.parameters: sympy
-    sympy.core.power: sympy
-    sympy.core.random: sympy
-    sympy.core.relational: sympy
-    sympy.core.rules: sympy
-    sympy.core.singleton: sympy
-    sympy.core.sorting: sympy
-    sympy.core.symbol: sympy
-    sympy.core.sympify: sympy
-    sympy.core.trace: sympy
-    sympy.core.traversal: sympy
-    sympy.crypto: sympy
-    sympy.crypto.crypto: sympy
-    sympy.diffgeom: sympy
-    sympy.diffgeom.diffgeom: sympy
-    sympy.diffgeom.rn: sympy
-    sympy.discrete: sympy
-    sympy.discrete.convolutions: sympy
-    sympy.discrete.recurrences: sympy
-    sympy.discrete.transforms: sympy
-    sympy.external: sympy
-    sympy.external.gmpy: sympy
-    sympy.external.importtools: sympy
-    sympy.external.pythonmpq: sympy
-    sympy.functions: sympy
-    sympy.functions.combinatorial: sympy
-    sympy.functions.combinatorial.factorials: sympy
-    sympy.functions.combinatorial.numbers: sympy
-    sympy.functions.elementary: sympy
-    sympy.functions.elementary.benchmarks: sympy
-    sympy.functions.elementary.benchmarks.bench_exp: sympy
-    sympy.functions.elementary.complexes: sympy
-    sympy.functions.elementary.exponential: sympy
-    sympy.functions.elementary.hyperbolic: sympy
-    sympy.functions.elementary.integers: sympy
-    sympy.functions.elementary.miscellaneous: sympy
-    sympy.functions.elementary.piecewise: sympy
-    sympy.functions.elementary.trigonometric: sympy
-    sympy.functions.special: sympy
-    sympy.functions.special.benchmarks: sympy
-    sympy.functions.special.benchmarks.bench_special: sympy
-    sympy.functions.special.bessel: sympy
-    sympy.functions.special.beta_functions: sympy
-    sympy.functions.special.bsplines: sympy
-    sympy.functions.special.delta_functions: sympy
-    sympy.functions.special.elliptic_integrals: sympy
-    sympy.functions.special.error_functions: sympy
-    sympy.functions.special.gamma_functions: sympy
-    sympy.functions.special.hyper: sympy
-    sympy.functions.special.mathieu_functions: sympy
-    sympy.functions.special.polynomials: sympy
-    sympy.functions.special.singularity_functions: sympy
-    sympy.functions.special.spherical_harmonics: sympy
-    sympy.functions.special.tensor_functions: sympy
-    sympy.functions.special.zeta_functions: sympy
-    sympy.galgebra: sympy
-    sympy.geometry: sympy
-    sympy.geometry.curve: sympy
-    sympy.geometry.ellipse: sympy
-    sympy.geometry.entity: sympy
-    sympy.geometry.exceptions: sympy
-    sympy.geometry.line: sympy
-    sympy.geometry.parabola: sympy
-    sympy.geometry.plane: sympy
-    sympy.geometry.point: sympy
-    sympy.geometry.polygon: sympy
-    sympy.geometry.util: sympy
-    sympy.holonomic: sympy
-    sympy.holonomic.holonomic: sympy
-    sympy.holonomic.holonomicerrors: sympy
-    sympy.holonomic.numerical: sympy
-    sympy.holonomic.recurrence: sympy
-    sympy.integrals: sympy
-    sympy.integrals.benchmarks: sympy
-    sympy.integrals.benchmarks.bench_integrate: sympy
-    sympy.integrals.benchmarks.bench_trigintegrate: sympy
-    sympy.integrals.deltafunctions: sympy
-    sympy.integrals.heurisch: sympy
-    sympy.integrals.integrals: sympy
-    sympy.integrals.intpoly: sympy
-    sympy.integrals.laplace: sympy
-    sympy.integrals.manualintegrate: sympy
-    sympy.integrals.meijerint: sympy
-    sympy.integrals.meijerint_doc: sympy
-    sympy.integrals.prde: sympy
-    sympy.integrals.quadrature: sympy
-    sympy.integrals.rationaltools: sympy
-    sympy.integrals.rde: sympy
-    sympy.integrals.risch: sympy
-    sympy.integrals.singularityfunctions: sympy
-    sympy.integrals.transforms: sympy
-    sympy.integrals.trigonometry: sympy
-    sympy.interactive: sympy
-    sympy.interactive.printing: sympy
-    sympy.interactive.session: sympy
-    sympy.interactive.traversal: sympy
-    sympy.liealgebras: sympy
-    sympy.liealgebras.cartan_matrix: sympy
-    sympy.liealgebras.cartan_type: sympy
-    sympy.liealgebras.dynkin_diagram: sympy
-    sympy.liealgebras.root_system: sympy
-    sympy.liealgebras.type_a: sympy
-    sympy.liealgebras.type_b: sympy
-    sympy.liealgebras.type_c: sympy
-    sympy.liealgebras.type_d: sympy
-    sympy.liealgebras.type_e: sympy
-    sympy.liealgebras.type_f: sympy
-    sympy.liealgebras.type_g: sympy
-    sympy.liealgebras.weyl_group: sympy
-    sympy.logic: sympy
-    sympy.logic.algorithms: sympy
-    sympy.logic.algorithms.dpll: sympy
-    sympy.logic.algorithms.dpll2: sympy
-    sympy.logic.algorithms.minisat22_wrapper: sympy
-    sympy.logic.algorithms.pycosat_wrapper: sympy
-    sympy.logic.boolalg: sympy
-    sympy.logic.inference: sympy
-    sympy.logic.utilities: sympy
-    sympy.logic.utilities.dimacs: sympy
-    sympy.matrices: sympy
-    sympy.matrices.benchmarks: sympy
-    sympy.matrices.benchmarks.bench_matrix: sympy
-    sympy.matrices.common: sympy
-    sympy.matrices.decompositions: sympy
-    sympy.matrices.dense: sympy
-    sympy.matrices.determinant: sympy
-    sympy.matrices.eigen: sympy
-    sympy.matrices.expressions: sympy
-    sympy.matrices.expressions.adjoint: sympy
-    sympy.matrices.expressions.applyfunc: sympy
-    sympy.matrices.expressions.blockmatrix: sympy
-    sympy.matrices.expressions.companion: sympy
-    sympy.matrices.expressions.determinant: sympy
-    sympy.matrices.expressions.diagonal: sympy
-    sympy.matrices.expressions.dotproduct: sympy
-    sympy.matrices.expressions.factorizations: sympy
-    sympy.matrices.expressions.fourier: sympy
-    sympy.matrices.expressions.funcmatrix: sympy
-    sympy.matrices.expressions.hadamard: sympy
-    sympy.matrices.expressions.inverse: sympy
-    sympy.matrices.expressions.kronecker: sympy
-    sympy.matrices.expressions.matadd: sympy
-    sympy.matrices.expressions.matexpr: sympy
-    sympy.matrices.expressions.matmul: sympy
-    sympy.matrices.expressions.matpow: sympy
-    sympy.matrices.expressions.permutation: sympy
-    sympy.matrices.expressions.sets: sympy
-    sympy.matrices.expressions.slice: sympy
-    sympy.matrices.expressions.special: sympy
-    sympy.matrices.expressions.trace: sympy
-    sympy.matrices.expressions.transpose: sympy
-    sympy.matrices.graph: sympy
-    sympy.matrices.immutable: sympy
-    sympy.matrices.inverse: sympy
-    sympy.matrices.matrices: sympy
-    sympy.matrices.normalforms: sympy
-    sympy.matrices.reductions: sympy
-    sympy.matrices.repmatrix: sympy
-    sympy.matrices.solvers: sympy
-    sympy.matrices.sparse: sympy
-    sympy.matrices.sparsetools: sympy
-    sympy.matrices.subspaces: sympy
-    sympy.matrices.utilities: sympy
-    sympy.multipledispatch: sympy
-    sympy.multipledispatch.conflict: sympy
-    sympy.multipledispatch.core: sympy
-    sympy.multipledispatch.dispatcher: sympy
-    sympy.multipledispatch.utils: sympy
-    sympy.ntheory: sympy
-    sympy.ntheory.bbp_pi: sympy
-    sympy.ntheory.continued_fraction: sympy
-    sympy.ntheory.digits: sympy
-    sympy.ntheory.ecm: sympy
-    sympy.ntheory.egyptian_fraction: sympy
-    sympy.ntheory.elliptic_curve: sympy
-    sympy.ntheory.factor_: sympy
-    sympy.ntheory.generate: sympy
-    sympy.ntheory.modular: sympy
-    sympy.ntheory.multinomial: sympy
-    sympy.ntheory.partitions_: sympy
-    sympy.ntheory.primetest: sympy
-    sympy.ntheory.qs: sympy
-    sympy.ntheory.residue_ntheory: sympy
-    sympy.parsing: sympy
-    sympy.parsing.ast_parser: sympy
-    sympy.parsing.autolev: sympy
-    sympy.parsing.autolev.test-examples.pydy-example-repo.chaos_pendulum: sympy
-    sympy.parsing.autolev.test-examples.pydy-example-repo.double_pendulum: sympy
-    sympy.parsing.autolev.test-examples.pydy-example-repo.mass_spring_damper: sympy
-    sympy.parsing.autolev.test-examples.pydy-example-repo.non_min_pendulum: sympy
-    sympy.parsing.autolev.test-examples.ruletest1: sympy
-    sympy.parsing.autolev.test-examples.ruletest10: sympy
-    sympy.parsing.autolev.test-examples.ruletest11: sympy
-    sympy.parsing.autolev.test-examples.ruletest12: sympy
-    sympy.parsing.autolev.test-examples.ruletest2: sympy
-    sympy.parsing.autolev.test-examples.ruletest3: sympy
-    sympy.parsing.autolev.test-examples.ruletest4: sympy
-    sympy.parsing.autolev.test-examples.ruletest5: sympy
-    sympy.parsing.autolev.test-examples.ruletest6: sympy
-    sympy.parsing.autolev.test-examples.ruletest7: sympy
-    sympy.parsing.autolev.test-examples.ruletest8: sympy
-    sympy.parsing.autolev.test-examples.ruletest9: sympy
-    sympy.parsing.c: sympy
-    sympy.parsing.c.c_parser: sympy
-    sympy.parsing.fortran: sympy
-    sympy.parsing.fortran.fortran_parser: sympy
-    sympy.parsing.latex: sympy
-    sympy.parsing.latex.errors: sympy
-    sympy.parsing.mathematica: sympy
-    sympy.parsing.maxima: sympy
-    sympy.parsing.sym_expr: sympy
-    sympy.parsing.sympy_parser: sympy
-    sympy.physics: sympy
-    sympy.physics.continuum_mechanics: sympy
-    sympy.physics.continuum_mechanics.beam: sympy
-    sympy.physics.continuum_mechanics.truss: sympy
-    sympy.physics.control: sympy
-    sympy.physics.control.control_plots: sympy
-    sympy.physics.control.lti: sympy
-    sympy.physics.hep: sympy
-    sympy.physics.hep.gamma_matrices: sympy
-    sympy.physics.hydrogen: sympy
-    sympy.physics.matrices: sympy
-    sympy.physics.mechanics: sympy
-    sympy.physics.mechanics.body: sympy
-    sympy.physics.mechanics.functions: sympy
-    sympy.physics.mechanics.joint: sympy
-    sympy.physics.mechanics.jointsmethod: sympy
-    sympy.physics.mechanics.kane: sympy
-    sympy.physics.mechanics.lagrange: sympy
-    sympy.physics.mechanics.linearize: sympy
-    sympy.physics.mechanics.method: sympy
-    sympy.physics.mechanics.models: sympy
-    sympy.physics.mechanics.particle: sympy
-    sympy.physics.mechanics.rigidbody: sympy
-    sympy.physics.mechanics.system: sympy
-    sympy.physics.optics: sympy
-    sympy.physics.optics.gaussopt: sympy
-    sympy.physics.optics.medium: sympy
-    sympy.physics.optics.polarization: sympy
-    sympy.physics.optics.utils: sympy
-    sympy.physics.optics.waves: sympy
-    sympy.physics.paulialgebra: sympy
-    sympy.physics.pring: sympy
-    sympy.physics.qho_1d: sympy
-    sympy.physics.quantum: sympy
-    sympy.physics.quantum.anticommutator: sympy
-    sympy.physics.quantum.boson: sympy
-    sympy.physics.quantum.cartesian: sympy
-    sympy.physics.quantum.cg: sympy
-    sympy.physics.quantum.circuitplot: sympy
-    sympy.physics.quantum.circuitutils: sympy
-    sympy.physics.quantum.commutator: sympy
-    sympy.physics.quantum.constants: sympy
-    sympy.physics.quantum.dagger: sympy
-    sympy.physics.quantum.density: sympy
-    sympy.physics.quantum.fermion: sympy
-    sympy.physics.quantum.gate: sympy
-    sympy.physics.quantum.grover: sympy
-    sympy.physics.quantum.hilbert: sympy
-    sympy.physics.quantum.identitysearch: sympy
-    sympy.physics.quantum.innerproduct: sympy
-    sympy.physics.quantum.matrixcache: sympy
-    sympy.physics.quantum.matrixutils: sympy
-    sympy.physics.quantum.operator: sympy
-    sympy.physics.quantum.operatorordering: sympy
-    sympy.physics.quantum.operatorset: sympy
-    sympy.physics.quantum.pauli: sympy
-    sympy.physics.quantum.piab: sympy
-    sympy.physics.quantum.qapply: sympy
-    sympy.physics.quantum.qasm: sympy
-    sympy.physics.quantum.qexpr: sympy
-    sympy.physics.quantum.qft: sympy
-    sympy.physics.quantum.qubit: sympy
-    sympy.physics.quantum.represent: sympy
-    sympy.physics.quantum.sho1d: sympy
-    sympy.physics.quantum.shor: sympy
-    sympy.physics.quantum.spin: sympy
-    sympy.physics.quantum.state: sympy
-    sympy.physics.quantum.tensorproduct: sympy
-    sympy.physics.quantum.trace: sympy
-    sympy.physics.secondquant: sympy
-    sympy.physics.sho: sympy
-    sympy.physics.units: sympy
-    sympy.physics.units.definitions: sympy
-    sympy.physics.units.definitions.dimension_definitions: sympy
-    sympy.physics.units.definitions.unit_definitions: sympy
-    sympy.physics.units.dimensions: sympy
-    sympy.physics.units.prefixes: sympy
-    sympy.physics.units.quantities: sympy
-    sympy.physics.units.systems: sympy
-    sympy.physics.units.systems.cgs: sympy
-    sympy.physics.units.systems.length_weight_time: sympy
-    sympy.physics.units.systems.mks: sympy
-    sympy.physics.units.systems.mksa: sympy
-    sympy.physics.units.systems.natural: sympy
-    sympy.physics.units.systems.si: sympy
-    sympy.physics.units.unitsystem: sympy
-    sympy.physics.units.util: sympy
-    sympy.physics.vector: sympy
-    sympy.physics.vector.dyadic: sympy
-    sympy.physics.vector.fieldfunctions: sympy
-    sympy.physics.vector.frame: sympy
-    sympy.physics.vector.functions: sympy
-    sympy.physics.vector.point: sympy
-    sympy.physics.vector.printing: sympy
-    sympy.physics.vector.vector: sympy
-    sympy.physics.wigner: sympy
-    sympy.plotting: sympy
-    sympy.plotting.experimental_lambdify: sympy
-    sympy.plotting.intervalmath: sympy
-    sympy.plotting.intervalmath.interval_arithmetic: sympy
-    sympy.plotting.intervalmath.interval_membership: sympy
-    sympy.plotting.intervalmath.lib_interval: sympy
-    sympy.plotting.plot: sympy
-    sympy.plotting.plot_implicit: sympy
-    sympy.plotting.pygletplot: sympy
-    sympy.plotting.pygletplot.color_scheme: sympy
-    sympy.plotting.pygletplot.managed_window: sympy
-    sympy.plotting.pygletplot.plot: sympy
-    sympy.plotting.pygletplot.plot_axes: sympy
-    sympy.plotting.pygletplot.plot_camera: sympy
-    sympy.plotting.pygletplot.plot_controller: sympy
-    sympy.plotting.pygletplot.plot_curve: sympy
-    sympy.plotting.pygletplot.plot_interval: sympy
-    sympy.plotting.pygletplot.plot_mode: sympy
-    sympy.plotting.pygletplot.plot_mode_base: sympy
-    sympy.plotting.pygletplot.plot_modes: sympy
-    sympy.plotting.pygletplot.plot_object: sympy
-    sympy.plotting.pygletplot.plot_rotation: sympy
-    sympy.plotting.pygletplot.plot_surface: sympy
-    sympy.plotting.pygletplot.plot_window: sympy
-    sympy.plotting.pygletplot.util: sympy
-    sympy.plotting.textplot: sympy
-    sympy.polys: sympy
-    sympy.polys.agca: sympy
-    sympy.polys.agca.extensions: sympy
-    sympy.polys.agca.homomorphisms: sympy
-    sympy.polys.agca.ideals: sympy
-    sympy.polys.agca.modules: sympy
-    sympy.polys.appellseqs: sympy
-    sympy.polys.benchmarks: sympy
-    sympy.polys.benchmarks.bench_galoispolys: sympy
-    sympy.polys.benchmarks.bench_groebnertools: sympy
-    sympy.polys.benchmarks.bench_solvers: sympy
-    sympy.polys.compatibility: sympy
-    sympy.polys.constructor: sympy
-    sympy.polys.densearith: sympy
-    sympy.polys.densebasic: sympy
-    sympy.polys.densetools: sympy
-    sympy.polys.dispersion: sympy
-    sympy.polys.distributedmodules: sympy
-    sympy.polys.domainmatrix: sympy
-    sympy.polys.domains: sympy
-    sympy.polys.domains.algebraicfield: sympy
-    sympy.polys.domains.characteristiczero: sympy
-    sympy.polys.domains.complexfield: sympy
-    sympy.polys.domains.compositedomain: sympy
-    sympy.polys.domains.domain: sympy
-    sympy.polys.domains.domainelement: sympy
-    sympy.polys.domains.expressiondomain: sympy
-    sympy.polys.domains.expressionrawdomain: sympy
-    sympy.polys.domains.field: sympy
-    sympy.polys.domains.finitefield: sympy
-    sympy.polys.domains.fractionfield: sympy
-    sympy.polys.domains.gaussiandomains: sympy
-    sympy.polys.domains.gmpyfinitefield: sympy
-    sympy.polys.domains.gmpyintegerring: sympy
-    sympy.polys.domains.gmpyrationalfield: sympy
-    sympy.polys.domains.groundtypes: sympy
-    sympy.polys.domains.integerring: sympy
-    sympy.polys.domains.modularinteger: sympy
-    sympy.polys.domains.mpelements: sympy
-    sympy.polys.domains.old_fractionfield: sympy
-    sympy.polys.domains.old_polynomialring: sympy
-    sympy.polys.domains.polynomialring: sympy
-    sympy.polys.domains.pythonfinitefield: sympy
-    sympy.polys.domains.pythonintegerring: sympy
-    sympy.polys.domains.pythonrational: sympy
-    sympy.polys.domains.pythonrationalfield: sympy
-    sympy.polys.domains.quotientring: sympy
-    sympy.polys.domains.rationalfield: sympy
-    sympy.polys.domains.realfield: sympy
-    sympy.polys.domains.ring: sympy
-    sympy.polys.domains.simpledomain: sympy
-    sympy.polys.euclidtools: sympy
-    sympy.polys.factortools: sympy
-    sympy.polys.fglmtools: sympy
-    sympy.polys.fields: sympy
-    sympy.polys.galoistools: sympy
-    sympy.polys.groebnertools: sympy
-    sympy.polys.heuristicgcd: sympy
-    sympy.polys.matrices: sympy
-    sympy.polys.matrices.ddm: sympy
-    sympy.polys.matrices.dense: sympy
-    sympy.polys.matrices.domainmatrix: sympy
-    sympy.polys.matrices.domainscalar: sympy
-    sympy.polys.matrices.eigen: sympy
-    sympy.polys.matrices.exceptions: sympy
-    sympy.polys.matrices.linsolve: sympy
-    sympy.polys.matrices.lll: sympy
-    sympy.polys.matrices.normalforms: sympy
-    sympy.polys.matrices.sdm: sympy
-    sympy.polys.modulargcd: sympy
-    sympy.polys.monomials: sympy
-    sympy.polys.multivariate_resultants: sympy
-    sympy.polys.numberfields: sympy
-    sympy.polys.numberfields.basis: sympy
-    sympy.polys.numberfields.exceptions: sympy
-    sympy.polys.numberfields.galois_resolvents: sympy
-    sympy.polys.numberfields.galoisgroups: sympy
-    sympy.polys.numberfields.minpoly: sympy
-    sympy.polys.numberfields.modules: sympy
-    sympy.polys.numberfields.primes: sympy
-    sympy.polys.numberfields.resolvent_lookup: sympy
-    sympy.polys.numberfields.subfield: sympy
-    sympy.polys.numberfields.utilities: sympy
-    sympy.polys.orderings: sympy
-    sympy.polys.orthopolys: sympy
-    sympy.polys.partfrac: sympy
-    sympy.polys.polyclasses: sympy
-    sympy.polys.polyconfig: sympy
-    sympy.polys.polyerrors: sympy
-    sympy.polys.polyfuncs: sympy
-    sympy.polys.polymatrix: sympy
-    sympy.polys.polyoptions: sympy
-    sympy.polys.polyquinticconst: sympy
-    sympy.polys.polyroots: sympy
-    sympy.polys.polytools: sympy
-    sympy.polys.polyutils: sympy
-    sympy.polys.rationaltools: sympy
-    sympy.polys.ring_series: sympy
-    sympy.polys.rings: sympy
-    sympy.polys.rootisolation: sympy
-    sympy.polys.rootoftools: sympy
-    sympy.polys.solvers: sympy
-    sympy.polys.specialpolys: sympy
-    sympy.polys.sqfreetools: sympy
-    sympy.polys.subresultants_qq_zz: sympy
-    sympy.printing: sympy
-    sympy.printing.aesaracode: sympy
-    sympy.printing.c: sympy
-    sympy.printing.codeprinter: sympy
-    sympy.printing.conventions: sympy
-    sympy.printing.cxx: sympy
-    sympy.printing.defaults: sympy
-    sympy.printing.dot: sympy
-    sympy.printing.fortran: sympy
-    sympy.printing.glsl: sympy
-    sympy.printing.gtk: sympy
-    sympy.printing.jscode: sympy
-    sympy.printing.julia: sympy
-    sympy.printing.lambdarepr: sympy
-    sympy.printing.latex: sympy
-    sympy.printing.llvmjitcode: sympy
-    sympy.printing.maple: sympy
-    sympy.printing.mathematica: sympy
-    sympy.printing.mathml: sympy
-    sympy.printing.numpy: sympy
-    sympy.printing.octave: sympy
-    sympy.printing.precedence: sympy
-    sympy.printing.pretty: sympy
-    sympy.printing.pretty.pretty: sympy
-    sympy.printing.pretty.pretty_symbology: sympy
-    sympy.printing.pretty.stringpict: sympy
-    sympy.printing.preview: sympy
-    sympy.printing.printer: sympy
-    sympy.printing.pycode: sympy
-    sympy.printing.python: sympy
-    sympy.printing.rcode: sympy
-    sympy.printing.repr: sympy
-    sympy.printing.rust: sympy
-    sympy.printing.smtlib: sympy
-    sympy.printing.str: sympy
-    sympy.printing.tableform: sympy
-    sympy.printing.tensorflow: sympy
-    sympy.printing.theanocode: sympy
-    sympy.printing.tree: sympy
-    sympy.release: sympy
-    sympy.sandbox: sympy
-    sympy.sandbox.indexed_integrals: sympy
-    sympy.series: sympy
-    sympy.series.acceleration: sympy
-    sympy.series.approximants: sympy
-    sympy.series.aseries: sympy
-    sympy.series.benchmarks: sympy
-    sympy.series.benchmarks.bench_limit: sympy
-    sympy.series.benchmarks.bench_order: sympy
-    sympy.series.formal: sympy
-    sympy.series.fourier: sympy
-    sympy.series.gruntz: sympy
-    sympy.series.kauers: sympy
-    sympy.series.limits: sympy
-    sympy.series.limitseq: sympy
-    sympy.series.order: sympy
-    sympy.series.residues: sympy
-    sympy.series.sequences: sympy
-    sympy.series.series: sympy
-    sympy.series.series_class: sympy
-    sympy.sets: sympy
-    sympy.sets.conditionset: sympy
-    sympy.sets.contains: sympy
-    sympy.sets.fancysets: sympy
-    sympy.sets.handlers: sympy
-    sympy.sets.handlers.add: sympy
-    sympy.sets.handlers.comparison: sympy
-    sympy.sets.handlers.functions: sympy
-    sympy.sets.handlers.intersection: sympy
-    sympy.sets.handlers.issubset: sympy
-    sympy.sets.handlers.mul: sympy
-    sympy.sets.handlers.power: sympy
-    sympy.sets.handlers.union: sympy
-    sympy.sets.ordinals: sympy
-    sympy.sets.powerset: sympy
-    sympy.sets.setexpr: sympy
-    sympy.sets.sets: sympy
-    sympy.simplify: sympy
-    sympy.simplify.combsimp: sympy
-    sympy.simplify.cse_main: sympy
-    sympy.simplify.cse_opts: sympy
-    sympy.simplify.epathtools: sympy
-    sympy.simplify.fu: sympy
-    sympy.simplify.gammasimp: sympy
-    sympy.simplify.hyperexpand: sympy
-    sympy.simplify.hyperexpand_doc: sympy
-    sympy.simplify.powsimp: sympy
-    sympy.simplify.radsimp: sympy
-    sympy.simplify.ratsimp: sympy
-    sympy.simplify.simplify: sympy
-    sympy.simplify.sqrtdenest: sympy
-    sympy.simplify.traversaltools: sympy
-    sympy.simplify.trigsimp: sympy
-    sympy.solvers: sympy
-    sympy.solvers.benchmarks: sympy
-    sympy.solvers.benchmarks.bench_solvers: sympy
-    sympy.solvers.bivariate: sympy
-    sympy.solvers.decompogen: sympy
-    sympy.solvers.deutils: sympy
-    sympy.solvers.diophantine: sympy
-    sympy.solvers.diophantine.diophantine: sympy
-    sympy.solvers.inequalities: sympy
-    sympy.solvers.ode: sympy
-    sympy.solvers.ode.hypergeometric: sympy
-    sympy.solvers.ode.lie_group: sympy
-    sympy.solvers.ode.nonhomogeneous: sympy
-    sympy.solvers.ode.ode: sympy
-    sympy.solvers.ode.riccati: sympy
-    sympy.solvers.ode.single: sympy
-    sympy.solvers.ode.subscheck: sympy
-    sympy.solvers.ode.systems: sympy
-    sympy.solvers.pde: sympy
-    sympy.solvers.polysys: sympy
-    sympy.solvers.recurr: sympy
-    sympy.solvers.solvers: sympy
-    sympy.solvers.solveset: sympy
-    sympy.stats: sympy
-    sympy.stats.compound_rv: sympy
-    sympy.stats.crv: sympy
-    sympy.stats.crv_types: sympy
-    sympy.stats.drv: sympy
-    sympy.stats.drv_types: sympy
-    sympy.stats.error_prop: sympy
-    sympy.stats.frv: sympy
-    sympy.stats.frv_types: sympy
-    sympy.stats.joint_rv: sympy
-    sympy.stats.joint_rv_types: sympy
-    sympy.stats.matrix_distributions: sympy
-    sympy.stats.random_matrix: sympy
-    sympy.stats.random_matrix_models: sympy
-    sympy.stats.rv: sympy
-    sympy.stats.rv_interface: sympy
-    sympy.stats.sampling: sympy
-    sympy.stats.sampling.sample_numpy: sympy
-    sympy.stats.sampling.sample_pymc: sympy
-    sympy.stats.sampling.sample_scipy: sympy
-    sympy.stats.stochastic_process: sympy
-    sympy.stats.stochastic_process_types: sympy
-    sympy.stats.symbolic_multivariate_probability: sympy
-    sympy.stats.symbolic_probability: sympy
-    sympy.strategies: sympy
-    sympy.strategies.branch: sympy
-    sympy.strategies.branch.core: sympy
-    sympy.strategies.branch.tools: sympy
-    sympy.strategies.branch.traverse: sympy
-    sympy.strategies.core: sympy
-    sympy.strategies.rl: sympy
-    sympy.strategies.tools: sympy
-    sympy.strategies.traverse: sympy
-    sympy.strategies.tree: sympy
-    sympy.strategies.util: sympy
-    sympy.tensor: sympy
-    sympy.tensor.array: sympy
-    sympy.tensor.array.array_comprehension: sympy
-    sympy.tensor.array.array_derivatives: sympy
-    sympy.tensor.array.arrayop: sympy
-    sympy.tensor.array.dense_ndim_array: sympy
-    sympy.tensor.array.expressions: sympy
-    sympy.tensor.array.expressions.array_expressions: sympy
-    sympy.tensor.array.expressions.arrayexpr_derivatives: sympy
-    sympy.tensor.array.expressions.conv_array_to_indexed: sympy
-    sympy.tensor.array.expressions.conv_array_to_matrix: sympy
-    sympy.tensor.array.expressions.conv_indexed_to_array: sympy
-    sympy.tensor.array.expressions.conv_matrix_to_array: sympy
-    sympy.tensor.array.expressions.from_array_to_indexed: sympy
-    sympy.tensor.array.expressions.from_array_to_matrix: sympy
-    sympy.tensor.array.expressions.from_indexed_to_array: sympy
-    sympy.tensor.array.expressions.from_matrix_to_array: sympy
-    sympy.tensor.array.expressions.utils: sympy
-    sympy.tensor.array.mutable_ndim_array: sympy
-    sympy.tensor.array.ndim_array: sympy
-    sympy.tensor.array.sparse_ndim_array: sympy
-    sympy.tensor.functions: sympy
-    sympy.tensor.index_methods: sympy
-    sympy.tensor.indexed: sympy
-    sympy.tensor.tensor: sympy
-    sympy.tensor.toperators: sympy
-    sympy.testing: sympy
-    sympy.testing.matrices: sympy
-    sympy.testing.pytest: sympy
-    sympy.testing.quality_unicode: sympy
-    sympy.testing.randtest: sympy
-    sympy.testing.runtests: sympy
-    sympy.testing.tmpfiles: sympy
-    sympy.this: sympy
-    sympy.unify: sympy
-    sympy.unify.core: sympy
-    sympy.unify.rewrite: sympy
-    sympy.unify.usympy: sympy
-    sympy.utilities: sympy
-    sympy.utilities.autowrap: sympy
-    sympy.utilities.codegen: sympy
-    sympy.utilities.decorator: sympy
-    sympy.utilities.enumerative: sympy
-    sympy.utilities.exceptions: sympy
-    sympy.utilities.iterables: sympy
-    sympy.utilities.lambdify: sympy
-    sympy.utilities.magic: sympy
-    sympy.utilities.matchpy_connector: sympy
-    sympy.utilities.mathml: sympy
-    sympy.utilities.memoization: sympy
-    sympy.utilities.misc: sympy
-    sympy.utilities.pkgdata: sympy
-    sympy.utilities.pytest: sympy
-    sympy.utilities.randtest: sympy
-    sympy.utilities.runtests: sympy
-    sympy.utilities.source: sympy
-    sympy.utilities.timeutils: sympy
-    sympy.utilities.tmpfiles: sympy
-    sympy.vector: sympy
-    sympy.vector.basisdependent: sympy
-    sympy.vector.coordsysrect: sympy
-    sympy.vector.deloperator: sympy
-    sympy.vector.dyadic: sympy
-    sympy.vector.functions: sympy
-    sympy.vector.implicitregion: sympy
-    sympy.vector.integrals: sympy
-    sympy.vector.operators: sympy
-    sympy.vector.orienters: sympy
-    sympy.vector.parametricregion: sympy
-    sympy.vector.point: sympy
-    sympy.vector.scalar: sympy
-    sympy.vector.vector: sympy
     tokenizers: tokenizers
     tokenizers.decoders: tokenizers
     tokenizers.implementations: tokenizers
@@ -3339,20 +2228,6 @@ manifest:
     torch.ao.nn.intrinsic: torch
     torch.ao.nn.intrinsic.modules: torch
     torch.ao.nn.intrinsic.modules.fused: torch
-    torch.ao.nn.intrinsic.qat: torch
-    torch.ao.nn.intrinsic.qat.modules: torch
-    torch.ao.nn.intrinsic.qat.modules.conv_fused: torch
-    torch.ao.nn.intrinsic.qat.modules.linear_fused: torch
-    torch.ao.nn.intrinsic.qat.modules.linear_relu: torch
-    torch.ao.nn.intrinsic.quantized: torch
-    torch.ao.nn.intrinsic.quantized.dynamic: torch
-    torch.ao.nn.intrinsic.quantized.dynamic.modules: torch
-    torch.ao.nn.intrinsic.quantized.dynamic.modules.linear_relu: torch
-    torch.ao.nn.intrinsic.quantized.modules: torch
-    torch.ao.nn.intrinsic.quantized.modules.bn_relu: torch
-    torch.ao.nn.intrinsic.quantized.modules.conv_add: torch
-    torch.ao.nn.intrinsic.quantized.modules.conv_relu: torch
-    torch.ao.nn.intrinsic.quantized.modules.linear_relu: torch
     torch.ao.nn.qat: torch
     torch.ao.nn.qat.dynamic: torch
     torch.ao.nn.qat.dynamic.modules: torch
@@ -3401,22 +2276,10 @@ manifest:
     torch.ao.ns.fx.graph_matcher: torch
     torch.ao.ns.fx.graph_passes: torch
     torch.ao.ns.fx.mappings: torch
-    torch.ao.ns.fx.n_shadows_utils: torch
     torch.ao.ns.fx.ns_types: torch
     torch.ao.ns.fx.pattern_utils: torch
-    torch.ao.ns.fx.qconfig_multi_mapping: torch
     torch.ao.ns.fx.utils: torch
     torch.ao.ns.fx.weight_utils: torch
-    torch.ao.pruning: torch
-    torch.ao.pruning.scheduler: torch
-    torch.ao.pruning.scheduler.base_scheduler: torch
-    torch.ao.pruning.scheduler.cubic_scheduler: torch
-    torch.ao.pruning.scheduler.lambda_scheduler: torch
-    torch.ao.pruning.sparsifier: torch
-    torch.ao.pruning.sparsifier.base_sparsifier: torch
-    torch.ao.pruning.sparsifier.nearly_diagonal_sparsifier: torch
-    torch.ao.pruning.sparsifier.utils: torch
-    torch.ao.pruning.sparsifier.weight_norm_sparsifier: torch
     torch.ao.quantization: torch
     torch.ao.quantization.backend_config: torch
     torch.ao.quantization.backend_config.backend_config: torch
@@ -3424,7 +2287,6 @@ manifest:
     torch.ao.quantization.backend_config.fbgemm: torch
     torch.ao.quantization.backend_config.native: torch
     torch.ao.quantization.backend_config.observation_type: torch
-    torch.ao.quantization.backend_config.onednn: torch
     torch.ao.quantization.backend_config.qnnpack: torch
     torch.ao.quantization.backend_config.tensorrt: torch
     torch.ao.quantization.backend_config.utils: torch
@@ -3433,51 +2295,43 @@ manifest:
     torch.ao.quantization.fuse_modules: torch
     torch.ao.quantization.fuser_method_mappings: torch
     torch.ao.quantization.fx: torch
+    torch.ao.quantization.fx.backend_config_utils: torch
     torch.ao.quantization.fx.convert: torch
     torch.ao.quantization.fx.custom_config: torch
     torch.ao.quantization.fx.fuse: torch
-    torch.ao.quantization.fx.fuse_handler: torch
+    torch.ao.quantization.fx.fusion_patterns: torch
     torch.ao.quantization.fx.graph_module: torch
     torch.ao.quantization.fx.lower_to_fbgemm: torch
     torch.ao.quantization.fx.lower_to_qnnpack: torch
-    torch.ao.quantization.fx.lstm_utils: torch
     torch.ao.quantization.fx.match_utils: torch
     torch.ao.quantization.fx.pattern_utils: torch
     torch.ao.quantization.fx.prepare: torch
     torch.ao.quantization.fx.qconfig_mapping_utils: torch
-    torch.ao.quantization.fx.quantize_handler: torch
+    torch.ao.quantization.fx.quantization_patterns: torch
     torch.ao.quantization.fx.tracer: torch
     torch.ao.quantization.fx.utils: torch
     torch.ao.quantization.observer: torch
-    torch.ao.quantization.pt2e: torch
-    torch.ao.quantization.pt2e.duplicate_dq_pass: torch
-    torch.ao.quantization.pt2e.eval_utils: torch
-    torch.ao.quantization.pt2e.generate_numeric_debug_handle: torch
-    torch.ao.quantization.pt2e.graph_utils: torch
-    torch.ao.quantization.pt2e.port_metadata_pass: torch
-    torch.ao.quantization.pt2e.prepare: torch
-    torch.ao.quantization.pt2e.qat_utils: torch
-    torch.ao.quantization.pt2e.representation: torch
-    torch.ao.quantization.pt2e.representation.rewrite: torch
-    torch.ao.quantization.pt2e.utils: torch
     torch.ao.quantization.qconfig: torch
     torch.ao.quantization.qconfig_mapping: torch
+    torch.ao.quantization.qconfig_mapping_utils: torch
     torch.ao.quantization.quant_type: torch
     torch.ao.quantization.quantization_mappings: torch
+    torch.ao.quantization.quantization_types: torch
     torch.ao.quantization.quantize: torch
     torch.ao.quantization.quantize_fx: torch
     torch.ao.quantization.quantize_jit: torch
-    torch.ao.quantization.quantize_pt2e: torch
-    torch.ao.quantization.quantizer: torch
-    torch.ao.quantization.quantizer.composable_quantizer: torch
-    torch.ao.quantization.quantizer.embedding_quantizer: torch
-    torch.ao.quantization.quantizer.quantizer: torch
-    torch.ao.quantization.quantizer.utils: torch
-    torch.ao.quantization.quantizer.x86_inductor_quantizer: torch
-    torch.ao.quantization.quantizer.xnnpack_quantizer: torch
-    torch.ao.quantization.quantizer.xnnpack_quantizer_utils: torch
     torch.ao.quantization.stubs: torch
     torch.ao.quantization.utils: torch
+    torch.ao.sparsity: torch
+    torch.ao.sparsity.scheduler: torch
+    torch.ao.sparsity.scheduler.base_scheduler: torch
+    torch.ao.sparsity.scheduler.cubic_scheduler: torch
+    torch.ao.sparsity.scheduler.lambda_scheduler: torch
+    torch.ao.sparsity.sparsifier: torch
+    torch.ao.sparsity.sparsifier.base_sparsifier: torch
+    torch.ao.sparsity.sparsifier.nearly_diagonal_sparsifier: torch
+    torch.ao.sparsity.sparsifier.utils: torch
+    torch.ao.sparsity.sparsifier.weight_norm_sparsifier: torch
     torch.autograd: torch
     torch.autograd.anomaly_mode: torch
     torch.autograd.forward_ad: torch
@@ -3491,7 +2345,6 @@ manifest:
     torch.autograd.profiler_util: torch
     torch.autograd.variable: torch
     torch.backends: torch
-    torch.backends.cpu: torch
     torch.backends.cuda: torch
     torch.backends.cudnn: torch
     torch.backends.cudnn.rnn: torch
@@ -3504,7 +2357,6 @@ manifest:
     torch.backends.xeon: torch
     torch.backends.xeon.run_cpu: torch
     torch.backends.xnnpack: torch
-    torch.compiler: torch
     torch.contrib: torch
     torch.cpu: torch
     torch.cpu.amp: torch
@@ -3531,7 +2383,6 @@ manifest:
     torch.distributed.algorithms.ddp_comm_hooks.ddp_zero_hook: torch
     torch.distributed.algorithms.ddp_comm_hooks.debugging_hooks: torch
     torch.distributed.algorithms.ddp_comm_hooks.default_hooks: torch
-    torch.distributed.algorithms.ddp_comm_hooks.mixed_precision_hooks: torch
     torch.distributed.algorithms.ddp_comm_hooks.optimizer_overlap_hooks: torch
     torch.distributed.algorithms.ddp_comm_hooks.post_localSGD_hook: torch
     torch.distributed.algorithms.ddp_comm_hooks.powerSGD_hook: torch
@@ -3543,25 +2394,7 @@ manifest:
     torch.distributed.algorithms.model_averaging.utils: torch
     torch.distributed.argparse_util: torch
     torch.distributed.autograd: torch
-    torch.distributed.c10d_logger: torch
-    torch.distributed.checkpoint: torch
-    torch.distributed.checkpoint.api: torch
-    torch.distributed.checkpoint.default_planner: torch
-    torch.distributed.checkpoint.filesystem: torch
-    torch.distributed.checkpoint.metadata: torch
-    torch.distributed.checkpoint.optimizer: torch
-    torch.distributed.checkpoint.planner: torch
-    torch.distributed.checkpoint.planner_helpers: torch
-    torch.distributed.checkpoint.resharding: torch
-    torch.distributed.checkpoint.state_dict: torch
-    torch.distributed.checkpoint.state_dict_loader: torch
-    torch.distributed.checkpoint.state_dict_saver: torch
-    torch.distributed.checkpoint.stateful: torch
-    torch.distributed.checkpoint.storage: torch
-    torch.distributed.checkpoint.utils: torch
-    torch.distributed.collective_utils: torch
     torch.distributed.constants: torch
-    torch.distributed.device_mesh: torch
     torch.distributed.distributed_c10d: torch
     torch.distributed.elastic: torch
     torch.distributed.elastic.agent: torch
@@ -3605,14 +2438,15 @@ manifest:
     torch.distributed.elastic.utils.logging: torch
     torch.distributed.elastic.utils.store: torch
     torch.distributed.fsdp: torch
-    torch.distributed.fsdp.api: torch
+    torch.distributed.fsdp.flat_param: torch
+    torch.distributed.fsdp.flatten_params_wrapper: torch
     torch.distributed.fsdp.fully_sharded_data_parallel: torch
     torch.distributed.fsdp.sharded_grad_scaler: torch
+    torch.distributed.fsdp.utils: torch
     torch.distributed.fsdp.wrap: torch
     torch.distributed.launch: torch
     torch.distributed.launcher: torch
     torch.distributed.launcher.api: torch
-    torch.distributed.logging_handlers: torch
     torch.distributed.nn: torch
     torch.distributed.nn.api: torch
     torch.distributed.nn.api.remote_module: torch
@@ -3622,7 +2456,6 @@ manifest:
     torch.distributed.nn.jit.templates: torch
     torch.distributed.nn.jit.templates.remote_module_template: torch
     torch.distributed.optim: torch
-    torch.distributed.optim.apply_optimizer_in_backward: torch
     torch.distributed.optim.functional_adadelta: torch
     torch.distributed.optim.functional_adagrad: torch
     torch.distributed.optim.functional_adam: torch
@@ -3631,7 +2464,6 @@ manifest:
     torch.distributed.optim.functional_rmsprop: torch
     torch.distributed.optim.functional_rprop: torch
     torch.distributed.optim.functional_sgd: torch
-    torch.distributed.optim.named_optimizer: torch
     torch.distributed.optim.optimizer: torch
     torch.distributed.optim.post_localSGD_optimizer: torch
     torch.distributed.optim.utils: torch
@@ -3667,13 +2499,6 @@ manifest:
     torch.distributed.rpc.rref_proxy: torch
     torch.distributed.rpc.server_process_global_profiler: torch
     torch.distributed.run: torch
-    torch.distributed.tensor: torch
-    torch.distributed.tensor.parallel: torch
-    torch.distributed.tensor.parallel.api: torch
-    torch.distributed.tensor.parallel.ddp: torch
-    torch.distributed.tensor.parallel.fsdp: torch
-    torch.distributed.tensor.parallel.input_reshard: torch
-    torch.distributed.tensor.parallel.style: torch
     torch.distributed.utils: torch
     torch.distributions: torch
     torch.distributions.bernoulli: torch
@@ -3696,7 +2521,6 @@ manifest:
     torch.distributions.half_cauchy: torch
     torch.distributions.half_normal: torch
     torch.distributions.independent: torch
-    torch.distributions.inverse_gamma: torch
     torch.distributions.kl: torch
     torch.distributions.kumaraswamy: torch
     torch.distributions.laplace: torch
@@ -3722,16 +2546,11 @@ manifest:
     torch.distributions.von_mises: torch
     torch.distributions.weibull: torch
     torch.distributions.wishart: torch
-    torch.export: torch
-    torch.export.exported_program: torch
-    torch.export.graph_signature: torch
     torch.fft: torch
-    torch.func: torch
     torch.functional: torch
     torch.futures: torch
     torch.fx: torch
     torch.fx.annotate: torch
-    torch.fx.config: torch
     torch.fx.experimental: torch
     torch.fx.experimental.accelerator_partitioner: torch
     torch.fx.experimental.const_fold: torch
@@ -3751,11 +2570,9 @@ manifest:
     torch.fx.experimental.optimization: torch
     torch.fx.experimental.partitioner_utils: torch
     torch.fx.experimental.proxy_tensor: torch
-    torch.fx.experimental.recording: torch
     torch.fx.experimental.refinement_types: torch
     torch.fx.experimental.rewriter: torch
     torch.fx.experimental.schema_type_annotation: torch
-    torch.fx.experimental.sym_node: torch
     torch.fx.experimental.symbolic_shapes: torch
     torch.fx.experimental.unification: torch
     torch.fx.experimental.unification.core: torch
@@ -3772,7 +2589,6 @@ manifest:
     torch.fx.experimental.unification.utils: torch
     torch.fx.experimental.unification.variable: torch
     torch.fx.experimental.unify_refinements: torch
-    torch.fx.experimental.validator: torch
     torch.fx.graph: torch
     torch.fx.graph_module: torch
     torch.fx.immutable_collections: torch
@@ -3780,9 +2596,9 @@ manifest:
     torch.fx.node: torch
     torch.fx.operator_schemas: torch
     torch.fx.passes: torch
-    torch.fx.passes.annotate_getitem_nodes: torch
     torch.fx.passes.backends: torch
     torch.fx.passes.backends.cudagraphs: torch
+    torch.fx.passes.backends.nvfuser: torch
     torch.fx.passes.dialect: torch
     torch.fx.passes.dialect.common: torch
     torch.fx.passes.dialect.common.cse_pass: torch
@@ -3807,8 +2623,6 @@ manifest:
     torch.fx.passes.utils.common: torch
     torch.fx.passes.utils.fuser_utils: torch
     torch.fx.passes.utils.matcher_utils: torch
-    torch.fx.passes.utils.matcher_with_name_node_map_utils: torch
-    torch.fx.passes.utils.source_matcher_utils: torch
     torch.fx.proxy: torch
     torch.fx.subgraph_rewriter: torch
     torch.fx.tensor_type: torch
@@ -3829,6 +2643,8 @@ manifest:
     torch.lib.libtorch: torch
     torch.lib.libtorch_cpu: torch
     torch.lib.libtorch_cuda: torch
+    torch.lib.libtorch_cuda_cpp: torch
+    torch.lib.libtorch_cuda_cu: torch
     torch.lib.libtorch_cuda_linalg: torch
     torch.lib.libtorch_global_deps: torch
     torch.lib.libtorch_python: torch
@@ -3843,9 +2659,6 @@ manifest:
     torch.masked.maskedtensor.reductions: torch
     torch.masked.maskedtensor.unary: torch
     torch.monitor: torch
-    torch.mps: torch
-    torch.mps.event: torch
-    torch.mps.profiler: torch
     torch.multiprocessing: torch
     torch.multiprocessing.pool: torch
     torch.multiprocessing.queue: torch
@@ -3965,7 +2778,6 @@ manifest:
     torch.onnx.symbolic_opset15: torch
     torch.onnx.symbolic_opset16: torch
     torch.onnx.symbolic_opset17: torch
-    torch.onnx.symbolic_opset18: torch
     torch.onnx.symbolic_opset7: torch
     torch.onnx.symbolic_opset8: torch
     torch.onnx.symbolic_opset9: torch
@@ -4032,11 +2844,7 @@ manifest:
     torch.random: torch
     torch.return_types: torch
     torch.serialization: torch
-    torch.signal: torch
-    torch.signal.windows: torch
-    torch.signal.windows.windows: torch
     torch.sparse: torch
-    torch.sparse.semi_structured: torch
     torch.special: torch
     torch.storage: torch
     torch.testing: torch
@@ -4044,11 +2852,12 @@ manifest:
     torch.types: torch
     torch.utils: torch
     torch.utils.backcompat: torch
-    torch.utils.backend_registration: torch
     torch.utils.benchmark: torch
     torch.utils.benchmark.examples: torch
+    torch.utils.benchmark.examples.blas_compare: torch
     torch.utils.benchmark.examples.blas_compare_setup: torch
     torch.utils.benchmark.examples.compare: torch
+    torch.utils.benchmark.examples.end_to_end: torch
     torch.utils.benchmark.examples.fuzzer: torch
     torch.utils.benchmark.examples.op_benchmark: torch
     torch.utils.benchmark.examples.simple_timeit: torch
@@ -4062,7 +2871,6 @@ manifest:
     torch.utils.benchmark.utils: torch
     torch.utils.benchmark.utils.common: torch
     torch.utils.benchmark.utils.compare: torch
-    torch.utils.benchmark.utils.compile: torch
     torch.utils.benchmark.utils.cpp_jit: torch
     torch.utils.benchmark.utils.fuzzer: torch
     torch.utils.benchmark.utils.sparse_fuzzer: torch
@@ -4077,7 +2885,15 @@ manifest:
     torch.utils.cpp_extension: torch
     torch.utils.data: torch
     torch.utils.data.backward_compatibility: torch
+    torch.utils.data.communication: torch
+    torch.utils.data.communication.eventloop: torch
+    torch.utils.data.communication.iter: torch
+    torch.utils.data.communication.map: torch
+    torch.utils.data.communication.messages: torch
+    torch.utils.data.communication.protocol: torch
+    torch.utils.data.communication.queue: torch
     torch.utils.data.dataloader: torch
+    torch.utils.data.dataloader_experimental: torch
     torch.utils.data.datapipes: torch
     torch.utils.data.datapipes.dataframe: torch
     torch.utils.data.datapipes.dataframe.dataframe_wrapper: torch
@@ -4095,7 +2911,6 @@ manifest:
     torch.utils.data.datapipes.iter.grouping: torch
     torch.utils.data.datapipes.iter.routeddecoder: torch
     torch.utils.data.datapipes.iter.selecting: torch
-    torch.utils.data.datapipes.iter.sharding: torch
     torch.utils.data.datapipes.iter.streamreader: torch
     torch.utils.data.datapipes.iter.utils: torch
     torch.utils.data.datapipes.map: torch
@@ -4113,10 +2928,8 @@ manifest:
     torch.utils.data.graph: torch
     torch.utils.data.graph_settings: torch
     torch.utils.data.sampler: torch
-    torch.utils.deterministic: torch
     torch.utils.dlpack: torch
     torch.utils.file_baton: torch
-    torch.utils.flop_counter: torch
     torch.utils.hipify: torch
     torch.utils.hipify.constants: torch
     torch.utils.hipify.cuda_to_hip_mappings: torch
@@ -4134,8 +2947,6 @@ manifest:
     torch.utils.tensorboard.summary: torch
     torch.utils.tensorboard.writer: torch
     torch.utils.throughput_benchmark: torch
-    torch.utils.viz: torch
-    torch.utils.weak: torch
     torch.version: torch
     torchgen: torch
     torchgen.api: torch
@@ -4150,9 +2961,6 @@ manifest:
     torchgen.api.structured: torch
     torchgen.api.translate: torch
     torchgen.api.types: torch
-    torchgen.api.types.signatures: torch
-    torchgen.api.types.types: torch
-    torchgen.api.types.types_base: torch
     torchgen.api.ufunc: torch
     torchgen.api.unboxing: torch
     torchgen.code_template: torch
@@ -4163,19 +2971,8 @@ manifest:
     torchgen.dest.native_functions: torch
     torchgen.dest.register_dispatch_key: torch
     torchgen.dest.ufunc: torch
-    torchgen.executorch: torch
-    torchgen.executorch.api: torch
-    torchgen.executorch.api.custom_ops: torch
-    torchgen.executorch.api.et_cpp: torch
-    torchgen.executorch.api.types: torch
-    torchgen.executorch.api.types.signatures: torch
-    torchgen.executorch.api.types.types: torch
-    torchgen.executorch.api.unboxing: torch
-    torchgen.executorch.model: torch
-    torchgen.executorch.parse: torch
     torchgen.gen: torch
     torchgen.gen_backend_stubs: torch
-    torchgen.gen_executorch: torch
     torchgen.gen_functionalization_type: torch
     torchgen.gen_lazy_tensor: torch
     torchgen.gen_vmap_plumbing: torch
@@ -4185,17 +2982,6 @@ manifest:
     torchgen.operator_versions: torch
     torchgen.operator_versions.gen_mobile_upgraders: torch
     torchgen.operator_versions.gen_mobile_upgraders_constant: torch
-    torchgen.packaged.autograd: torch
-    torchgen.packaged.autograd.context: torch
-    torchgen.packaged.autograd.gen_annotated_fn_args: torch
-    torchgen.packaged.autograd.gen_autograd: torch
-    torchgen.packaged.autograd.gen_autograd_functions: torch
-    torchgen.packaged.autograd.gen_inplace_or_view_type: torch
-    torchgen.packaged.autograd.gen_python_functions: torch
-    torchgen.packaged.autograd.gen_trace_type: torch
-    torchgen.packaged.autograd.gen_variable_factories: torch
-    torchgen.packaged.autograd.gen_variable_type: torch
-    torchgen.packaged.autograd.load_derivatives: torch
     torchgen.selective_build: torch
     torchgen.selective_build.operator: torch
     torchgen.selective_build.selector: torch
@@ -4204,7 +2990,6 @@ manifest:
     torchgen.static_runtime.gen_static_runtime_ops: torch
     torchgen.static_runtime.generator: torch
     torchgen.utils: torch
-    torchgen.yaml_utils: torch
     tqdm: tqdm
     tqdm.asyncio: tqdm
     tqdm.auto: tqdm
@@ -5760,46 +4545,6 @@ manifest:
     transformers.utils.sentencepiece_model_pb2: transformers
     transformers.utils.sentencepiece_model_pb2_new: transformers
     transformers.utils.versions: transformers
-    triton: triton
-    triton.common: triton
-    triton.common.backend: triton
-    triton.common.build: triton
-    triton.compiler: triton
-    triton.compiler.code_generator: triton
-    triton.compiler.compiler: triton
-    triton.compiler.errors: triton
-    triton.compiler.make_launcher: triton
-    triton.compiler.target: triton
-    triton.compiler.utils: triton
-    triton.language: triton
-    triton.language.core: triton
-    triton.language.extra: triton
-    triton.language.extra.cuda: triton
-    triton.language.math: triton
-    triton.language.random: triton
-    triton.language.semantic: triton
-    triton.language.standard: triton
-    triton.ops: triton
-    triton.ops.blocksparse: triton
-    triton.ops.blocksparse.matmul: triton
-    triton.ops.blocksparse.softmax: triton
-    triton.ops.cross_entropy: triton
-    triton.ops.flash_attention: triton
-    triton.ops.matmul: triton
-    triton.ops.matmul_perf_model: triton
-    triton.runtime: triton
-    triton.runtime.autotuner: triton
-    triton.runtime.cache: triton
-    triton.runtime.driver: triton
-    triton.runtime.errors: triton
-    triton.runtime.interpreter: triton
-    triton.runtime.jit: triton
-    triton.testing: triton
-    triton.tools: triton
-    triton.tools.build_extern: triton
-    triton.tools.compile: triton
-    triton.tools.disasm: triton
-    triton.tools.link: triton
     typing_extensions: typing_extensions
     unidecode: Unidecode
     unidecode.util: Unidecode
@@ -6030,6 +4775,25 @@ manifest:
     wcwidth.unicode_versions: wcwidth
     wcwidth.wcwidth: wcwidth
     websocket: websocket_client
+    wheel: wheel
+    wheel.bdist_wheel: wheel
+    wheel.cli: wheel
+    wheel.cli.convert: wheel
+    wheel.cli.pack: wheel
+    wheel.cli.tags: wheel
+    wheel.cli.unpack: wheel
+    wheel.macosx_libfile: wheel
+    wheel.metadata: wheel
+    wheel.util: wheel
+    wheel.vendored: wheel
+    wheel.vendored.packaging: wheel
+    wheel.vendored.packaging.markers: wheel
+    wheel.vendored.packaging.requirements: wheel
+    wheel.vendored.packaging.specifiers: wheel
+    wheel.vendored.packaging.tags: wheel
+    wheel.vendored.packaging.utils: wheel
+    wheel.vendored.packaging.version: wheel
+    wheel.wheelfile: wheel
     wrapt: wrapt
     wrapt.arguments: wrapt
     wrapt.decorators: wrapt
@@ -6059,4 +4823,4 @@ manifest:
     zipp.py310compat: zipp
   pip_repository:
     name: pip_deps
-integrity: 42be188a33901839e3829f5598da2a334d9375440355acbd30e9c1b0b92b153b
+integrity: b4254e7397a20dc69d5c4e0c002d3526d916fbb19877aef1991a4341c1d97e9a

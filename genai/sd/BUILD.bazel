@@ -7,7 +7,12 @@ py_binary(
     visibility = ["//:__subpackages__"],
     deps = [
         "@pip_deps//diffusers",
+        "@pip_deps//nvidia_cuda_cupti_cu11",  # keep
+        "@pip_deps//nvidia_cuda_nvrtc_cu11",  # keep
+        "@pip_deps//nvidia_cuda_runtime_cu11",  # keep
+        "@pip_deps//nvidia_cudnn_cu11",  # keep
         "@pip_deps//torch",
+        "@pip_deps//transformers",  # keep
     ],
 )
 

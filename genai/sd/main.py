@@ -2,27 +2,39 @@ import ctypes
 import sys
 import os
 import platform
+import logging
 from typing import Dict
+
+logger = logging.getLogger(__name__)
 
 
 def _preload_cuda_deps(lib_folder: str, lib_name: str) -> None:
     """Preloads cuda deps if they could not be found otherwise."""
+    logging.info("Preloading ", lib_folder)
+
     # Should only be called on Linux if default path resolution have failed
     assert platform.system() == "Linux", "Should only be called on Linux"
     import glob
 
-    lib_path = None
+    paths_to_search = [
+        os.path.join("/usr/local/cuda-*/targets/*/lib", lib_name),
+        os.path.join("/usr/lib64/", lib_name),
+    ]
     for path in sys.path:
-        nvidia_path = os.path.join(path, "nvidia")
-        if not os.path.exists(nvidia_path):
-            continue
-        candidate_lib_paths = glob.glob(os.path.join(nvidia_path, lib_folder, "lib", lib_name))
+        paths_to_search.append(os.path.join(path, "nvidia", lib_folder, "lib", lib_name))
+
+    lib_path = None
+    for path in paths_to_search:
+        candidate_lib_paths = glob.glob(path)
         if candidate_lib_paths and not lib_path:
             lib_path = candidate_lib_paths[0]
         if lib_path:
             break
+
     if not lib_path:
-        raise ValueError(f"{lib_name} not found in the system path {sys.path}")
+        paths = "\n".join(paths_to_search)
+        raise ValueError(f"{lib_name} not found in {paths}")
+
     ctypes.CDLL(lib_path)
 
 
@@ -51,5 +63,6 @@ import torch
 from diffusers import StableDiffusionPipeline
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     print(torch)
     print(StableDiffusionPipeline)
