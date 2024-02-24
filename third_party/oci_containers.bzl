@@ -24,3 +24,9 @@ def load_oci_images():
         digest = "sha256:2a669a950ee7941bf0e308372aa9ab1a38dc5491f75e3d6acf7b5e941a3bc32f",
         image = "index.docker.io/juanzolotoochin/ubuntu-build",
     )
+
+    oci_pull(
+        name = "nvidia-cuda",
+        digest = "sha256:fb0ac5fcdfdbc87368da7dcc3755717a288587e962e8399895f7f1e58bb7b3c4",
+        image = "index.docker.io/nvidia/cuda",
+    )

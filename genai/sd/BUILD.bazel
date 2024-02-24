@@ -1,4 +1,5 @@
 load("//:bazel/python.bzl", "py_binary")
+load("//bazel/oci:defs.bzl", "image")
 
 py_binary(
     name = "main",
@@ -8,4 +9,10 @@ py_binary(
         "@pip_deps//diffusers",
         "@pip_deps//torch",
     ],
+)
+
+image(
+    name = "genai-image",
+    base = "@nvidia-cuda",
+    binary = ":main",
 )
