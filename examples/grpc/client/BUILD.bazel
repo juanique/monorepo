@@ -1,19 +1,21 @@
 load("@pip_deps//:requirements.bzl", "requirement")
-load("//:bazel/python.bzl", "py_test")
+load("//:bazel/python.bzl", "py_binary", "py_library", "py_test")
 
 py_library(
     name = "greeter_client",
     srcs = ["greeter_client.py"],
+    visibility = ["//:__subpackages__"],
     deps = [
-        requirement("grpcio"),
         "//examples/grpc/protos:helloworld_py_grpc",
         "//examples/grpc/protos:helloworld_py_proto",
+        "@pip_deps//grpcio",
     ],
 )
 
 py_binary(
     name = "greeter_client_main",
     srcs = ["greeter_client_main.py"],
+    visibility = ["//:__subpackages__"],
     deps = [":greeter_client"],
 )
 
@@ -25,8 +27,8 @@ py_test(
     ],
     firecracker = True,
     deps = [
-        "//salsa/docker/testing:docker_service",
-        requirement("docker"),
         ":greeter_client",
+        "//salsa/docker/testing:docker_service",
+        "@pip_deps//docker",
     ],
 )
