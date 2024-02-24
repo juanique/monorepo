@@ -16,6 +16,7 @@ type Options struct {
 	OnlyGetImageID bool
 	LogToFile      string
 	NoRun          bool // backwards compatibilty with rules_dockerk
+	NoSkipLayers   bool
 }
 
 var opts = Options{}
@@ -60,10 +61,16 @@ func buildAndLoadImage(i Image, repoTags []string) error {
 	}
 
 	firstTag := repoTags[0]
-	existingLayers, err := loader.GetImageLayerDigests(ctx, firstTag)
-	log.Println("Found existing layers:", existingLayers)
-	if err != nil {
-		return err
+
+	var existingLayers []string
+	if opts.NoSkipLayers {
+		existingLayers = []string{}
+	} else {
+		existingLayers, err := loader.GetImageLayerDigests(ctx, firstTag)
+		log.Println("Found existing layers:", existingLayers)
+		if err != nil {
+			return err
+		}
 	}
 
 	tarPath, err := builder.Build(i, BuildOpts{SkipLayers: existingLayers})
@@ -101,6 +108,7 @@ func main() {
 	rootCmd.Flags().StringVar(&opts.Output, "output", "", "Format for the output")
 	rootCmd.Flags().BoolVar(&opts.OnlyGetImageID, "only-get-image-id", false, "Only print the image ID, not build it")
 	rootCmd.Flags().BoolVar(&opts.NoRun, "norun", false, "unused - only here for backwards compatibility with rules_docker")
+	rootCmd.Flags().BoolVar(&opts.NoSkipLayers, "noskiplayers", false, "do not skip loading layers")
 	rootCmd.Flags().StringVar(&opts.LogToFile, "log-to-file", "", "whether to print logs to a file")
 
 	if err := rootCmd.Execute(); err != nil {

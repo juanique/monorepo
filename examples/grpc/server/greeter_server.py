@@ -8,9 +8,7 @@ import sys
 
 
 class Greeter(helloworld_pb2_grpc.GreeterServicer):
-    def SayHello(
-        self, req: helloworld_pb2.HelloRequest, context: grpc.ServicerContext
-    ) -> helloworld_pb2.HelloReply:
+    def SayHello(self, req: helloworld_pb2.HelloRequest, context: grpc.ServicerContext) -> helloworld_pb2.HelloReply:
         logging.info("Got request %s", req)
         return helloworld_pb2.HelloReply(message="Hello %s!" % req.name)
 
