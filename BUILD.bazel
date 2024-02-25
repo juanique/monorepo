@@ -1,4 +1,4 @@
-load("@bazel_gazelle//:def.bzl", "gazelle")
+load("@bazel_gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
 load("@buildifier_prebuilt//:rules.bzl", "buildifier")
 load("@rules_python_gazelle_plugin//manifest:defs.bzl", "gazelle_python_manifest")
@@ -21,7 +21,15 @@ exports_files([
 # gazelle:python_generation_mode file
 gazelle(
     name = "gazelle",
-    gazelle = "@rules_python_gazelle_plugin//python:gazelle_binary",
+    gazelle = ":gazelle_binary",
+)
+
+gazelle_binary(
+    name = "gazelle_binary",
+    languages = DEFAULT_LANGUAGES + [
+        "@rules_python_gazelle_plugin//python",
+    ],
+    visibility = ["//visibility:public"],
 )
 
 gazelle(
