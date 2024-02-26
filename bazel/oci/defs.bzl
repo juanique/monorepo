@@ -2,36 +2,38 @@ load("@rules_pkg//:pkg.bzl", "pkg_tar")
 load("@rules_oci//oci:defs.bzl", "oci_image")
 load("@aspect_bazel_lib//lib:tar.bzl", "tar")
 
-def image(name, binary, base = "@distroless_base"):
+def image(name, binary = None, base = "@distroless_base", **kwargs):
     tars = []
 
-    entrypoint_name = "_" + name + ".entrypoint"
-    _oci_entrypoint(
-        name = entrypoint_name,
-        binary = binary,
-    )
+    if binary:
+        entrypoint_name = "_" + name + ".entrypoint"
+        _oci_entrypoint(
+            name = entrypoint_name,
+            binary = binary,
+        )
 
-    bin_tar_name = "_" + name + ".bin_tar"
-    tar(
-        name = bin_tar_name,
-        srcs = [binary],
-    )
-    tars.append(bin_tar_name)
+        bin_tar_name = "_" + name + ".bin_tar"
+        tar(
+            name = bin_tar_name,
+            srcs = [binary],
+        )
+        tars.append(bin_tar_name)
 
-    entrypoint_tar_nane = "_" + name + ".entrypoint_tar"
-    pkg_tar(
-        name = entrypoint_tar_nane,
-        srcs = [entrypoint_name],
-        package_dir = "usr/local/bin",
-    )
+        entrypoint_tar_nane = "_" + name + ".entrypoint_tar"
+        pkg_tar(
+            name = entrypoint_tar_nane,
+            srcs = [entrypoint_name],
+            package_dir = "usr/local/bin",
+        )
 
-    tars.append(entrypoint_tar_nane)
+        tars.append(entrypoint_tar_nane)
+        kwargs["entrypoint"] = ["/usr/local/bin/" + entrypoint_name + ".sh"]
 
     oci_image(
         name = name,
         base = base,
-        entrypoint = ["/usr/local/bin/" + entrypoint_name + ".sh"],
         tars = tars,
+        **kwargs
     )
 
     loader_name = name + ".loader"

@@ -1,16 +1,19 @@
 import time
 import psycopg2
 import docker
+import logging
 
 from salsa.docker.testing.docker_service import DockerService
+
+logger = logging.getLogger(__name__)
 
 
 class PostgresService(DockerService):
     def __init__(self, docker_client: docker.DockerClient):
         super().__init__(
             docker_client,
-            image_name="engprod/docker/postgres",
-            image_tar="monorepo/engprod/docker/postgres_image.tar",
+            image_name="engprod/docker/postgres_image",
+            loader_target="//engprod/docker:postgres_image.loader",
             container_name="postgres",
             port=5432,
         )
@@ -31,6 +34,7 @@ class PostgresService(DockerService):
                 )
             except psycopg2.OperationalError as error:
                 time.sleep(1)
+                logger.info("Waiting for postgres: %s", error)
                 last_error = error
 
         raise last_error
