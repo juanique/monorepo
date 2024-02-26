@@ -14,14 +14,14 @@ class TestGreeterClient(unittest.TestCase):
         self.service = DockerService(
             self.docker_client,
             image_name="bazel/examples/grpc/server",
-            image_tar="monorepo/examples/grpc/server/greeter_server_docker.tar",
+            loader_target="//bazel/examples/grpc/server:greeter_server_docker.loader",
             container_name="greeter_server",
             port=50051,
         )
         self.service.start()
 
     def tearDown(self) -> None:
-        self.service.stop()
+        # self.service.stop()
         self.docker_client.close()
 
     def test_hello(self) -> None:
