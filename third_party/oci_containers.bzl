@@ -31,3 +31,9 @@ def load_oci_images():
         digest = "sha256:cd116dbc6ac97b18f8e1ad07aa94399117863731ec99f06ae1270937a98119bf",
         image = "index.docker.io/library/postgres",
     )
+
+    oci_pull(
+        name = "ubuntu",
+        digest = "sha256:eea2c875bb135db3a5d5c959a4161eecce3f6a988cf054125d7f4e836e93e020",
+        image = "index.docker.io/juanzolotoochin/ubuntu-base",
+    )
