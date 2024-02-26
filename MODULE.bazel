@@ -1,4 +1,9 @@
 module(
     name = "monorepo",
-    version = "1.0"
+    version = "1.0",
 )
+
+bazel_dep(name = "grpc", version = "1.56.3")
+bazel_dep(name = "rules_pkg", version = "0.10.1")
+bazel_dep(name = "rules_go", version = "0.46.0")
+bazel_dep(name = "gazelle", version = "0.35.0")

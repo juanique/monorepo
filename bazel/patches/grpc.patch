@@ -17,20 +17,20 @@ index ce0f40493d..9b43c35ca1 100644
 +++ b/bazel/grpc_deps.bzl
 @@ -17,7 +17,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
  load("@com_github_grpc_grpc//bazel:grpc_python_deps.bzl", "grpc_python_deps")
- 
+
  # buildifier: disable=unnamed-macro
 -def grpc_deps():
 +def grpc_deps(python_headers=None):
      """Loads dependencies need to compile and test the grpc library."""
- 
+
      native.bind(
 @@ -499,7 +499,7 @@ def grpc_deps():
              ],
          )
- 
+
 -    grpc_python_deps()
 +    grpc_python_deps(python_headers)
- 
+
  # TODO: move some dependencies from "grpc_deps" here?
  # buildifier: disable=unnamed-macro
 diff --git a/bazel/grpc_extra_deps.bzl b/bazel/grpc_extra_deps.bzl
@@ -40,7 +40,7 @@ index 4d8afa3131..ccb0aa66e5 100644
 @@ -13,14 +13,11 @@
  # limitations under the License.
  """Loads the dependencies necessary for the external repositories defined in grpc_deps.bzl."""
- 
+
 -load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
  load("@build_bazel_apple_support//lib:repositories.bzl", "apple_support_dependencies")
  load("@build_bazel_rules_apple//apple:repositories.bzl", "apple_rules_dependencies")
@@ -50,12 +50,12 @@ index 4d8afa3131..ccb0aa66e5 100644
  load("@envoy_api//bazel:repositories.bzl", "api_dependencies")
 -load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
  load("@upb//bazel:workspace_deps.bzl", "upb_deps")
- 
+
  def grpc_extra_deps(ignore_version_differences = False):
 @@ -52,14 +49,6 @@ def grpc_extra_deps(ignore_version_differences = False):
- 
+
      api_dependencies()
- 
+
 -    go_rules_dependencies()
 -    go_register_toolchains(version = "1.18")
 -    gazelle_dependencies()
@@ -65,7 +65,7 @@ index 4d8afa3131..ccb0aa66e5 100644
 -    go_third_party()
 -
      apple_rules_dependencies(ignore_version_differences = ignore_version_differences)
- 
+
      apple_support_dependencies()
 diff --git a/bazel/grpc_python_deps.bzl b/bazel/grpc_python_deps.bzl
 index 39893eef6e..1394f27cd4 100644
@@ -73,7 +73,7 @@ index 39893eef6e..1394f27cd4 100644
 +++ b/bazel/grpc_python_deps.bzl
 @@ -17,7 +17,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
  load("@com_github_grpc_grpc//third_party/py:python_configure.bzl", "python_configure")
- 
+
  # buildifier: disable=unnamed-macro
 -def grpc_python_deps():
 +def grpc_python_deps(python_headers):
@@ -81,11 +81,11 @@ index 39893eef6e..1394f27cd4 100644
      if "io_bazel_rules_python" not in native.existing_rules():
          http_archive(
 @@ -32,7 +32,7 @@ def grpc_python_deps():
- 
+
      native.bind(
          name = "python_headers",
 -        actual = "@local_config_python//:python_headers",
 +        actual = python_headers or "@local_config_python//:python_headers",
      )
- 
+
      if "cython" not in native.existing_rules():
