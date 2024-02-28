@@ -1,3 +1,4 @@
 from my_lib import FOO
 
-print(FOO)
+if __name__ == "__main__":
+    print(FOO)

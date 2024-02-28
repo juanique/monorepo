@@ -1,30 +1,36 @@
 load("@pip_deps//:requirements.bzl", "requirement")
-load("//:bazel/python.bzl", "pytest_test")
+load("//:bazel/python.bzl", "py_binary", "pytest_test")
+
+# gazelle:map_kind py_test pytest_test //:bazel/python.bzl
 
 exports_files(["version.py"])
 
 py_binary(
     name = "version",
     srcs = ["version.py"],
+    visibility = ["//:__subpackages__"],
 )
 
 py_binary(
     name = "tree",
     srcs = ["tree.py"],
+    visibility = ["//:__subpackages__"],
     deps = [
-        requirement("rich"),
+        "@pip_deps//rich",
     ],
 )
 
 py_binary(
     name = "github_example",
     srcs = ["github_example.py"],
+    visibility = ["//:__subpackages__"],
     deps = [
-        requirement("PyGithub"),
+        "@pip_deps//pygithub",
     ],
 )
 
 pytest_test(
     name = "test_pytest",
     srcs = ["test_pytest.py"],
+    deps = ["@pip_deps//pytest"],
 )
