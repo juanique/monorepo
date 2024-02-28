@@ -18,7 +18,7 @@ build --nolegacy_important_outputs
 build --noremote_upload_local_results
 
 # We'll enable this someday and rely on MODULE.bazel
-# build --experimental_enable_bzlmod
+build --noenable_bzlmod
 
 
 build:remote --remote_executor=grpcs://remote.buildbuddy.io
