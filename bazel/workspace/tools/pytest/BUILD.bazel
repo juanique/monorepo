@@ -1,3 +1,12 @@
+load("//:bazel/python.bzl", "py_binary")
+
 exports_files([
     "pytest_wrapper.py",
 ])
+
+py_binary(
+    name = "pytest_wrapper",
+    srcs = ["pytest_wrapper.py"],
+    visibility = ["//:__subpackages__"],
+    deps = ["@pip_deps//pytest"],
+)
