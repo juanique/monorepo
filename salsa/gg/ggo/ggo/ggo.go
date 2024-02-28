@@ -64,7 +64,7 @@ type CloneOpts struct {
 // Main point of interaction with the GitGud repo
 type GitGud struct {
 	// Handler to the underlying repo
-	repo *git.Repo
+	repo git.Repo
 
 	// Persisted local state
 	state RepoState
@@ -79,7 +79,7 @@ type NewGitGudOpts struct {
 }
 
 // Creates a new instance of GitGud
-func NewGitGud(repo *git.Repo, state RepoState, opts NewGitGudOpts) (*GitGud, error) {
+func NewGitGud(repo git.Repo, state RepoState, opts NewGitGudOpts) (*GitGud, error) {
 	return &GitGud{
 		repo:       repo,
 		state:      state,
@@ -162,7 +162,7 @@ func ParseGithubRepoUrl(url string) (GitHubRepoMetadata, error) {
 	return meta, fmt.Errorf("unable to parse the provided URL: %s", url)
 }
 
-func initRemoteCommit(repo *git.Repo) (GudCommit, error) {
+func initRemoteCommit(repo git.Repo) (GudCommit, error) {
 	var commit GudCommit
 
 	remoteBranch, err := repo.ActiveBranch()
