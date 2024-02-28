@@ -8,6 +8,7 @@ import click
 from salsa.gg.gg import GitGud
 
 
+# cambios
 @click.group()
 def cli() -> None:
     pass
