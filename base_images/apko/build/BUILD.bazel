@@ -1,8 +1,16 @@
 load("@rules_apko//apko:defs.bzl", "apko_image")
+load("@rules_oci//oci:defs.bzl", "oci_push")
 
 apko_image(
     name = "build",
     config = "apko.yaml",
     contents = "@apko_base_build//:contents",
     tag = "build:latest",
+)
+
+oci_push(
+    name = "push",
+    image = ":build",
+    remote_tags = ["latest"],
+    repository = "index.docker.io/juanzolotoochin/ubuntu-build",
 )

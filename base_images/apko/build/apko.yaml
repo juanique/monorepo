@@ -5,6 +5,8 @@ contents:
     - https://packages.wolfi.dev/os
   packages:
     - wolfi-base
+    - bash
+    - python3
 
 archs:
   - x86_64

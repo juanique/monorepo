@@ -4,11 +4,14 @@ load("@buildifier_prebuilt//:rules.bzl", "buildifier")
 load("@rules_python_gazelle_plugin//manifest:defs.bzl", "gazelle_python_manifest")
 load("@rules_python_gazelle_plugin//modules_mapping:def.bzl", "modules_mapping")
 load("@pip_deps//:requirements.bzl", "all_whl_requirements")
+load("@rules_apko//apko:defs.bzl", "apko_bazelrc")
 
 exports_files([
     "pyproject.toml",
     "mypy.ignore",
 ])
+
+apko_bazelrc()
 
 ### Proto resolve
 # gazelle:resolve py examples.grpc.protos.helloworld_pb2 //examples/grpc/protos:helloworld_py_proto
@@ -47,7 +50,7 @@ platform(
     ],
     exec_properties = {
         "OSFamily": "Linux",
-        "container-image": "docker://docker.io/juanzolotoochin/ubuntu-build:latest",
+        "container-image": "docker://docker.io/juanzolotoochin/ubuntu-build@sha256:f504c0074f700f06f9c05fa7aba79c3a0d9953518516acbc67021d956e3db737",
     },
 )
 
