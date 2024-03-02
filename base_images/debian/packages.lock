@@ -69,6 +69,12 @@
           "version": "1:2.39.2-1.1"
         },
         {
+          "name": "grep",
+          "sha256": "3264acea728df3c48a54f20e9291b965130e306b9d00adac76647049da7196df",
+          "url": "https://snapshot.debian.org/archive/debian/20231111T025358Z/pool/main/g/grep/grep_3.8-5_amd64.deb",
+          "version": "3.8-5"
+        },
+        {
           "name": "libacl1",
           "sha256": "8be9df5795114bfe90e2be3d208ef47a5edd3fc7b3e20d387a597486d444e5e2",
           "url": "https://snapshot.debian.org/archive/debian/20231111T025358Z/pool/main/a/acl/libacl1_2.3.1-3_amd64.deb",
@@ -249,6 +255,12 @@
           "version": "5.4.1-0.2"
         },
         {
+          "name": "libmpfr6",
+          "sha256": "37b7a2b4e78890b6a074777f27b96c84f58e81558ba08410c2b6c0ca4a4ad77b",
+          "url": "https://snapshot.debian.org/archive/debian/20231111T025358Z/pool/main/m/mpfr4/libmpfr6_4.2.0-1_amd64.deb",
+          "version": "4.2.0-1"
+        },
+        {
           "name": "libncursesw6",
           "sha256": "98fa7a53dc565a38b65fb70422ad08001bf5361d8fbc74255280c329996a6bec",
           "url": "https://snapshot.debian.org/archive/debian/20231111T025358Z/pool/main/n/ncurses/libncursesw6_6.4-4_amd64.deb",
@@ -337,6 +349,12 @@
           "sha256": "2b07f5287b9105f40158b56e4d70cc1652dac56a408f3507b4ab3d061eed425f",
           "url": "https://snapshot.debian.org/archive/debian/20231111T025358Z/pool/main/libs/libselinux/libselinux1_3.4-1+b6_amd64.deb",
           "version": "3.4-1+b6"
+        },
+        {
+          "name": "libsigsegv2",
+          "sha256": "92336a5c47989b82ba4c778adc0ea22fc84450773f2d8428fca4448b0789cfe6",
+          "url": "https://snapshot.debian.org/archive/debian/20231111T025358Z/pool/main/libs/libsigsegv/libsigsegv2_2.14-1_amd64.deb",
+          "version": "2.14-1"
         },
         {
           "name": "libsqlite3_0",
@@ -597,6 +615,15 @@
         {
           "dependencies": [
             "gcc_12_base",
+            "libc6",
+            "libgcc_s1",
+            "libpcre2_8_0"
+          ],
+          "name": "grep"
+        },
+        {
+          "dependencies": [
+            "gcc_12_base",
             "libgcc_s1"
           ],
           "name": "libc6"
@@ -644,6 +671,15 @@
         {
           "dependencies": [
             "gcc_12_base",
+            "libc6",
+            "libgcc_s1",
+            "libgmp10"
+          ],
+          "name": "libmpfr6"
+        },
+        {
+          "dependencies": [
+            "gcc_12_base",
             "libbz2_1_0",
             "libc6",
             "libcom_err2",
@@ -668,6 +704,14 @@
             "libuuid1"
           ],
           "name": "libpython3_11_stdlib"
+        },
+        {
+          "dependencies": [
+            "gcc_12_base",
+            "libc6",
+            "libgcc_s1"
+          ],
+          "name": "libsigsegv2"
         },
         {
           "dependencies": [

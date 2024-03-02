@@ -1,6 +1,9 @@
 - distros: ["debian12"]
   archs: ["amd64"]
   packages:
+    - libmpfr6
+    - libsigsegv2
+    - grep
     - git
     - findutils
     - awk

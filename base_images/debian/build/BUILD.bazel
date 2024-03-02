@@ -33,6 +33,9 @@ image(
     env = {"LANG": "C.UTF-8"},
     os = "linux",
     tars = [
+        debian_package_layer("libmpfr6"),
+        debian_package_layer("libsigsegv2"),
+        debian_package_layer("grep"),
         debian_package_layer("git"),
         debian_package_layer("findutils"),
         debian_package_layer("awk"),
