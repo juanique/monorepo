@@ -1,6 +1,10 @@
 - distros: ["debian12"]
   archs: ["amd64"]
   packages:
+    - git
+    - findutils
+    - awk
+    - diffutils
     - sed
     - xz-utils
     - coreutils

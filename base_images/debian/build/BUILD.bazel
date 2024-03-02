@@ -33,6 +33,10 @@ image(
     env = {"LANG": "C.UTF-8"},
     os = "linux",
     tars = [
+        debian_package_layer("git"),
+        debian_package_layer("findutils"),
+        debian_package_layer("awk"),
+        debian_package_layer("diffutils"),
         debian_package_layer("sed"),
         debian_package_layer("xz-utils"),
         debian_package_layer("liblz4-1"),
