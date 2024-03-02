@@ -44,9 +44,9 @@ gazelle_dependencies()
 
 http_archive(
     name = "aspect_bazel_lib",
-    sha256 = "bda4a69fa50411b5feef473b423719d88992514d259dadba7d8218a1d02c7883",
-    strip_prefix = "bazel-lib-2.3.0",
-    url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.3.0/bazel-lib-v2.3.0.tar.gz",
+    sha256 = "a59096e01b43d86c6667a869f0e90e0c4b1d4cb03c3d3a972a32ff687c750ac2",
+    strip_prefix = "bazel-lib-2.5.1",
+    url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.5.1/bazel-lib-v2.5.1.tar.gz",
 )
 
 #########################
