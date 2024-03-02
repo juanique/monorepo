@@ -111,6 +111,63 @@
         "checksum": "Q1Szc3cxj+pMd2uIiRS7yEnYlzTck="
       },
       {
+        "name": "libattr1",
+        "url": "https://packages.wolfi.dev/os/x86_64/libattr1-2.5.2-r0.apk",
+        "version": "2.5.2-r0",
+        "architecture": "x86_64",
+        "signature": {
+          "range": "bytes=0-701",
+          "checksum": "sha1-RpV/LrL+ABDuWsqBZnesuOJ3/FQ="
+        },
+        "control": {
+          "range": "bytes=702-1084",
+          "checksum": "sha1-Gutydt0wEmQh1/rH46Gfzm404xI="
+        },
+        "data": {
+          "range": "bytes=1085-57345",
+          "checksum": "sha256-B7iQKAkk10Gbw3sqG4p7BJkNtM4Yeo68kTDmwOmvL4Q="
+        },
+        "checksum": "Q1Gutydt0wEmQh1/rH46Gfzm404xI="
+      },
+      {
+        "name": "libacl1",
+        "url": "https://packages.wolfi.dev/os/x86_64/libacl1-2.3.2-r0.apk",
+        "version": "2.3.2-r0",
+        "architecture": "x86_64",
+        "signature": {
+          "range": "bytes=0-706",
+          "checksum": "sha1-Po+X3/i01fpuPQqDNW5tScbjivk="
+        },
+        "control": {
+          "range": "bytes=707-1098",
+          "checksum": "sha1-P8y3f15Qby3w4pYD5nQQ5g0ZzIk="
+        },
+        "data": {
+          "range": "bytes=1099-71180",
+          "checksum": "sha256-3bCBno+N1sLlEuH2bb56q1LOKziXweBcd1A1k9BrzFk="
+        },
+        "checksum": "Q1P8y3f15Qby3w4pYD5nQQ5g0ZzIk="
+      },
+      {
+        "name": "acl",
+        "url": "https://packages.wolfi.dev/os/x86_64/acl-2.3.2-r0.apk",
+        "version": "2.3.2-r0",
+        "architecture": "x86_64",
+        "signature": {
+          "range": "bytes=0-696",
+          "checksum": "sha1-M/fdmhcVJIihUgd4Eo0PNR5WAVs="
+        },
+        "control": {
+          "range": "bytes=697-1108",
+          "checksum": "sha1-Q4j/Y64+Uq7qnCg0PydwBMOKCk0="
+        },
+        "data": {
+          "range": "bytes=1109-594671",
+          "checksum": "sha256-FFiWJ708TJLkJ6mQjg7a51mR2hKXSYIKcTXvGndhQPo="
+        },
+        "checksum": "Q1Q4j/Y64+Uq7qnCg0PydwBMOKCk0="
+      },
+      {
         "name": "ncurses-terminfo-base",
         "url": "https://packages.wolfi.dev/os/x86_64/ncurses-terminfo-base-6.4_p20231125-r1.apk",
         "version": "6.4_p20231125-r1",
@@ -546,6 +603,25 @@
           "checksum": "sha256-XRnQv4CPMYnySQG3oYbWVWDZ52qYM7FzvkvoUY0Ja4U="
         },
         "checksum": "Q1Zizg1HB1+QkPwEjr8tdrj6Ivx3k="
+      },
+      {
+        "name": "zstd",
+        "url": "https://packages.wolfi.dev/os/x86_64/zstd-1.5.5-r2.apk",
+        "version": "1.5.5-r2",
+        "architecture": "x86_64",
+        "signature": {
+          "range": "bytes=0-701",
+          "checksum": "sha1-+9/VCwC4qJbJsbuPjgX5S8IYmTg="
+        },
+        "control": {
+          "range": "bytes=702-1121",
+          "checksum": "sha1-L9cdqJ4WCTEbQo4zjLjOXdZTvTI="
+        },
+        "data": {
+          "range": "bytes=1122-1036456",
+          "checksum": "sha256-LBp0TWXaEjIjG3piQ1bETAKlMEP02Bd5k2IHZdPaAPQ="
+        },
+        "checksum": "Q1L9cdqJ4WCTEbQo4zjLjOXdZTvTI="
       }
     ]
   }

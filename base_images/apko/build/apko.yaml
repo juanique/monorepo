@@ -7,6 +7,8 @@ contents:
     - wolfi-base
     - bash
     - python3
+    - acl
+    - zstd
 
 archs:
   - x86_64

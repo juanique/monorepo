@@ -81,13 +81,13 @@ _py_gazelle_deps()
 load("@rules_python//python:pip.bzl", "pip_parse")
 
 python_register_toolchains(
-    name = "python3_9",
+    name = "python3_10",
     # Available versions are listed in @rules_python//python:versions.bzl.
     # We recommend using the same version your team is already standardized on.
-    python_version = "3.9",
+    python_version = "3.10",
 )
 
-load("@python3_9//:defs.bzl", "interpreter")
+load("@python3_10//:defs.bzl", "interpreter")
 
 pip_parse(
     name = "pip_deps",
@@ -180,7 +180,7 @@ http_archive(
 load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
 
 grpc_deps(
-    python_headers = "@python3_9//:python_headers",
+    python_headers = "@python3_10//:python_headers",
 )
 
 load("@com_github_grpc_grpc//bazel:grpc_extra_deps.bzl", "grpc_extra_deps")
@@ -449,3 +449,30 @@ translate_apko_lock(
 load("@apko_base_build//:repositories.bzl", "apko_repositories")
 
 apko_repositories()
+
+##############
+# Rules debian
+
+http_archive(
+    name = "rules_debian_packages",
+    sha256 = "0ae3b332f9d894e57693ce900769d2bd1b693e1f5ea1d9cdd82fa4479c93bcc8",
+    strip_prefix = "rules_debian_packages-0.2.0",
+    url = "https://github.com/betaboon/rules_debian_packages/releases/download/v0.2.0/rules_debian_packages-v0.2.0.tar.gz",
+)
+
+load("@rules_debian_packages//debian_packages:repositories.bzl", "rules_debian_packages_dependencies")
+
+rules_debian_packages_dependencies(python_interpreter_target = interpreter)
+
+load("@rules_debian_packages//debian_packages:defs.bzl", "debian_packages_repository")
+
+debian_packages_repository(
+    name = "debian_packages",
+    default_arch = "amd64",
+    default_distro = "debian12",
+    lock_file = "//base_images/debian:packages.lock",
+)
+
+load("@debian_packages//:packages.bzl", install_debian_deps = "install_deps")
+
+install_debian_deps()

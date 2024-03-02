@@ -66,6 +66,7 @@ func buildAndLoadImage(i Image, repoTags []string) error {
 		return err
 	}
 
+	existingLayers = []string{}
 	tarPath, err := builder.Build(i, BuildOpts{SkipLayers: existingLayers})
 	if err != nil {
 		return err

@@ -50,7 +50,7 @@ platform(
     ],
     exec_properties = {
         "OSFamily": "Linux",
-        "container-image": "docker://docker.io/juanzolotoochin/ubuntu-build@sha256:f504c0074f700f06f9c05fa7aba79c3a0d9953518516acbc67021d956e3db737",
+        "container-image": "docker://docker.io/juanzolotoochin/ubuntu-build@sha256:ea472ec9efd63e0a5be58cd900cd5317317a8b6fccf54949d1f277fb96d16f6c",
     },
 )
 
