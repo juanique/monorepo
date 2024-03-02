@@ -1,0 +1,8 @@
+load("@rules_apko//apko:defs.bzl", "apko_image")
+
+apko_image(
+    name = "build",
+    config = "apko.yaml",
+    contents = "@apko_base_build//:contents",
+    tag = "build:latest",
+)
