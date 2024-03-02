@@ -1,6 +1,8 @@
 - distros: ["debian12"]
   archs: ["amd64"]
   packages:
+    - sed
+    - xz-utils
     - coreutils
     - bash
     - libzstd-dev

@@ -9,13 +9,13 @@ package(default_visibility = ["//visibility:public"])
 pkg_mklink(
     name = "usr_bin_python_symlink",
     link_name = "/usr/bin/python",
-    target = "/bin/bin/python3.11",
+    target = "/usr/bin/python3.11",
 )
 
 pkg_mklink(
     name = "usr_bin_python3_symlink",
     link_name = "/usr/bin/python3",
-    target = "/bin/bin/python3.11",
+    target = "/usr/bin/python3.11",
 )
 
 pkg_tar(
@@ -33,6 +33,8 @@ image(
     env = {"LANG": "C.UTF-8"},
     os = "linux",
     tars = [
+        debian_package_layer("sed"),
+        debian_package_layer("xz-utils"),
         debian_package_layer("liblz4-1"),
         debian_package_layer("libzstd-dev"),
         debian_package_layer("coreutils"),

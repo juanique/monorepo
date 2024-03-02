@@ -285,10 +285,22 @@
           "version": "3.11.2-3"
         },
         {
+          "name": "sed",
+          "sha256": "177cacdfe9508448d84bf25534a87a7fcc058d8e2dcd422672851ea13f2115df",
+          "url": "https://snapshot.debian.org/archive/debian/20231111T025358Z/pool/main/s/sed/sed_4.9-1_amd64.deb",
+          "version": "4.9-1"
+        },
+        {
           "name": "tzdata",
           "sha256": "825efb56b6b9f7ca816074d7c2f6118894f455e64839d85eb1de53f4a610991e",
           "url": "https://snapshot.debian.org/archive/debian/20231111T025358Z/pool/main/t/tzdata/tzdata_2023c-5_all.deb",
           "version": "2023c-5"
+        },
+        {
+          "name": "xz_utils",
+          "sha256": "5ef7e6c1cd6b165455466bbfa6c22d8f5b61109d29aeab906bd3406322f34b15",
+          "url": "https://snapshot.debian.org/archive/debian/20231111T025358Z/pool/main/x/xz-utils/xz-utils_5.4.1-0.2_amd64.deb",
+          "version": "5.4.1-0.2"
         },
         {
           "name": "zlib1g",
@@ -480,8 +492,28 @@
           "name": "python3_distutils"
         },
         {
+          "dependencies": [
+            "gcc_12_base",
+            "libacl1",
+            "libc6",
+            "libgcc_s1",
+            "libpcre2_8_0",
+            "libselinux1"
+          ],
+          "name": "sed"
+        },
+        {
           "dependencies": [],
           "name": "tzdata"
+        },
+        {
+          "dependencies": [
+            "gcc_12_base",
+            "libc6",
+            "libgcc_s1",
+            "liblzma5"
+          ],
+          "name": "xz_utils"
         }
       ]
     }
