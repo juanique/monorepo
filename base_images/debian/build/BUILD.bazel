@@ -2,7 +2,7 @@ load("@debian_packages//:packages.bzl", "debian_package_layer")
 load("@rules_pkg//pkg:mappings.bzl", "pkg_mklink")
 load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
 load("//bazel/oci:defs.bzl", "image")
-load("@rules_oci//oci:defs.bzl", "oci_push")
+load("@rules_oci//oci:defs.bzl", "oci_push", "oci_tarball")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -26,13 +26,10 @@ pkg_tar(
     ],
 )
 
-image(
-    name = "build",
-    architecture = "amd64",
-    base = None,
-    env = {"LANG": "C.UTF-8"},
-    os = "linux",
-    tars = [
+pkg_tar(
+    name = "build_layers",
+    deps = [
+        debian_package_layer("docker-ce-cli"),
         debian_package_layer("libmpfr6"),
         debian_package_layer("libsigsegv2"),
         debian_package_layer("grep"),
@@ -46,6 +43,17 @@ image(
         debian_package_layer("libzstd-dev"),
         debian_package_layer("coreutils"),
         debian_package_layer("bash"),
+    ],
+)
+
+image(
+    name = "build",
+    architecture = "amd64",
+    base = None,
+    env = {"LANG": "C.UTF-8"},
+    os = "linux",
+    tars = [
+        ":build_layers",
         # required to replicate distroless/static
         debian_package_layer("base-files"),
         debian_package_layer("netbase"),
@@ -69,6 +77,12 @@ image(
         ":symlinks_layer",
     ],
     visibility = ["//visibility:private"],
+)
+
+oci_tarball(
+    name = "tarball",
+    image = ":build",
+    repo_tags = ["build:latest"],
 )
 
 oci_push(
