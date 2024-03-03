@@ -29,7 +29,6 @@ pkg_tar(
 pkg_tar(
     name = "build_layers",
     deps = [
-        debian_package_layer("docker-ce-cli"),
         debian_package_layer("libmpfr6"),
         debian_package_layer("libsigsegv2"),
         debian_package_layer("grep"),
