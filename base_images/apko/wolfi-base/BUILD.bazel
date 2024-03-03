@@ -1,9 +1,8 @@
 load("@rules_apko//apko:defs.bzl", "apko_image")
-load("@rules_oci//oci:defs.bzl", "oci_push")
 
 apko_image(
     name = "wolfi-base",
     config = "apko.yaml",
-    contents = "@apko_base_build//:contents",
+    contents = "@apko_wolfi_base//:contents",
     tag = "wolfi-base:latest",
 )
