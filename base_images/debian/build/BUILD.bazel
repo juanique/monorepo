@@ -2,7 +2,7 @@ load("@debian_packages//:packages.bzl", "debian_package_layer")
 load("@rules_pkg//pkg:mappings.bzl", "pkg_mklink")
 load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
 load("//bazel/oci:defs.bzl", "image")
-load("@rules_oci//oci:defs.bzl", "oci_push", "oci_tarball")
+load("@rules_oci//oci:defs.bzl", "oci_push")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -76,12 +76,6 @@ image(
         ":symlinks_layer",
     ],
     visibility = ["//visibility:private"],
-)
-
-oci_tarball(
-    name = "tarball",
-    image = ":build",
-    repo_tags = ["build:latest"],
 )
 
 oci_push(
