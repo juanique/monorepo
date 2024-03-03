@@ -442,11 +442,11 @@ apko_register_toolchains(name = "apko")
 load("@rules_apko//apko:translate_lock.bzl", "translate_apko_lock")
 
 translate_apko_lock(
-    name = "apko_base_build",
-    lock = "@//base_images/apko/build:apko.lock.json",
+    name = "apko_wolfi_base",
+    lock = "@//base_images/apko/wolfi-base:apko.lock.json",
 )
 
-load("@apko_base_build//:repositories.bzl", "apko_repositories")
+load("@apko_wolfi_base//:repositories.bzl", "apko_repositories")
 
 apko_repositories()
 
