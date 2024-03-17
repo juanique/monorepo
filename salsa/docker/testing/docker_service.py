@@ -37,12 +37,14 @@ class DockerService:
         self.thread: Optional[threading.Thread] = None
         self.container = None
 
-    def load_from_tar(self) -> None:
+    def _load_from_tar(self) -> None:
         tar_image = runfiles.Create().Rlocation(self.image_tar)
         with open(tar_image, "rb") as tar_file:
             self.docker_client.images.load(tar_file)[0].tag(self.image_name, "latest")
 
-    def load_from_loader_bin(self) -> None:
+    def _load_from_loader_bin(self) -> None:
+        assert self.loader_target
+
         loader_bin = "monorepo/" + (
             self.loader_target.replace(
                 "//",
@@ -63,9 +65,9 @@ class DockerService:
 
         try:
             if self.image_tar:
-                self.load_from_tar()
+                self._load_from_tar()
             elif self.loader_target:
-                self.load_from_loader_bin()
+                self._load_from_loader_bin()
             else:
                 raise ValueError("missing loader")
         except Exception as e:
