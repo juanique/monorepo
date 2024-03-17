@@ -268,6 +268,10 @@ func (b *ImageBuilder) Build(i Image, opts BuildOpts) (string, error) {
 	tarInputs := []string{}
 	for _, file := range b.filesToCopy {
 		if file.src != file.dst {
+			if files.FileExists(file.dst) {
+				// TOOD(juan.munoz): Why does this happen sometimes? how should we handle it?
+				continue
+			}
 			if err := files.CreateSymLink(file.src, file.dst); err != nil && file.src != file.dst {
 				return "", err
 			}

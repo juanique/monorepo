@@ -172,7 +172,7 @@ func (d *DockerLoader) LoadTarIntoDocker(ctx context.Context, tarPath, imageID s
 	json.FromJSON(string(data), &loadErr)
 	if loadErr.ErrorDetail.Message != "" {
 		log.Println("Load error:", loadErr.ErrorDetail.Message)
-		return action, fmt.Errorf("Error loading tar file into Docker: %s", loadErr.ErrorDetail.Message)
+		return action, fmt.Errorf("Error loading tar file into Docker, error details: %s", loadErr.ErrorDetail.Message)
 	}
 
 	action.Digest = imageID
