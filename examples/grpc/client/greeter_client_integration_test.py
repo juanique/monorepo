@@ -13,8 +13,8 @@ class TestGreeterClient(unittest.TestCase):
         self.docker_client = docker.from_env()
         self.service = DockerService(
             self.docker_client,
-            image_name="bazel/examples/grpc/server",
-            loader_target="//bazel/examples/grpc/server:greeter_server_docker.loader",
+            image_name="examples/grpc/server/greeter_server_docker",
+            loader_target="//examples/grpc/server:greeter_server_docker.loader",
             container_name="greeter_server",
             port=50051,
         )
