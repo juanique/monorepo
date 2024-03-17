@@ -1,3 +1,4 @@
+load("@rules_distroless//distroless:defs.bzl", "passwd")
 load("@debian_packages//:packages.bzl", "debian_package_layer")
 load("@rules_pkg//pkg:mappings.bzl", "pkg_mklink")
 load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
@@ -5,6 +6,20 @@ load("//bazel/oci:defs.bzl", "image")
 load("@rules_oci//oci:defs.bzl", "oci_push")
 
 package(default_visibility = ["//visibility:public"])
+
+passwd(
+    name = "passwd",
+    entries = [
+        dict(
+            gecos = ["root"],
+            gid = 0,
+            home = "/root",
+            shell = "/usr/bin/bash",
+            uid = 0,
+            username = "root",
+        ),
+    ],
+)
 
 pkg_mklink(
     name = "usr_bin_python_symlink",
@@ -18,17 +33,42 @@ pkg_mklink(
     target = "/usr/bin/python3.11",
 )
 
+pkg_mklink(
+    name = "usr_sbin_iptables",
+    link_name = "/usr/sbin/iptables",
+    target = "/usr/sbin/iptables-nft",
+)
+
 pkg_tar(
     name = "symlinks_layer",
     srcs = [
         ":usr_bin_python3_symlink",
         ":usr_bin_python_symlink",
+        ":usr_sbin_iptables",
     ],
+)
+
+pkg_tar(
+    name = "docker_layer",
+    srcs = [
+        "@docker//:containerd-bin",
+        "@docker//:containerd-shim-runc-v2-bin",
+        "@docker//:ctr-bin",
+        "@docker//:docker-bin",
+        "@docker//:docker-init-bin",
+        "@docker//:docker-proxy-bin",
+        "@docker//:dockerd-bin",
+        "@docker//:runc-bin",
+    ],
+    package_dir = "/usr/bin",
 )
 
 pkg_tar(
     name = "build_layers",
     deps = [
+        debian_package_layer("thin-provisioning-tools"),
+        debian_package_layer("fuse-overlayfs"),
+        debian_package_layer("iptables"),
         debian_package_layer("libmpfr6"),
         debian_package_layer("libsigsegv2"),
         debian_package_layer("grep"),
@@ -74,6 +114,8 @@ image(
         debian_package_layer("python3-distutils"),
         # symlinks
         ":symlinks_layer",
+        ":docker_layer",
+        ":passwd",
     ],
     visibility = ["//visibility:private"],
 )

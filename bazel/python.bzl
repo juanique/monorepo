@@ -9,7 +9,7 @@ FIRECRACKER_EXEC_PROPERTIES = {
     "test.init-dockerd": "true",
     # Tell BuildBuddy to preserve the microVM state across test runs.
     "test.recycle-runner": "true",
-    "container-image": "docker://gcr.io/flame-public/executor-docker-default:enterprise-v1.6.0",
+    "container-image": "docker://docker.io/juanzolotoochin/ubuntu-build@sha256:e40b6484a68eb805862dc1dd3a474aa355db4b8b9f393a5ae29ba5b908ea36eb",
 }
 
 def py_binary(name, srcs, **kwargs):
@@ -34,7 +34,6 @@ def py_binary(name, srcs, **kwargs):
     py_ruff_test(name = name + "_pylint", srcs = srcs)
 
 def py_library(name, srcs, **kwargs):
-    print(srcs)
     native.py_library(name = name, srcs = srcs, **kwargs)
     py_ruff_test(name = name + "_pylint", srcs = srcs)
 

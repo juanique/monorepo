@@ -476,3 +476,17 @@ debian_packages_repository(
 load("@debian_packages//:packages.bzl", install_debian_deps = "install_deps")
 
 install_debian_deps()
+
+############
+# Rules distroless
+
+http_archive(
+    name = "rules_distroless",
+    sha256 = "4b6d6a4bd03431f4f680ff5f6feea0b8ccf52c0296a12818d2c9595392e45543",
+    strip_prefix = "rules_distroless-0.2.0",
+    url = "https://github.com/GoogleContainerTools/rules_distroless/releases/download/v0.2.0/rules_distroless-v0.2.0.tar.gz",
+)
+
+load("@rules_distroless//distroless:dependencies.bzl", "distroless_dependencies")
+
+distroless_dependencies()

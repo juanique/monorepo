@@ -1,6 +1,9 @@
 - distros: ["debian12"]
   archs: ["amd64"]
   packages:
+    - thin-provisioning-tools
+    - fuse-overlayfs
+    - iptables
     - libmpfr6
     - libsigsegv2
     - grep
