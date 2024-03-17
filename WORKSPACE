@@ -25,6 +25,10 @@ http_archive(
 
 load("@io_bazel_rules_go//go:deps.bzl", "go_download_sdk", "go_register_toolchains", "go_rules_dependencies")
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
+load("//:deps.bzl", "go_repositories")
+
+# gazelle:repository_macro deps.bzl%go_repositories
+go_repositories()
 
 go_rules_dependencies()
 
@@ -158,10 +162,6 @@ http_archive(
 )
 
 load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
-load("//:deps.bzl", "go_repositories")
-
-# gazelle:repository_macro deps.bzl%go_repositories
-go_repositories()
 
 rules_proto_dependencies()
 
@@ -253,14 +253,6 @@ container_pull(
     digest = "sha256:eea2c875bb135db3a5d5c959a4161eecce3f6a988cf054125d7f4e836e93e020",
     registry = "docker.io",
     repository = "juanzolotoochin/ubuntu-base",
-)
-
-container_pull(
-    name = "postgres",
-    digest = "sha256:cd116dbc6ac97b18f8e1ad07aa94399117863731ec99f06ae1270937a98119bf",
-    registry = "docker.io",
-    repository = "postgres",
-    tag = "11.3-alpine",
 )
 
 http_archive(

@@ -1,9 +1,9 @@
 load("//:bazel/python.bzl", "py_library", "py_test")
-load("@io_bazel_rules_docker//container:container.bzl", "container_image")
+load("//bazel/oci:defs.bzl", "image")
 
-container_image(
+image(
     name = "postgres_image",
-    base = "@postgres//image",
+    base = "@postgres",
     env = {
         "POSTGRES_USER": "postgres",
         "POSTGRES_PASSWORD": "postgres",
@@ -15,7 +15,7 @@ py_library(
     name = "postgres_service",
     srcs = ["postgres_service.py"],
     data = [
-        ":postgres_image.tar",
+        ":postgres_image.loader",
     ],
     visibility = ["//:__subpackages__"],
     deps = [
