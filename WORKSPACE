@@ -48,9 +48,9 @@ gazelle_dependencies()
 
 http_archive(
     name = "aspect_bazel_lib",
-    sha256 = "bda4a69fa50411b5feef473b423719d88992514d259dadba7d8218a1d02c7883",
-    strip_prefix = "bazel-lib-2.3.0",
-    url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.3.0/bazel-lib-v2.3.0.tar.gz",
+    sha256 = "a59096e01b43d86c6667a869f0e90e0c4b1d4cb03c3d3a972a32ff687c750ac2",
+    strip_prefix = "bazel-lib-2.5.1",
+    url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.5.1/bazel-lib-v2.5.1.tar.gz",
 )
 
 #########################
@@ -85,13 +85,13 @@ _py_gazelle_deps()
 load("@rules_python//python:pip.bzl", "pip_parse")
 
 python_register_toolchains(
-    name = "python3_9",
+    name = "python3_10",
     # Available versions are listed in @rules_python//python:versions.bzl.
     # We recommend using the same version your team is already standardized on.
-    python_version = "3.9",
+    python_version = "3.10",
 )
 
-load("@python3_9//:defs.bzl", "interpreter")
+load("@python3_10//:defs.bzl", "interpreter")
 
 pip_parse(
     name = "pip_deps",
@@ -180,7 +180,7 @@ http_archive(
 load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
 
 grpc_deps(
-    python_headers = "@python3_9//:python_headers",
+    python_headers = "@python3_10//:python_headers",
 )
 
 load("@com_github_grpc_grpc//bazel:grpc_extra_deps.bzl", "grpc_extra_deps")
@@ -414,3 +414,71 @@ aspect_bazel_lib_dependencies()
 # Register bazel-lib toolchains
 
 aspect_bazel_lib_register_toolchains()
+
+###############
+# Rules apko
+
+http_archive(
+    name = "rules_apko",
+    sha256 = "0c1152e23c72ebf9ffac1921e395ad6a5501e72ded4ce505a5e05161e1f0793d",
+    strip_prefix = "rules_apko-1.2.3",
+    url = "https://github.com/chainguard-dev/rules_apko/releases/download/v1.2.3/rules_apko-v1.2.3.tar.gz",
+)
+
+load("@rules_apko//apko:repositories.bzl", "apko_register_toolchains", "rules_apko_dependencies")
+
+rules_apko_dependencies()
+
+apko_register_toolchains(name = "apko")
+
+load("@rules_apko//apko:translate_lock.bzl", "translate_apko_lock")
+
+translate_apko_lock(
+    name = "apko_wolfi_base",
+    lock = "@//base_images/apko/wolfi-base:apko.lock.json",
+)
+
+load("@apko_wolfi_base//:repositories.bzl", "apko_repositories")
+
+apko_repositories()
+
+##############
+# Rules debian
+
+http_archive(
+    name = "rules_debian_packages",
+    sha256 = "0ae3b332f9d894e57693ce900769d2bd1b693e1f5ea1d9cdd82fa4479c93bcc8",
+    strip_prefix = "rules_debian_packages-0.2.0",
+    url = "https://github.com/betaboon/rules_debian_packages/releases/download/v0.2.0/rules_debian_packages-v0.2.0.tar.gz",
+)
+
+load("@rules_debian_packages//debian_packages:repositories.bzl", "rules_debian_packages_dependencies")
+
+rules_debian_packages_dependencies(python_interpreter_target = interpreter)
+
+load("@rules_debian_packages//debian_packages:defs.bzl", "debian_packages_repository")
+
+debian_packages_repository(
+    name = "debian_packages",
+    default_arch = "amd64",
+    default_distro = "debian12",
+    lock_file = "//base_images/debian:packages.lock",
+)
+
+load("@debian_packages//:packages.bzl", install_debian_deps = "install_deps")
+
+install_debian_deps()
+
+############
+# Rules distroless
+
+http_archive(
+    name = "rules_distroless",
+    sha256 = "4b6d6a4bd03431f4f680ff5f6feea0b8ccf52c0296a12818d2c9595392e45543",
+    strip_prefix = "rules_distroless-0.2.0",
+    url = "https://github.com/GoogleContainerTools/rules_distroless/releases/download/v0.2.0/rules_distroless-v0.2.0.tar.gz",
+)
+
+load("@rules_distroless//distroless:dependencies.bzl", "distroless_dependencies")
+
+distroless_dependencies()
