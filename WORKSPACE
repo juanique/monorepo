@@ -187,44 +187,6 @@ load("@com_github_grpc_grpc//bazel:grpc_extra_deps.bzl", "grpc_extra_deps")
 
 grpc_extra_deps()
 
-# Docker
-http_archive(
-    name = "io_bazel_rules_docker",
-    sha256 = "b1e80761a8a8243d03ebca8845e9cc1ba6c82ce7c5179ce2b295cd36f7e394bf",
-    urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.25.0/rules_docker-v0.25.0.tar.gz"],
-)
-
-load(
-    "@io_bazel_rules_docker//repositories:repositories.bzl",
-    container_repositories = "repositories",
-)
-
-container_repositories()
-
-load("@io_bazel_rules_docker//repositories:deps.bzl", container_deps = "deps")
-
-container_deps()
-
-load(
-    "@io_bazel_rules_docker//container:container.bzl",
-    "container_pull",
-)
-
-container_pull(
-    name = "java_base",
-    # 'tag' is also supported, but digest is encouraged for reproducibility.
-    digest = "sha256:deadbeef",
-    registry = "gcr.io",
-    repository = "distroless/java",
-)
-
-load(
-    "@io_bazel_rules_docker//python3:image.bzl",
-    _py_image_repos = "repositories",
-)
-
-_py_image_repos()
-
 # mypy integration
 http_archive(
     name = "mypy_integration",
@@ -246,13 +208,6 @@ load("@mypy_integration//:config.bzl", "mypy_configuration")
 
 mypy_configuration(
     mypy_exclude_list = "//:mypy.ignore",
-)
-
-container_pull(
-    name = "ubuntu",
-    digest = "sha256:eea2c875bb135db3a5d5c959a4161eecce3f6a988cf054125d7f4e836e93e020",
-    registry = "docker.io",
-    repository = "juanzolotoochin/ubuntu-base",
 )
 
 http_archive(
