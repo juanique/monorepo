@@ -1,0 +1,8 @@
+load("@rules_apko//apko:defs.bzl", "apko_image")
+
+apko_image(
+    name = "wolfi-base",
+    config = "apko.yaml",
+    contents = "@apko_wolfi_base//:contents",
+    tag = "wolfi-base:latest",
+)
