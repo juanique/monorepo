@@ -12,6 +12,8 @@ py_binary(
         "//examples/grpc/protos:helloworld_py_proto",
         "@pip_deps//grpcio",
         "@pip_deps//grpcio_reflection",
+        "@pip_deps//grpclib",  # keep
+        "@pip_deps//protobuf",  # keep
     ],
 )
 

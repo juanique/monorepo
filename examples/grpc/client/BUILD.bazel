@@ -8,6 +8,8 @@ py_library(
         "//examples/grpc/protos:helloworld_py_grpc",
         "//examples/grpc/protos:helloworld_py_proto",
         "@pip_deps//grpcio",
+        "@pip_deps//grpclib",  # keep
+        "@pip_deps//protobuf",  # keep
     ],
 )
 

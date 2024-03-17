@@ -47,3 +47,6 @@ build --host_cxxopt=-std=c++14
 build:full_local --bes_backend=""
 build:full_local --bes_results_url=""
 build:full_local --remote_cache=""
+
+# Required for rules_apko to make range requests
+try-import %workspace%/.apko/.bazelrc
