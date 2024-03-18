@@ -36,13 +36,7 @@ pkg_mklink(
 pkg_mklink(
     name = "usr_sbin_iptables",
     link_name = "/usr/sbin/iptables",
-    target = "/usr/sbin/iptables-legacy",
-)
-
-pkg_mklink(
-    name = "usr_sbin_ip6tables",
-    link_name = "/usr/sbin/ip6tables",
-    target = "/usr/sbin/ip6tables-legacy",
+    target = "/usr/sbin/iptables-nft",
 )
 
 pkg_tar(
@@ -50,7 +44,6 @@ pkg_tar(
     srcs = [
         ":usr_bin_python3_symlink",
         ":usr_bin_python_symlink",
-        ":usr_sbin_ip6tables",
         ":usr_sbin_iptables",
     ],
 )
@@ -131,5 +124,5 @@ oci_push(
     name = "push",
     image = ":build",
     remote_tags = ["latest"],
-    repository = "index.docker.io/juanzolotoochin/ubuntu-build",
+    repository = "index.docker.io/juanzolotoochin/ubuntu-build-v2",
 )
