@@ -19,7 +19,7 @@ build --remote_instance_name=instance_name_1
 build --noremote_upload_local_results
 
 # We'll enable this someday and rely on MODULE.bazel
-build --noenable_bzlmod
+build --enable_bzlmod
 
 
 build:remote --remote_executor=grpcs://remote.buildbuddy.io
