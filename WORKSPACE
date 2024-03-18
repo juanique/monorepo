@@ -147,9 +147,9 @@ go_repository(
 
 http_archive(
     name = "com_google_protobuf",
-    sha256 = "974409b1d6eb2b6508fd26bea2f9b327a4480f122a6fdf38e485321549308121",
-    strip_prefix = "protobuf-24.0",
-    urls = ["https://github.com/protocolbuffers/protobuf/archive/refs/tags/v24.0.zip"],
+    sha256 = "c2c71ebc90af9796e8834f65093f2fab88b0a82b2a3e805b34842645a2afc4b0",
+    strip_prefix = "protobuf-26.0",
+    urls = ["https://github.com/protocolbuffers/protobuf/archive/refs/tags/v26.0.zip"],
 )
 
 http_archive(
@@ -172,9 +172,9 @@ http_archive(
     name = "com_github_grpc_grpc",
     patch_args = ["-p1"],
     patches = ["//bazel/patches:grpc.patch"],
-    sha256 = "8393767af531b2d0549a4c26cf8ba1f665b16c16fb6c9238a7755e45444881dd",
-    strip_prefix = "grpc-1.57.0",
-    urls = ["https://github.com/grpc/grpc/archive/v1.57.0.tar.gz"],
+    sha256 = "c9f9ae6e4d6f40464ee9958be4068087881ed6aa37e30d0e64d40ed7be39dd01",
+    strip_prefix = "grpc-1.62.1",
+    urls = ["https://github.com/grpc/grpc/archive/refs/tags/v1.62.1.tar.gz"],
 )
 
 load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
@@ -186,44 +186,6 @@ grpc_deps(
 load("@com_github_grpc_grpc//bazel:grpc_extra_deps.bzl", "grpc_extra_deps")
 
 grpc_extra_deps()
-
-# Docker
-http_archive(
-    name = "io_bazel_rules_docker",
-    sha256 = "b1e80761a8a8243d03ebca8845e9cc1ba6c82ce7c5179ce2b295cd36f7e394bf",
-    urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.25.0/rules_docker-v0.25.0.tar.gz"],
-)
-
-load(
-    "@io_bazel_rules_docker//repositories:repositories.bzl",
-    container_repositories = "repositories",
-)
-
-container_repositories()
-
-load("@io_bazel_rules_docker//repositories:deps.bzl", container_deps = "deps")
-
-container_deps()
-
-load(
-    "@io_bazel_rules_docker//container:container.bzl",
-    "container_pull",
-)
-
-container_pull(
-    name = "java_base",
-    # 'tag' is also supported, but digest is encouraged for reproducibility.
-    digest = "sha256:deadbeef",
-    registry = "gcr.io",
-    repository = "distroless/java",
-)
-
-load(
-    "@io_bazel_rules_docker//python3:image.bzl",
-    _py_image_repos = "repositories",
-)
-
-_py_image_repos()
 
 # mypy integration
 http_archive(
@@ -246,13 +208,6 @@ load("@mypy_integration//:config.bzl", "mypy_configuration")
 
 mypy_configuration(
     mypy_exclude_list = "//:mypy.ignore",
-)
-
-container_pull(
-    name = "ubuntu",
-    digest = "sha256:eea2c875bb135db3a5d5c959a4161eecce3f6a988cf054125d7f4e836e93e020",
-    registry = "docker.io",
-    repository = "juanzolotoochin/ubuntu-base",
 )
 
 http_archive(

@@ -24,7 +24,7 @@ py_test(
     name = "greeter_client_integration_test",
     srcs = ["greeter_client_integration_test.py"],
     data = [
-        "//examples/grpc/server:greeter_server_docker.tar",
+        "//examples/grpc/server:greeter_server_docker.loader",
     ],
     firecracker = True,
     deps = [
