@@ -1,4 +1,6 @@
 module(
     name = "monorepo",
-    version = "1.0"
+    version = "1.0",
 )
+
+bazel_dep(name = "rules_license", version = "0.0.8")
