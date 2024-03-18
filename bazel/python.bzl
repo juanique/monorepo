@@ -9,7 +9,7 @@ FIRECRACKER_EXEC_PROPERTIES = {
     "test.init-dockerd": "true",
     # Tell BuildBuddy to preserve the microVM state across test runs.
     "test.recycle-runner": "true",
-    "container-image": "docker://docker.io/juanzolotoochin/ubuntu-build-v2@sha256:646b75559857a0b3a39ab572b8547a4085515d6c761cf72eb8739787d57d9ba9",
+    "container-image": "docker://docker.io/juanzolotoochin/ubuntu-build-v2@sha256:dc3ab6faa67a26c7657350e9bac40f0d8290674af2f618ad7c8e2d5efcb99b83",
 }
 
 def py_binary(name, srcs, **kwargs):
