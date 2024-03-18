@@ -89,10 +89,6 @@ pkg_tar(
         debian_package_layer("libzstd-dev"),
         debian_package_layer("coreutils"),
         debian_package_layer("bash"),
-
-        # Required by rules_python to bootstrap python binaries.
-        # Can be removed after migrating to rules_py
-        debian_package_layer("python3.11-minimal"),
     ],
 )
 
@@ -104,15 +100,25 @@ image(
     os = "linux",
     tars = [
         ":build_layers",
-        # From distroless/static
+        # required to replicate distroless/static
         debian_package_layer("base-files"),
         debian_package_layer("netbase"),
         debian_package_layer("tzdata"),
         debian_package_layer("ca-certificates"),
-        # From distroless/base
+        # required to replicate distroless/base
         debian_package_layer("libc6"),
         debian_package_layer("libssl3"),
         debian_package_layer("openssl"),
+        # required to replicate distroless/cc
+        debian_package_layer("libgcc-s1"),
+        debian_package_layer("libgomp1"),
+        debian_package_layer("libstdc++6"),
+        # required to replicate distroless/python
+        debian_package_layer("dash"),
+        debian_package_layer("libc-bin"),
+        debian_package_layer("python3.11-minimal"),
+        debian_package_layer("libpython3.11-stdlib"),
+        debian_package_layer("python3-distutils"),
         ":symlinks_layer",
         ":docker_layer",
         ":passwd",
