@@ -1,0 +1,23 @@
+load("//:bazel/python.bzl", "py_binary")
+load("//bazel/oci:defs.bzl", "image")
+
+py_binary(
+    name = "main",
+    srcs = ["main.py"],
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "@pip_deps//diffusers",
+        "@pip_deps//nvidia_cuda_cupti_cu11",  # keep
+        "@pip_deps//nvidia_cuda_nvrtc_cu11",  # keep
+        "@pip_deps//nvidia_cuda_runtime_cu11",  # keep
+        "@pip_deps//nvidia_cudnn_cu11",  # keep
+        "@pip_deps//torch",
+        "@pip_deps//transformers",  # keep
+    ],
+)
+
+image(
+    name = "genai-image",
+    base = "@nvidia-cuda",
+    binary = ":main",
+)
