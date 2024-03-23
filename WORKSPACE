@@ -58,9 +58,11 @@ http_archive(
 
 http_archive(
     name = "rules_python",
-    sha256 = "d71d2c67e0bce986e1c5a7731b4693226867c45bfe0b7c5e0067228a536fc580",
-    strip_prefix = "rules_python-0.29.0",
-    url = "https://github.com/bazelbuild/rules_python/releases/download/0.29.0/rules_python-0.29.0.tar.gz",
+    patch_args = ["-p1"],
+    patches = ["//bazel/patches:rules_python.patch"],
+    sha256 = "c68bdc4fbec25de5b5493b8819cfc877c4ea299c0dcb15c244c5a00208cde311",
+    strip_prefix = "rules_python-0.31.0",
+    url = "https://github.com/bazelbuild/rules_python/releases/download/0.31.0/rules_python-0.31.0.tar.gz",
 )
 
 load("@rules_python//python:repositories.bzl", "py_repositories", "python_register_toolchains")
@@ -95,6 +97,7 @@ load("@python3_10//:defs.bzl", "interpreter")
 
 pip_parse(
     name = "pip_deps",
+    download_only = True,
     python_interpreter_target = interpreter,
     requirements_lock = "//:requirements_lock.txt",
 )
@@ -114,7 +117,11 @@ install_mypy_deps()
 load("@pip_deps//:requirements.bzl", "install_deps")
 
 # Call it to define repos for your requirements.
-install_deps()
+install_deps(
+    whl_patches = {
+        "//bazel/patches:rich.patch": '{"whls": ["rich-10.12.0-py3-none-any.whl"],"patch_strip": 1}',
+    },
+)
 
 go_repository(
     name = "org_golang_google_genproto_googleapis_rpc",
