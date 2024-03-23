@@ -1,4 +1,10 @@
 load("@pip_deps//:requirements.bzl", "requirement")
+load(
+    "@aspect_rules_py//py:defs.bzl",
+    _py_binary = "py_binary",
+    _py_library = "py_library",
+    _py_test = "py_test",
+)
 
 FIRECRACKER_EXEC_PROPERTIES = {
     # Tell BuildBuddy to run this test using a Firecracker microVM.
@@ -9,7 +15,6 @@ FIRECRACKER_EXEC_PROPERTIES = {
     "test.init-dockerd": "true",
     # Tell BuildBuddy to preserve the microVM state across test runs.
     "test.recycle-runner": "true",
-    "container-image": "docker://docker.io/juanzolotoochin/ubuntu-build-v2@sha256:dc3ab6faa67a26c7657350e9bac40f0d8290674af2f618ad7c8e2d5efcb99b83",
 }
 
 def py_binary(name, srcs, **kwargs):
@@ -19,7 +24,7 @@ def py_binary(name, srcs, **kwargs):
     test.
 
     Args:
-     name: Name that will be used for the native py_binary target.
+     name: Name that will be used for the _py_binary target.
      **kwargs: All other target args.
     """
 
@@ -29,24 +34,25 @@ def py_binary(name, srcs, **kwargs):
         else:
             fail("Missing main attribute for multi srcs target.")
 
-    native.py_binary(name = name, srcs = srcs, **kwargs)
+    _py_binary(name = name, srcs = srcs, **kwargs)
 
     py_ruff_test(name = name + "_pylint", srcs = srcs)
 
 def py_library(name, srcs, **kwargs):
-    native.py_library(name = name, srcs = srcs, **kwargs)
+    print(srcs)
+    _py_library(name = name, srcs = srcs, **kwargs)
     py_ruff_test(name = name + "_pylint", srcs = srcs)
 
 def py_test(name, srcs, firecracker = False, **kwargs):
     if firecracker:
-        native.py_test(
+        _py_test(
             name = name,
             exec_properties = FIRECRACKER_EXEC_PROPERTIES,
             srcs = srcs,
             **kwargs
         )
     else:
-        native.py_test(
+        _py_test(
             name = name,
             srcs = srcs,
             **kwargs
@@ -56,12 +62,10 @@ def py_test(name, srcs, firecracker = False, **kwargs):
 
 def pylint_test(name, srcs, deps = [], args = [], data = [], **kwargs):
     kwargs["main"] = "pylint_test_wrapper.py"
-    native.py_test(
+    _py_test(
         name = name,
         srcs = ["//bazel/workspace/tools/pylint:pylint_test_wrapper.py"] + srcs,
         args = ["--pylint-rcfile=$(location //bazel/workspace/tools/pylint:.pylintrc)"] + args + ["$(location :%s)" % x for x in srcs],
-        python_version = "PY3",
-        srcs_version = "PY3",
         deps = deps + [
             requirement("pytest"),
             requirement("pytest-pylint"),
@@ -78,12 +82,10 @@ def py_debug(name, og_name, srcs, deps = [], args = [], data = [], **kwargs):
 
     py_debug_wrapper(name = wrapper_dep_name, out = wrapper_filename)
 
-    native.py_binary(
+    _py_binary(
         name = name,
         srcs = [wrapper_filename] + srcs,
         main = wrapper_filename,
-        python_version = "PY3",
-        srcs_version = "PY3",
         deps = deps + [
             requirement("pytest"),
             requirement("debugpy"),
@@ -117,7 +119,7 @@ py_debug_wrapper = rule(
 )
 
 def pytest_test(name, srcs, deps = [], args = [], **kwargs):
-    native.py_test(
+    _py_test(
         name = name,
         srcs = [
             "//bazel/workspace/tools/pytest:pytest_wrapper.py",
@@ -126,8 +128,6 @@ def pytest_test(name, srcs, deps = [], args = [], **kwargs):
         args = [
             "--capture=no",
         ] + args + ["$(location :%s)" % x for x in srcs],
-        python_version = "PY3",
-        srcs_version = "PY3",
         deps = deps + [
             requirement("pytest"),
         ],
