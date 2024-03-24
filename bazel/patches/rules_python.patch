@@ -1,0 +1,34 @@
+diff --git a/python/pip_install/pip_repository.bzl b/python/pip_install/pip_repository.bzl
+index 110ade1..92ec692 100644
+--- a/python/pip_install/pip_repository.bzl
++++ b/python/pip_install/pip_repository.bzl
+@@ -777,7 +777,9 @@ def _whl_library_impl(rctx):
+         patches = {}
+         for patch_file, json_args in rctx.attr.whl_patches.items():
+             patch_dst = struct(**json.decode(json_args))
++            print("==> Checking if", whl_path.basename, "in", patch_dst.whls)
+             if whl_path.basename in patch_dst.whls:
++                print("==> it is")
+                 patches[patch_file] = patch_dst.patch_strip
+ 
+         whl_path = patch_whl(
+diff --git a/python/private/patch_whl.bzl b/python/private/patch_whl.bzl
+index 9e3119f..f8340c1 100644
+--- a/python/private/patch_whl.bzl
++++ b/python/private/patch_whl.bzl
+@@ -49,6 +49,7 @@ def patch_whl(rctx, *, python_interpreter, whl_path, patches, **kwargs):
+     # extract files into the current directory for patching as rctx.patch
+     # does not support patching in another directory.
+     whl_input = rctx.path(whl_path)
++    print("===> patching", whl_input.basename, "with", patches)
+ 
+     # symlink to a zip file to use bazel's extract so that we can use bazel's
+     # repository_ctx patch implementation. The whl file may be in a different
+@@ -60,6 +61,7 @@ def patch_whl(rctx, *, python_interpreter, whl_path, patches, **kwargs):
+         fail("Failed to remove the symlink after extracting")
+ 
+     for patch_file, patch_strip in patches.items():
++        print("=====> patching", patch_file, patch_strip)
+         rctx.patch(patch_file, strip = patch_strip)
+ 
+     # Generate an output filename, which we will be returning
