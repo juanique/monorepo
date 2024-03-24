@@ -49,3 +49,6 @@ build:full_local --remote_cache=""
 
 # Required for rules_apko to make range requests
 try-import %workspace%/.apko/.bazelrc
+
+# User-level configs
+try-import %workspace%/auto.bazelrc
