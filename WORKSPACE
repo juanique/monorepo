@@ -437,3 +437,13 @@ http_archive(
 load("@rules_distroless//distroless:dependencies.bzl", "distroless_dependencies")
 
 distroless_dependencies()
+
+##############
+# rules py
+
+http_archive(
+    name = "aspect_rules_py",
+    sha256 = "e1d1023bc9ba8545dc87c6df10508d9d7c20f489f5e5c5c1e16380b33c013485",
+    strip_prefix = "rules_py-0.5.0",
+    url = "https://github.com/aspect-build/rules_py/releases/download/v0.5.0/rules_py-v0.5.0.tar.gz",
+)
