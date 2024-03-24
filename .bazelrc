@@ -1,3 +1,5 @@
+build --bes_backend=grpcs://remote.buildbuddy.io
+build --bes_results_url=https://app.buildbuddy.io/invocation/
 build --build_metadata=REPO_URL=https://github.com/juanique/monorepo.git
 build --keep_backend_build_event_connections_alive=false
 
@@ -8,6 +10,7 @@ build --experimental_profile_include_primary_output
 
 ## Remote caching
 build --remote_download_outputs=minimal
+build --remote_cache=grpcs://remote.buildbuddy.io
 build --experimental_remote_cache_compression
 build --experimental_remote_build_event_upload=minimal
 build --nolegacy_important_outputs
@@ -46,5 +49,3 @@ build:full_local --remote_cache=""
 
 # Required for rules_apko to make range requests
 try-import %workspace%/.apko/.bazelrc
-
-try-import %workspace%/auto.bazelrc
