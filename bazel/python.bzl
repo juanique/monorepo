@@ -134,15 +134,16 @@ def pytest_test(name, srcs, deps = [], args = [], **kwargs):
         **kwargs
     )
 
-def py_executable(name, binary):
+def py_executable(name, binary, tags = []):
     zip_target_name = binary.replace(":", "") + "_zip"
     native.filegroup(
         name = zip_target_name,
         srcs = [binary],
+        tags = tags,
         output_group = "python_zip_file",
     )
 
-    _py_executable_wrapper(name = name, binary = zip_target_name)
+    _py_executable_wrapper(name = name, binary = zip_target_name, tags = tags)
 
 def _py_executable_wrapper_impl(ctx):
     output = ctx.actions.declare_file(ctx.attr.name)
