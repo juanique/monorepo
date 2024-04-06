@@ -1,0 +1,124 @@
+diff --git a/torch/__init__.py b/torch/__init__.py
+index 881f0e3..77743e0 100644
+--- a/torch/__init__.py
++++ b/torch/__init__.py
+@@ -16,6 +16,7 @@ import platform
+ import textwrap
+ import ctypes
+ import inspect
++import logging
+ 
+ # multipy/deploy is setting this import before importing torch, this is the most
+ # reliable way we have to detect if we're running within deploy.
+@@ -140,60 +141,70 @@ if sys.platform == 'win32':
+ 
+     kernel32.SetErrorMode(prev_error_mode)
+ 
+-
+-def _preload_cuda_deps(lib_folder, lib_name):
++def _preload_cuda_deps(lib_folder: str, lib_name: str) -> None:
+     """Preloads cuda deps if they could not be found otherwise."""
++    logging.info("Preloading %s", lib_folder)
++
+     # Should only be called on Linux if default path resolution have failed
+-    assert platform.system() == 'Linux', 'Should only be called on Linux'
++    assert platform.system() == "Linux", "Should only be called on Linux"
+     import glob
+-    lib_path = None
++
++    paths_to_search = [
++        os.path.join("/usr/local/cuda-*/targets/*/lib", lib_name),
++        os.path.join("/usr/lib64/", lib_name),
++    ]
+     for path in sys.path:
+-        nvidia_path = os.path.join(path, 'nvidia')
+-        if not os.path.exists(nvidia_path):
+-            continue
+-        candidate_lib_paths = glob.glob(os.path.join(nvidia_path, lib_folder, 'lib', lib_name))
++        paths_to_search.append(os.path.join(path, "nvidia", lib_folder, "lib", lib_name))
++
++    lib_path = None
++    for path in paths_to_search:
++        candidate_lib_paths = glob.glob(path)
+         if candidate_lib_paths and not lib_path:
+             lib_path = candidate_lib_paths[0]
+         if lib_path:
+             break
++
+     if not lib_path:
+-        raise ValueError(f"{lib_name} not found in the system path {sys.path}")
++        paths = "\n".join(paths_to_search)
++        raise ValueError(f"{lib_name} not found in {paths}")
++
+     ctypes.CDLL(lib_path)
+ 
+ 
+ # See Note [Global dependencies]
+ def _load_global_deps() -> None:
++    logging.info("loading global deps")
+     if _running_with_deploy() or platform.system() == 'Windows':
++        logging.info("running on windows, stop")
+         return
+ 
+     lib_name = 'libtorch_global_deps' + ('.dylib' if platform.system() == 'Darwin' else '.so')
+     here = os.path.abspath(__file__)
+     lib_path = os.path.join(os.path.dirname(here), 'lib', lib_name)
+ 
+-    try:
+-        ctypes.CDLL(lib_path, mode=ctypes.RTLD_GLOBAL)
+-    except OSError as err:
+-        # Can only happen for wheel with cuda libs as PYPI deps
+-        # As PyTorch is not purelib, but nvidia-*-cu12 is
+-        cuda_libs: Dict[str, str] = {
+-            'cublas': 'libcublas.so.*[0-9]',
+-            'cudnn': 'libcudnn.so.*[0-9]',
+-            'cuda_nvrtc': 'libnvrtc.so.*[0-9]',
+-            'cuda_runtime': 'libcudart.so.*[0-9]',
+-            'cuda_cupti': 'libcupti.so.*[0-9]',
+-            'cufft': 'libcufft.so.*[0-9]',
+-            'curand': 'libcurand.so.*[0-9]',
+-            'cusolver': 'libcusolver.so.*[0-9]',
+-            'cusparse': 'libcusparse.so.*[0-9]',
+-            'nccl': 'libnccl.so.*[0-9]',
+-            'nvtx': 'libnvToolsExt.so.*[0-9]',
+-        }
+-        is_cuda_lib_err = [lib for lib in cuda_libs.values() if(lib.split('.')[0] in err.args[0])]
+-        if not is_cuda_lib_err:
+-            raise err
+-        for lib_folder, lib_name in cuda_libs.items():
+-            _preload_cuda_deps(lib_folder, lib_name)
+-        ctypes.CDLL(lib_path, mode=ctypes.RTLD_GLOBAL)
++    logging.info("will try preloading")
++    # Can only happen for wheel with cuda libs as PYPI deps
++    # As PyTorch is not purelib, but nvidia-*-cu12 is
++    # These dependencies have been topologically sorted,
++    # so that a lib is loaded after all of its dependencies.
++    cuda_libs: Dict[str, str] = {
++        'nvjitlink': 'libnvJitLink.so.*[0-9]',
++        'cusparse': 'libcusparse.so.*[0-9]',
++        'cublas': 'libcublas.so.*[0-9]',
++        'cudnn': 'libcudnn.so.*[0-9]',
++        'cuda_nvrtc': 'libnvrtc.so.*[0-9]',
++        'cuda_runtime': 'libcudart.so.*[0-9]',
++        'cuda_cupti': 'libcupti.so.*[0-9]',
++        'cufft': 'libcufft.so.*[0-9]',
++        'curand': 'libcurand.so.*[0-9]',
++        'cusolver': 'libcusolver.so.*[0-9]',
++        'nccl': 'libnccl.so.*[0-9]',
++        'nvtx': 'libnvToolsExt.so.*[0-9]',
++    }
++    for lib_folder, lib_name in cuda_libs.items():
++        logging.info("preload %s", lib_name)
++        _preload_cuda_deps(lib_folder, lib_name)
++    ctypes.CDLL(lib_path, mode=ctypes.RTLD_GLOBAL)
+ 
+ 
+ if (USE_RTLD_GLOBAL_WITH_LIBTORCH or os.getenv('TORCH_USE_RTLD_GLOBAL')) and \
+@@ -230,6 +241,7 @@ else:
+     # want USE_RTLD_GLOBAL_WITH_LIBTORCH = False and USE_GLOBAL_DEPS = False
+     #
+     # See Note [Global dependencies]
++    logging.info("USE_GLOBAL_DEPS %s", USE_GLOBAL_DEPS)
+     if USE_GLOBAL_DEPS:
+         _load_global_deps()
+     from torch._C import *  # noqa: F403

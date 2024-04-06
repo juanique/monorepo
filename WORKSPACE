@@ -114,7 +114,11 @@ install_mypy_deps()
 load("@pip_deps//:requirements.bzl", "install_deps")
 
 # Call it to define repos for your requirements.
-install_deps()
+install_deps(
+    whl_patches = {
+        "//bazel/patches:pip_torch.patch": '{"whls": ["torch-2.1.0-cp310-cp310-manylinux1_x86_64.whl"],"patch_strip": 1}',
+    },
+)
 
 go_repository(
     name = "org_golang_google_genproto_googleapis_rpc",
