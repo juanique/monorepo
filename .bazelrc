@@ -1,3 +1,4 @@
+build --action_env=RULES_PYTHON_ENABLE_PYSTAR=0
 build --bes_backend=grpcs://remote.buildbuddy.io
 build --bes_results_url=https://app.buildbuddy.io/invocation/
 build --build_metadata=REPO_URL=https://github.com/juanique/monorepo.git
@@ -18,7 +19,7 @@ build --remote_instance_name=instance_name_1
 build --noremote_upload_local_results
 
 # We'll enable this someday and rely on MODULE.bazel
-build --noenable_bzlmod
+common --noenable_bzlmod
 
 
 build:remote --remote_executor=grpcs://remote.buildbuddy.io
