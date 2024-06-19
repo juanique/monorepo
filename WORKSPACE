@@ -35,13 +35,20 @@ go_rules_dependencies()
 go_register_toolchains(go_version = "1.21.6")
 
 go_download_sdk(
-    name = "go_sdk",
+    name = "go_sdk_amd64",
     goarch = "amd64",
     goos = "linux",
     version = "1.21.6",
 )
 
-gazelle_dependencies()
+go_download_sdk(
+    name = "go_sdk_arm64",
+    goarch = "arm64",
+    goos = "linux",
+    version = "1.21.6",
+)
+
+gazelle_dependencies(go_sdk = "go_sdk")
 
 ###########
 # Aspect bazel lib
