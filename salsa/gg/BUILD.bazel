@@ -69,4 +69,5 @@ oci_push(
 py_executable(
     name = "gg_executable",
     binary = ":gg_cli",
+    tags = ["manual"],
 )
