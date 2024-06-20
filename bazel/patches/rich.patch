@@ -1,0 +1,13 @@
+diff --git a/rich/tree.py b/rich/tree.py
+index 5fd46fd..6a413a5 100644
+--- a/rich/tree.py
++++ b/rich/tree.py
+@@ -9,6 +9,8 @@ from .style import Style, StyleStack, StyleType
+ from .styled import Styled
+ 
+ 
++print("im a tree")
++
+ class Tree(JupyterMixin):
+     """A renderable for a tree structure.
+ 
