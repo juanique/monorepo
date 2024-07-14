@@ -5,6 +5,14 @@ import (
 	"path/filepath"
 )
 
+func FileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
+}
+
 // CreateSymLink creates a symbolic link from src to dest.
 func CreateSymLink(src string, dest string) error {
 	// Convert src to an absolute path

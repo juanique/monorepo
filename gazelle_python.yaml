@@ -519,11 +519,70 @@ manifest:
     grpc_reflection.v1alpha.reflection: grpcio_reflection
     grpc_reflection.v1alpha.reflection_pb2: grpcio_reflection
     grpc_reflection.v1alpha.reflection_pb2_grpc: grpcio_reflection
+    grpclib: grpclib
+    grpclib.channelz: grpclib
+    grpclib.channelz.service: grpclib
+    grpclib.channelz.v1: grpclib
+    grpclib.channelz.v1.channelz_grpc: grpclib
+    grpclib.channelz.v1.channelz_pb2: grpclib
+    grpclib.client: grpclib
+    grpclib.config: grpclib
+    grpclib.const: grpclib
+    grpclib.encoding: grpclib
+    grpclib.encoding.base: grpclib
+    grpclib.encoding.proto: grpclib
+    grpclib.events: grpclib
+    grpclib.exceptions: grpclib
+    grpclib.health: grpclib
+    grpclib.health.check: grpclib
+    grpclib.health.service: grpclib
+    grpclib.health.v1: grpclib
+    grpclib.health.v1.health_grpc: grpclib
+    grpclib.health.v1.health_pb2: grpclib
+    grpclib.metadata: grpclib
+    grpclib.plugin: grpclib
+    grpclib.plugin.main: grpclib
+    grpclib.protocol: grpclib
+    grpclib.reflection: grpclib
+    grpclib.reflection.service: grpclib
+    grpclib.reflection.v1: grpclib
+    grpclib.reflection.v1.reflection_grpc: grpclib
+    grpclib.reflection.v1.reflection_pb2: grpclib
+    grpclib.reflection.v1alpha: grpclib
+    grpclib.reflection.v1alpha.reflection_grpc: grpclib
+    grpclib.reflection.v1alpha.reflection_pb2: grpclib
+    grpclib.server: grpclib
+    grpclib.stream: grpclib
+    grpclib.testing: grpclib
+    grpclib.utils: grpclib
+    h2: h2
+    h2.config: h2
+    h2.connection: h2
+    h2.errors: h2
+    h2.events: h2
+    h2.exceptions: h2
+    h2.frame_buffer: h2
+    h2.settings: h2
+    h2.stream: h2
+    h2.utilities: h2
+    h2.windows: h2
+    hpack: hpack
+    hpack.exceptions: hpack
+    hpack.hpack: hpack
+    hpack.huffman: hpack
+    hpack.huffman_constants: hpack
+    hpack.huffman_table: hpack
+    hpack.struct: hpack
+    hpack.table: hpack
     humanize: humanize
     humanize.filesize: humanize
     humanize.i18n: humanize
     humanize.number: humanize
     humanize.time: humanize
+    hyperframe: hyperframe
+    hyperframe.exceptions: hyperframe
+    hyperframe.flags: hyperframe
+    hyperframe.frame: hyperframe
     idna: idna
     idna.codec: idna
     idna.compat: idna
@@ -591,6 +650,7 @@ manifest:
     lazy_object_proxy.slots: lazy_object_proxy
     lazy_object_proxy.utils: lazy_object_proxy
     mccabe: mccabe
+    multidict: multidict
     nacl: PyNaCl
     nacl.bindings: PyNaCl
     nacl.bindings.crypto_aead: PyNaCl
@@ -1214,7 +1274,6 @@ manifest:
     rich.themes: rich
     rich.traceback: rich
     rich.tree: rich
-    six: six
     smmap: smmap
     smmap.buf: smmap
     smmap.mman: smmap
@@ -1467,4 +1526,4 @@ manifest:
     wrapt.wrappers: wrapt
   pip_repository:
     name: pip_deps
-integrity: ca9936cea9a5644d27258fd3db8e0d8decce31099810f84731d9e5f8ed88092e
+integrity: bf2854838279f44156dcc6fb67627c1c87d3518f249043b56e203ff1d917cbe3

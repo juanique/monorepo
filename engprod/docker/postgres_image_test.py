@@ -1,5 +1,6 @@
 import unittest
 import docker
+import logging
 
 from engprod.docker.postgres_service import PostgresService
 
@@ -28,4 +29,6 @@ class TestPostgresImage(unittest.TestCase):
 
 
 if __name__ == "__main__":
+    print("pepe")
+    logging.basicConfig(level=logging.DEBUG)
     unittest.main()
