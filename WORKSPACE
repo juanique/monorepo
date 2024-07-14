@@ -35,13 +35,20 @@ go_rules_dependencies()
 go_register_toolchains(go_version = "1.21.6")
 
 go_download_sdk(
-    name = "go_sdk",
+    name = "go_sdk_amd64",
     goarch = "amd64",
     goos = "linux",
     version = "1.21.6",
 )
 
-gazelle_dependencies()
+go_download_sdk(
+    name = "go_sdk_arm64",
+    goarch = "arm64",
+    goos = "linux",
+    version = "1.21.6",
+)
+
+gazelle_dependencies(go_sdk = "go_sdk")
 
 ###########
 # Aspect bazel lib
@@ -323,10 +330,10 @@ rules_foreign_cc_dependencies()
 
 http_archive(
     name = "rules_perl",
-    sha256 = "765e6a282cc38b197a6408c625bd3fc28f3f2d44353fb4615490a6eb0b8f420c",
-    strip_prefix = "rules_perl-e3ed0f1727d15db6c5ff84f64454b9a4926cc591",
+    sha256 = "7c35dd1f37c280b8a78bd6815b1b62ab2043a566396b0168ec8e91aa46d88fc3",
+    strip_prefix = "rules_perl-0.2.3",
     urls = [
-        "https://github.com/bazelbuild/rules_perl/archive/e3ed0f1727d15db6c5ff84f64454b9a4926cc591.tar.gz",
+	"https://github.com/bazelbuild/rules_perl/archive/refs/tags/0.2.3.tar.gz",
     ],
 )
 

@@ -72,3 +72,5 @@ Thumbs.db
 # User-specific .bazelrc
 user.bazelrc
 yarn.lock
+
+auto.bazelrc
