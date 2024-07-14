@@ -1,6 +1,5 @@
 load("//:bazel/python.bzl", "py_binary")
-load("//:bazel/docker.bzl", "py_image")
-load("@io_bazel_rules_docker//container:container.bzl", "container_push")
+load("//bazel/oci:defs.bzl", "image")
 
 package(default_visibility = ["//examples:__subpackages__"])
 
@@ -13,20 +12,13 @@ py_binary(
         "//examples/grpc/protos:helloworld_py_proto",
         "@pip_deps//grpcio",
         "@pip_deps//grpcio_reflection",
+        "@pip_deps//grpclib",  # keep
+        "@pip_deps//protobuf",  # keep
     ],
 )
 
-py_image(
+image(
     name = "greeter_server_docker",
+    base = "@ubuntu",
     binary = ":greeter_server",
-    port = "50051",
-)
-
-container_push(
-    name = "greeter_server_docker_tag",
-    format = "Docker",
-    image = ":greeter_server_docker",
-    registry = "localhost:5000",
-    repository = "monorepo/greeter_server",
-    tag = "latest",
 )
