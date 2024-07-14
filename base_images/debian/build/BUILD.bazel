@@ -1,0 +1,134 @@
+load("@rules_distroless//distroless:defs.bzl", "passwd")
+load("@debian_packages//:packages.bzl", "debian_package_layer")
+load("@rules_pkg//pkg:mappings.bzl", "pkg_mklink")
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
+load("//bazel/oci:defs.bzl", "image")
+load("@rules_oci//oci:defs.bzl", "oci_push")
+
+package(default_visibility = ["//visibility:public"])
+
+passwd(
+    name = "passwd",
+    entries = [
+        dict(
+            gecos = ["root"],
+            gid = 0,
+            home = "/root",
+            shell = "/usr/bin/bash",
+            uid = 0,
+            username = "root",
+        ),
+    ],
+)
+
+pkg_mklink(
+    name = "usr_bin_python_symlink",
+    link_name = "/usr/bin/python",
+    target = "/usr/bin/python3.11",
+)
+
+pkg_mklink(
+    name = "usr_bin_python3_symlink",
+    link_name = "/usr/bin/python3",
+    target = "/usr/bin/python3.11",
+)
+
+pkg_mklink(
+    name = "usr_sbin_iptables",
+    link_name = "/usr/sbin/iptables",
+    target = "/usr/sbin/iptables-legacy",
+)
+
+pkg_mklink(
+    name = "usr_sbin_ip6tables",
+    link_name = "/usr/sbin/ip6tables",
+    target = "/usr/sbin/ip6tables-legacy",
+)
+
+pkg_tar(
+    name = "symlinks_layer",
+    srcs = [
+        ":usr_bin_python3_symlink",
+        ":usr_bin_python_symlink",
+        ":usr_sbin_ip6tables",
+        ":usr_sbin_iptables",
+    ],
+)
+
+pkg_tar(
+    name = "docker_layer",
+    srcs = [
+        "@docker//:containerd-bin",
+        "@docker//:containerd-shim-runc-v2-bin",
+        "@docker//:ctr-bin",
+        "@docker//:docker-bin",
+        "@docker//:docker-init-bin",
+        "@docker//:docker-proxy-bin",
+        "@docker//:dockerd-bin",
+        "@docker//:runc-bin",
+    ],
+    package_dir = "/usr/bin",
+)
+
+pkg_tar(
+    name = "build_layers",
+    deps = [
+        debian_package_layer("thin-provisioning-tools"),
+        debian_package_layer("fuse-overlayfs"),
+        debian_package_layer("iptables"),
+        debian_package_layer("libmpfr6"),
+        debian_package_layer("libsigsegv2"),
+        debian_package_layer("grep"),
+        debian_package_layer("git"),
+        debian_package_layer("findutils"),
+        debian_package_layer("awk"),
+        debian_package_layer("diffutils"),
+        debian_package_layer("sed"),
+        debian_package_layer("xz-utils"),
+        debian_package_layer("liblz4-1"),
+        debian_package_layer("libzstd-dev"),
+        debian_package_layer("coreutils"),
+        debian_package_layer("bash"),
+    ],
+)
+
+image(
+    name = "build",
+    architecture = "amd64",
+    base = None,
+    env = {"LANG": "C.UTF-8"},
+    os = "linux",
+    tars = [
+        ":build_layers",
+        # required to replicate distroless/static
+        debian_package_layer("base-files"),
+        debian_package_layer("netbase"),
+        debian_package_layer("tzdata"),
+        debian_package_layer("ca-certificates"),
+        # required to replicate distroless/base
+        debian_package_layer("libc6"),
+        debian_package_layer("libssl3"),
+        debian_package_layer("openssl"),
+        # required to replicate distroless/cc
+        debian_package_layer("libgcc-s1"),
+        debian_package_layer("libgomp1"),
+        debian_package_layer("libstdc++6"),
+        # required to replicate distroless/python
+        debian_package_layer("dash"),
+        debian_package_layer("libc-bin"),
+        debian_package_layer("python3.11-minimal"),
+        debian_package_layer("libpython3.11-stdlib"),
+        debian_package_layer("python3-distutils"),
+        ":symlinks_layer",
+        ":docker_layer",
+        ":passwd",
+    ],
+    visibility = ["//visibility:private"],
+)
+
+oci_push(
+    name = "push",
+    image = ":build",
+    remote_tags = ["latest"],
+    repository = "index.docker.io/juanzolotoochin/ubuntu-build-v2",
+)

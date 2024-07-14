@@ -1,14 +1,17 @@
-load("@bazel_gazelle//:def.bzl", "gazelle")
+load("@bazel_gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
 load("@buildifier_prebuilt//:rules.bzl", "buildifier")
 load("@rules_python_gazelle_plugin//manifest:defs.bzl", "gazelle_python_manifest")
 load("@rules_python_gazelle_plugin//modules_mapping:def.bzl", "modules_mapping")
 load("@pip_deps//:requirements.bzl", "all_whl_requirements")
+load("@rules_apko//apko:defs.bzl", "apko_bazelrc")
 
 exports_files([
     "pyproject.toml",
     "mypy.ignore",
 ])
+
+apko_bazelrc()
 
 ### Proto resolve
 # gazelle:resolve py examples.grpc.protos.helloworld_pb2 //examples/grpc/protos:helloworld_py_proto
@@ -21,7 +24,15 @@ exports_files([
 # gazelle:python_generation_mode file
 gazelle(
     name = "gazelle",
-    gazelle = "@rules_python_gazelle_plugin//python:gazelle_binary",
+    gazelle = ":gazelle_binary",
+)
+
+gazelle_binary(
+    name = "gazelle_binary",
+    languages = DEFAULT_LANGUAGES + [
+        "@rules_python_gazelle_plugin//python",
+    ],
+    visibility = ["//visibility:public"],
 )
 
 gazelle(
@@ -47,7 +58,7 @@ platform(
     ],
     exec_properties = {
         "OSFamily": "Linux",
-        "container-image": "docker://docker.io/juanzolotoochin/ubuntu-build:latest",
+        "container-image": "docker://docker.io/juanzolotoochin/ubuntu-build-v2@sha256:dc3ab6faa67a26c7657350e9bac40f0d8290674af2f618ad7c8e2d5efcb99b83",
     },
 )
 
