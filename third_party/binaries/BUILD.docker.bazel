@@ -1,0 +1,56 @@
+load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "docker-files",
+    srcs = glob(["*/**"]),
+)
+
+native_binary(
+    name = "docker-bin",
+    src = "docker",
+    out = "docker",
+)
+
+native_binary(
+    name = "docker-init-bin",
+    src = "docker-init",
+    out = "docker-init",
+)
+
+native_binary(
+    name = "docker-proxy-bin",
+    src = "docker-proxy",
+    out = "docker-proxy",
+)
+
+native_binary(
+    name = "containerd-bin",
+    src = "containerd",
+    out = "containerd",
+)
+
+native_binary(
+    name = "containerd-shim-runc-v2-bin",
+    src = "containerd-shim-runc-v2",
+    out = "containerd-shim-runc-v2",
+)
+
+native_binary(
+    name = "ctr-bin",
+    src = "ctr",
+    out = "ctr",
+)
+
+native_binary(
+    name = "runc-bin",
+    src = "runc",
+    out = "runc",
+)
+
+native_binary(
+    name = "dockerd-bin",
+    src = "dockerd",
+    out = "dockerd",
+)

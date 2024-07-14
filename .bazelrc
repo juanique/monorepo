@@ -11,14 +11,14 @@ build --experimental_profile_include_primary_output
 ## Remote caching
 build --remote_download_outputs=minimal
 build --remote_cache=grpcs://remote.buildbuddy.io
-build --remote_header=x-buildbuddy-api-key=WIbWV8AieSxh4RlxUiRk
 build --experimental_remote_cache_compression
 build --experimental_remote_build_event_upload=minimal
 build --nolegacy_important_outputs
+build --remote_instance_name=instance_name_1
 build --noremote_upload_local_results
 
 # We'll enable this someday and rely on MODULE.bazel
-build --noenable_bzlmod
+common --noenable_bzlmod
 
 
 build:remote --remote_executor=grpcs://remote.buildbuddy.io
@@ -28,8 +28,8 @@ build:remote --platforms=//:docker_image_platform
 build:remote --remote_timeout=1800
 build:remote --jobs=50
 
-# mypy not working yet
-# build --aspects @mypy_integration//:mypy.bzl%mypy_aspect
+# mypy aspect
+build --aspects @mypy_integration//:mypy.bzl%mypy_aspect
 build --output_groups=+mypy
 build --@mypy_integration//:mypy_config=//bazel/workspace:mypy.ini
 
@@ -46,3 +46,9 @@ build --host_cxxopt=-std=c++14
 build:full_local --bes_backend=""
 build:full_local --bes_results_url=""
 build:full_local --remote_cache=""
+
+# Required for rules_apko to make range requests
+try-import %workspace%/.apko/.bazelrc
+
+# User-level configs
+try-import %workspace%/auto.bazelrc
