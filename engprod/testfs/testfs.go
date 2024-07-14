@@ -27,6 +27,8 @@ type TestFS interface {
 	FileContentsEqual(relPath string, contents string) bool
 	// Returns an absolute path of a file in the test fs given its relative path
 	AbsPath(relPath string) string
+	// Returns the base path of the test fs
+	BasePath() string
 }
 
 // testFS is a concrete implementation of the TestFS interface
@@ -39,6 +41,10 @@ func New() TestFS {
 	tempDir, err := os.MkdirTemp("", "testfs")
 	must.NoError(err)
 	return &testFS{basePath: tempDir}
+}
+
+func (t testFS) BasePath() string {
+	return t.basePath
 }
 
 // SetFileContents sets the contents of a file in the test file system
