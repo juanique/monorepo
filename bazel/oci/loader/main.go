@@ -12,10 +12,11 @@ import (
 )
 
 type Options struct {
-	Output         string
-	OnlyGetImageID bool
-	LogToFile      string
-	NoRun          bool // backwards compatibilty with rules_dockerk
+	Output                string
+	OnlyGetImageID        bool
+	LogToFile             string
+	NoReuseExistingLayers bool
+	NoRun                 bool // backwards compatibilty with rules_dockerk
 }
 
 var opts = Options{}
@@ -66,6 +67,9 @@ func buildAndLoadImage(i Image, repoTags []string) error {
 		return err
 	}
 
+	if opts.NoReuseExistingLayers {
+		existingLayers = []string{}
+	}
 	tarPath, err := builder.Build(i, BuildOpts{SkipLayers: existingLayers})
 	if err != nil {
 		return err
@@ -101,6 +105,7 @@ func main() {
 	rootCmd.Flags().StringVar(&opts.Output, "output", "", "Format for the output")
 	rootCmd.Flags().BoolVar(&opts.OnlyGetImageID, "only-get-image-id", false, "Only print the image ID, not build it")
 	rootCmd.Flags().BoolVar(&opts.NoRun, "norun", false, "unused - only here for backwards compatibility with rules_docker")
+	rootCmd.Flags().BoolVar(&opts.NoReuseExistingLayers, "noreusexistinglayers", false, "do not reuse existing layers")
 	rootCmd.Flags().StringVar(&opts.LogToFile, "log-to-file", "", "whether to print logs to a file")
 
 	if err := rootCmd.Execute(); err != nil {

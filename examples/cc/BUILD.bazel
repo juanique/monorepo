@@ -1,5 +1,22 @@
 load("@rules_cc//cc:defs.bzl", "cc_binary")
 
+genrule(
+    name = "generate_test_script",
+    outs = ["binary_test.sh"],
+    cmd = """
+        echo '#!/bin/bash' > $@
+        echo 'echo TEST_SRCDIR = $$TEST_SRCDIR' >> $@
+        echo 'exec $$TEST_SRCDIR/monorepo/examples/cc/cc_version' >> $@
+        chmod +x $@
+    """,
+)
+
+sh_test(
+    name = "binary_test",
+    srcs = [":generate_test_script"],
+    data = [":cc_version"],
+)
+
 cc_binary(
     name = "cc_version",
     srcs = ["cc_version.cc"],

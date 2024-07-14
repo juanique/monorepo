@@ -25,28 +25,39 @@ http_archive(
 
 load("@io_bazel_rules_go//go:deps.bzl", "go_download_sdk", "go_register_toolchains", "go_rules_dependencies")
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
+load("//:deps.bzl", "go_repositories")
+
+# gazelle:repository_macro deps.bzl%go_repositories
+go_repositories()
 
 go_rules_dependencies()
 
 go_register_toolchains(go_version = "1.21.6")
 
 go_download_sdk(
-    name = "go_sdk",
+    name = "go_sdk_amd64",
     goarch = "amd64",
     goos = "linux",
     version = "1.21.6",
 )
 
-gazelle_dependencies()
+go_download_sdk(
+    name = "go_sdk_arm64",
+    goarch = "arm64",
+    goos = "linux",
+    version = "1.21.6",
+)
+
+gazelle_dependencies(go_sdk = "go_sdk")
 
 ###########
 # Aspect bazel lib
 
 http_archive(
     name = "aspect_bazel_lib",
-    sha256 = "bda4a69fa50411b5feef473b423719d88992514d259dadba7d8218a1d02c7883",
-    strip_prefix = "bazel-lib-2.3.0",
-    url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.3.0/bazel-lib-v2.3.0.tar.gz",
+    sha256 = "a59096e01b43d86c6667a869f0e90e0c4b1d4cb03c3d3a972a32ff687c750ac2",
+    strip_prefix = "bazel-lib-2.5.1",
+    url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.5.1/bazel-lib-v2.5.1.tar.gz",
 )
 
 #########################
@@ -54,9 +65,9 @@ http_archive(
 
 http_archive(
     name = "rules_python",
-    sha256 = "d71d2c67e0bce986e1c5a7731b4693226867c45bfe0b7c5e0067228a536fc580",
-    strip_prefix = "rules_python-0.29.0",
-    url = "https://github.com/bazelbuild/rules_python/releases/download/0.29.0/rules_python-0.29.0.tar.gz",
+    sha256 = "c68bdc4fbec25de5b5493b8819cfc877c4ea299c0dcb15c244c5a00208cde311",
+    strip_prefix = "rules_python-0.31.0",
+    url = "https://github.com/bazelbuild/rules_python/releases/download/0.31.0/rules_python-0.31.0.tar.gz",
 )
 
 load("@rules_python//python:repositories.bzl", "py_repositories", "python_register_toolchains")
@@ -81,13 +92,13 @@ _py_gazelle_deps()
 load("@rules_python//python:pip.bzl", "pip_parse")
 
 python_register_toolchains(
-    name = "python3_9",
+    name = "python3_10",
     # Available versions are listed in @rules_python//python:versions.bzl.
     # We recommend using the same version your team is already standardized on.
-    python_version = "3.9",
+    python_version = "3.10",
 )
 
-load("@python3_9//:defs.bzl", "interpreter")
+load("@python3_10//:defs.bzl", "interpreter")
 
 pip_parse(
     name = "pip_deps",
@@ -143,9 +154,9 @@ go_repository(
 
 http_archive(
     name = "com_google_protobuf",
-    sha256 = "974409b1d6eb2b6508fd26bea2f9b327a4480f122a6fdf38e485321549308121",
-    strip_prefix = "protobuf-24.0",
-    urls = ["https://github.com/protocolbuffers/protobuf/archive/refs/tags/v24.0.zip"],
+    sha256 = "c2c71ebc90af9796e8834f65093f2fab88b0a82b2a3e805b34842645a2afc4b0",
+    strip_prefix = "protobuf-26.0",
+    urls = ["https://github.com/protocolbuffers/protobuf/archive/refs/tags/v26.0.zip"],
 )
 
 http_archive(
@@ -158,10 +169,6 @@ http_archive(
 )
 
 load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
-load("//:deps.bzl", "go_repositories")
-
-# gazelle:repository_macro deps.bzl%go_repositories
-go_repositories()
 
 rules_proto_dependencies()
 
@@ -172,58 +179,20 @@ http_archive(
     name = "com_github_grpc_grpc",
     patch_args = ["-p1"],
     patches = ["//bazel/patches:grpc.patch"],
-    sha256 = "8393767af531b2d0549a4c26cf8ba1f665b16c16fb6c9238a7755e45444881dd",
-    strip_prefix = "grpc-1.57.0",
-    urls = ["https://github.com/grpc/grpc/archive/v1.57.0.tar.gz"],
+    sha256 = "c9f9ae6e4d6f40464ee9958be4068087881ed6aa37e30d0e64d40ed7be39dd01",
+    strip_prefix = "grpc-1.62.1",
+    urls = ["https://github.com/grpc/grpc/archive/refs/tags/v1.62.1.tar.gz"],
 )
 
 load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
 
 grpc_deps(
-    python_headers = "@python3_9//:python_headers",
+    python_headers = "@python3_10//:python_headers",
 )
 
 load("@com_github_grpc_grpc//bazel:grpc_extra_deps.bzl", "grpc_extra_deps")
 
 grpc_extra_deps()
-
-# Docker
-http_archive(
-    name = "io_bazel_rules_docker",
-    sha256 = "b1e80761a8a8243d03ebca8845e9cc1ba6c82ce7c5179ce2b295cd36f7e394bf",
-    urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.25.0/rules_docker-v0.25.0.tar.gz"],
-)
-
-load(
-    "@io_bazel_rules_docker//repositories:repositories.bzl",
-    container_repositories = "repositories",
-)
-
-container_repositories()
-
-load("@io_bazel_rules_docker//repositories:deps.bzl", container_deps = "deps")
-
-container_deps()
-
-load(
-    "@io_bazel_rules_docker//container:container.bzl",
-    "container_pull",
-)
-
-container_pull(
-    name = "java_base",
-    # 'tag' is also supported, but digest is encouraged for reproducibility.
-    digest = "sha256:deadbeef",
-    registry = "gcr.io",
-    repository = "distroless/java",
-)
-
-load(
-    "@io_bazel_rules_docker//python3:image.bzl",
-    _py_image_repos = "repositories",
-)
-
-_py_image_repos()
 
 # mypy integration
 http_archive(
@@ -246,21 +215,6 @@ load("@mypy_integration//:config.bzl", "mypy_configuration")
 
 mypy_configuration(
     mypy_exclude_list = "//:mypy.ignore",
-)
-
-container_pull(
-    name = "ubuntu",
-    digest = "sha256:eea2c875bb135db3a5d5c959a4161eecce3f6a988cf054125d7f4e836e93e020",
-    registry = "docker.io",
-    repository = "juanzolotoochin/ubuntu-base",
-)
-
-container_pull(
-    name = "postgres",
-    digest = "sha256:cd116dbc6ac97b18f8e1ad07aa94399117863731ec99f06ae1270937a98119bf",
-    registry = "docker.io",
-    repository = "postgres",
-    tag = "11.3-alpine",
 )
 
 http_archive(
@@ -376,10 +330,10 @@ rules_foreign_cc_dependencies()
 
 http_archive(
     name = "rules_perl",
-    sha256 = "765e6a282cc38b197a6408c625bd3fc28f3f2d44353fb4615490a6eb0b8f420c",
-    strip_prefix = "rules_perl-e3ed0f1727d15db6c5ff84f64454b9a4926cc591",
+    sha256 = "7c35dd1f37c280b8a78bd6815b1b62ab2043a566396b0168ec8e91aa46d88fc3",
+    strip_prefix = "rules_perl-0.2.3",
     urls = [
-        "https://github.com/bazelbuild/rules_perl/archive/e3ed0f1727d15db6c5ff84f64454b9a4926cc591.tar.gz",
+	"https://github.com/bazelbuild/rules_perl/archive/refs/tags/0.2.3.tar.gz",
     ],
 )
 
@@ -422,3 +376,71 @@ aspect_bazel_lib_dependencies()
 # Register bazel-lib toolchains
 
 aspect_bazel_lib_register_toolchains()
+
+###############
+# Rules apko
+
+http_archive(
+    name = "rules_apko",
+    sha256 = "0c1152e23c72ebf9ffac1921e395ad6a5501e72ded4ce505a5e05161e1f0793d",
+    strip_prefix = "rules_apko-1.2.3",
+    url = "https://github.com/chainguard-dev/rules_apko/releases/download/v1.2.3/rules_apko-v1.2.3.tar.gz",
+)
+
+load("@rules_apko//apko:repositories.bzl", "apko_register_toolchains", "rules_apko_dependencies")
+
+rules_apko_dependencies()
+
+apko_register_toolchains(name = "apko")
+
+load("@rules_apko//apko:translate_lock.bzl", "translate_apko_lock")
+
+translate_apko_lock(
+    name = "apko_wolfi_base",
+    lock = "@//base_images/apko/wolfi-base:apko.lock.json",
+)
+
+load("@apko_wolfi_base//:repositories.bzl", "apko_repositories")
+
+apko_repositories()
+
+##############
+# Rules debian
+
+http_archive(
+    name = "rules_debian_packages",
+    sha256 = "0ae3b332f9d894e57693ce900769d2bd1b693e1f5ea1d9cdd82fa4479c93bcc8",
+    strip_prefix = "rules_debian_packages-0.2.0",
+    url = "https://github.com/betaboon/rules_debian_packages/releases/download/v0.2.0/rules_debian_packages-v0.2.0.tar.gz",
+)
+
+load("@rules_debian_packages//debian_packages:repositories.bzl", "rules_debian_packages_dependencies")
+
+rules_debian_packages_dependencies(python_interpreter_target = interpreter)
+
+load("@rules_debian_packages//debian_packages:defs.bzl", "debian_packages_repository")
+
+debian_packages_repository(
+    name = "debian_packages",
+    default_arch = "amd64",
+    default_distro = "debian12",
+    lock_file = "//base_images/debian:packages.lock",
+)
+
+load("@debian_packages//:packages.bzl", install_debian_deps = "install_deps")
+
+install_debian_deps()
+
+############
+# Rules distroless
+
+http_archive(
+    name = "rules_distroless",
+    sha256 = "4b6d6a4bd03431f4f680ff5f6feea0b8ccf52c0296a12818d2c9595392e45543",
+    strip_prefix = "rules_distroless-0.2.0",
+    url = "https://github.com/GoogleContainerTools/rules_distroless/releases/download/v0.2.0/rules_distroless-v0.2.0.tar.gz",
+)
+
+load("@rules_distroless//distroless:dependencies.bzl", "distroless_dependencies")
+
+distroless_dependencies()
