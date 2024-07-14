@@ -35,13 +35,20 @@ go_rules_dependencies()
 go_register_toolchains(go_version = "1.21.6")
 
 go_download_sdk(
-    name = "go_sdk",
+    name = "go_sdk_amd64",
     goarch = "amd64",
     goos = "linux",
     version = "1.21.6",
 )
 
-gazelle_dependencies()
+go_download_sdk(
+    name = "go_sdk_arm64",
+    goarch = "arm64",
+    goos = "linux",
+    version = "1.21.6",
+)
+
+gazelle_dependencies(go_sdk = "go_sdk")
 
 ###########
 # Aspect bazel lib
@@ -233,11 +240,11 @@ buildbuddy(name = "buildbuddy_toolchain")
 ##############
 # Uber zig GCC toolchain
 
-HERMETIC_CC_TOOLCHAIN_VERSION = "v2.2.1"
+HERMETIC_CC_TOOLCHAIN_VERSION = "v3.0.1"
 
 http_archive(
     name = "hermetic_cc_toolchain",
-    sha256 = "3b8107de0d017fe32e6434086a9568f97c60a111b49dc34fc7001e139c30fdea",
+    sha256 = "3bc6ec127622fdceb4129cb06b6f7ab098c4d539124dde96a6318e7c32a53f7a",
     urls = [
         "https://mirror.bazel.build/github.com/uber/hermetic_cc_toolchain/releases/download/{0}/hermetic_cc_toolchain-{0}.tar.gz".format(HERMETIC_CC_TOOLCHAIN_VERSION),
         "https://github.com/uber/hermetic_cc_toolchain/releases/download/{0}/hermetic_cc_toolchain-{0}.tar.gz".format(HERMETIC_CC_TOOLCHAIN_VERSION),
@@ -328,10 +335,10 @@ rules_foreign_cc_dependencies()
 
 http_archive(
     name = "rules_perl",
-    sha256 = "765e6a282cc38b197a6408c625bd3fc28f3f2d44353fb4615490a6eb0b8f420c",
-    strip_prefix = "rules_perl-e3ed0f1727d15db6c5ff84f64454b9a4926cc591",
+    sha256 = "7c35dd1f37c280b8a78bd6815b1b62ab2043a566396b0168ec8e91aa46d88fc3",
+    strip_prefix = "rules_perl-0.2.3",
     urls = [
-        "https://github.com/bazelbuild/rules_perl/archive/e3ed0f1727d15db6c5ff84f64454b9a4926cc591.tar.gz",
+	"https://github.com/bazelbuild/rules_perl/archive/refs/tags/0.2.3.tar.gz",
     ],
 )
 
