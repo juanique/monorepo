@@ -1,0 +1,20 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "components",
+    srcs = [
+        "base.go",
+        "fpscounter.go",
+        "input.go",
+        "position.go",
+        "rect.go",
+        "text.go",
+    ],
+    importpath = "github.com/juanique/monorepo/taco/components",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//taco/core",
+        "@com_github_veandco_go_sdl2//sdl",
+        "@com_github_veandco_go_sdl2//ttf",
+    ],
+)

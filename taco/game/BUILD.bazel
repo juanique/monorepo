@@ -1,0 +1,20 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "game_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/juanique/monorepo/taco/game",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//taco",
+        "//taco/core",
+        "@com_github_veandco_go_sdl2//sdl",
+        "@com_github_veandco_go_sdl2//ttf",
+    ],
+)
+
+go_binary(
+    name = "game",
+    embed = [":game_lib"],
+    visibility = ["//visibility:public"],
+)

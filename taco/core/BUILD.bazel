@@ -1,0 +1,12 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "core",
+    srcs = [
+        "core.go",
+        "timer.go",
+    ],
+    importpath = "github.com/juanique/monorepo/taco/core",
+    visibility = ["//visibility:public"],
+    deps = ["@com_github_veandco_go_sdl2//sdl"],
+)

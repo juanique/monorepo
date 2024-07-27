@@ -186,6 +186,14 @@ def go_repositories():
         version = "v1.8.4",
     )
     go_repository(
+        name = "com_github_veandco_go_sdl2",
+        importpath = "github.com/veandco/go-sdl2",
+        patch_args = ["-p1"],
+        patches = ["//bazel/patches:com_github_veandco_go_sdl2.patch"],
+        sum = "h1:fZv6wC3zz1Xt167P09gazawnpa0KY5LM7JAvKpX9d/U=",
+        version = "v0.4.40",
+    )
+    go_repository(
         name = "com_google_cloud_go_compute",
         importpath = "cloud.google.com/go/compute",
         sum = "h1:6aKEtlUiwEpJzM001l0yFkpXmUVXaN8W+fbkb2AZNbg=",

@@ -1,0 +1,16 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "taco",
+    srcs = [
+        "engine.go",
+        "game.go",
+    ],
+    importpath = "github.com/juanique/monorepo/taco",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//taco/components",
+        "//taco/core",
+        "@com_github_veandco_go_sdl2//sdl",
+    ],
+)

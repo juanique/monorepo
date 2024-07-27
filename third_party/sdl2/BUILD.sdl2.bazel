@@ -1,0 +1,32 @@
+load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
+
+filegroup(
+    name = "all_srcs",
+    srcs = glob(["**"]),
+    visibility = ["//visibility:public"],
+)
+
+cmake(
+    name = "sdl2",
+    # configure_command = "configure",
+    # configure_in_place = True,
+    # configure_options = [],
+    env = select({
+        "@platforms//os:macos": {
+            "AR": "",
+            "PERL": "$$EXT_BUILD_ROOT$$/$(PERL)",
+        },
+        "//conditions:default": {
+            "PERL": "$$EXT_BUILD_ROOT$$/$(PERL)",
+        },
+    }),
+    lib_name = "sdl2",
+    lib_source = ":all_srcs",
+    out_include_dir = "include/SDL2",
+    out_shared_libs = [
+        "libSDL2.so",
+    ],
+    targets = [],
+    toolchains = ["@rules_perl//:current_toolchain"],
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "sdl_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/juanique/monorepo/examples/sdl",
+    visibility = ["//visibility:private"],
+    deps = ["@com_github_veandco_go_sdl2//sdl"],
+)
+
+go_binary(
+    name = "sdl",
+    embed = [":sdl_lib"],
+    visibility = ["//visibility:public"],
+)

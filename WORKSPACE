@@ -333,7 +333,7 @@ http_archive(
     sha256 = "7c35dd1f37c280b8a78bd6815b1b62ab2043a566396b0168ec8e91aa46d88fc3",
     strip_prefix = "rules_perl-0.2.3",
     urls = [
-	"https://github.com/bazelbuild/rules_perl/archive/refs/tags/0.2.3.tar.gz",
+        "https://github.com/bazelbuild/rules_perl/archive/refs/tags/0.2.3.tar.gz",
     ],
 )
 
