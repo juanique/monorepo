@@ -1,0 +1,21 @@
+diff --git a/apt/private/index.bzl b/apt/private/index.bzl
+index ac76fe4..231b6ee 100644
+--- a/apt/private/index.bzl
++++ b/apt/private/index.bzl
+@@ -86,6 +86,7 @@ def _deb_package_index_impl(rctx):
+         )
+ 
+         repo_name = "%s%s_%s" % ("@" if rctx.attr.bzlmod else "", rctx.attr.name, package_key)
++        dep_set = {dep["name"] : dep for dep in package["dependencies"]}
+ 
+         rctx.file(
+             "%s/%s/BUILD.bazel" % (package["name"], package["arch"]),
+@@ -94,7 +95,7 @@ def _deb_package_index_impl(rctx):
+                 src = '"@%s//:data"' % repo_name,
+                 deps = ",\n        ".join([
+                     '"//%s/%s"' % (dep["name"], package["arch"])
+-                    for dep in package["dependencies"]
++                    for _, dep in dep_set.items()
+                 ]),
+                 urls = [package["url"]],
+                 name = package["name"],
