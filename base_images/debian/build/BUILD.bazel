@@ -1,9 +1,9 @@
 load("@rules_distroless//distroless:defs.bzl", "passwd")
-load("@debian_packages//:packages.bzl", "debian_package_layer")
 load("@rules_pkg//pkg:mappings.bzl", "pkg_mklink")
 load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
 load("//bazel/oci:defs.bzl", "image")
 load("@rules_oci//oci:defs.bzl", "oci_push")
+load("//base_images/debian:debian12.bzl", "debian_image")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -70,55 +70,52 @@ pkg_tar(
     package_dir = "/usr/bin",
 )
 
-pkg_tar(
-    name = "build_layers",
-    deps = [
-        debian_package_layer("thin-provisioning-tools"),
-        debian_package_layer("fuse-overlayfs"),
-        debian_package_layer("iptables"),
-        debian_package_layer("libmpfr6"),
-        debian_package_layer("libsigsegv2"),
-        debian_package_layer("grep"),
-        debian_package_layer("git"),
-        debian_package_layer("findutils"),
-        debian_package_layer("awk"),
-        debian_package_layer("diffutils"),
-        debian_package_layer("sed"),
-        debian_package_layer("xz-utils"),
-        debian_package_layer("liblz4-1"),
-        debian_package_layer("libzstd-dev"),
-        debian_package_layer("coreutils"),
-        debian_package_layer("bash"),
+debian_image(
+    name = "build_base",
+    debian_packages = [
+        "@debian12//thin-provisioning-tools",
+        "@debian12//fuse-overlayfs",
+        "@debian12//iptables",
+        "@debian12//libmpfr6",
+        "@debian12//libsigsegv2",
+        "@debian12//grep",
+        "@debian12//git",
+        "@debian12//findutils",
+        "@debian12//gawk",
+        "@debian12//diffutils",
+        "@debian12//sed",
+        "@debian12//xz-utils",
+        "@debian12//liblz4-1",
+        "@debian12//libzstd-dev",
+        "@debian12//coreutils",
+        "@debian12//bash",
+        # required to replicate distroless/static
+        "@debian12//base-files",
+        "@debian12//netbase",
+        "@debian12//tzdata",
+        "@debian12//ca-certificates",
+        # required to replicate distroless/base
+        "@debian12//libc6",
+        "@debian12//libssl3",
+        "@debian12//openssl",
+        # required to replicate distroless/cc
+        "@debian12//libgcc-s1",
+        "@debian12//libgomp1",
+        "@debian12//libstdc++6",
+        # required to replicate distroless/python
+        "@debian12//dash",
+        "@debian12//libc-bin",
+        "@debian12//python3.11-minimal",
+        "@debian12//libpython3.11-stdlib",
+        "@debian12//python3-distutils",
     ],
+    env = {"LANG": "C.UTF-8"},
 )
 
 image(
     name = "build",
-    architecture = "amd64",
-    base = None,
-    env = {"LANG": "C.UTF-8"},
-    os = "linux",
+    base = "build_base",
     tars = [
-        ":build_layers",
-        # required to replicate distroless/static
-        debian_package_layer("base-files"),
-        debian_package_layer("netbase"),
-        debian_package_layer("tzdata"),
-        debian_package_layer("ca-certificates"),
-        # required to replicate distroless/base
-        debian_package_layer("libc6"),
-        debian_package_layer("libssl3"),
-        debian_package_layer("openssl"),
-        # required to replicate distroless/cc
-        debian_package_layer("libgcc-s1"),
-        debian_package_layer("libgomp1"),
-        debian_package_layer("libstdc++6"),
-        # required to replicate distroless/python
-        debian_package_layer("dash"),
-        debian_package_layer("libc-bin"),
-        debian_package_layer("python3.11-minimal"),
-        debian_package_layer("libpython3.11-stdlib"),
-        debian_package_layer("python3-distutils"),
         ":symlinks_layer",
         ":docker_layer",
         ":passwd",
