@@ -55,9 +55,9 @@ gazelle_dependencies(go_sdk = "go_sdk")
 
 http_archive(
     name = "aspect_bazel_lib",
-    sha256 = "a59096e01b43d86c6667a869f0e90e0c4b1d4cb03c3d3a972a32ff687c750ac2",
-    strip_prefix = "bazel-lib-2.5.1",
-    url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.5.1/bazel-lib-v2.5.1.tar.gz",
+    sha256 = "c780120ab99a4ca9daac69911eb06434b297214743ee7e0a1f1298353ef686db",
+    strip_prefix = "bazel-lib-2.7.9",
+    url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.7.9/bazel-lib-v2.7.9.tar.gz",
 )
 
 #########################
