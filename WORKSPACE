@@ -3,6 +3,18 @@ workspace(name = "monorepo")
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
+#########################
+## rules_ python
+
+http_archive(
+    name = "rules_python",
+    patch_args = ["-p1"],
+    patches = ["//bazel/patches:rules_python.patch"],
+    sha256 = "c68bdc4fbec25de5b5493b8819cfc877c4ea299c0dcb15c244c5a00208cde311",
+    strip_prefix = "rules_python-0.31.0",
+    url = "https://github.com/bazelbuild/rules_python/releases/download/0.31.0/rules_python-0.31.0.tar.gz",
+)
+
 ##################
 # Golang support
 http_archive(
@@ -60,16 +72,6 @@ http_archive(
     url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.5.1/bazel-lib-v2.5.1.tar.gz",
 )
 
-#########################
-## rules_ python
-
-http_archive(
-    name = "rules_python",
-    sha256 = "c68bdc4fbec25de5b5493b8819cfc877c4ea299c0dcb15c244c5a00208cde311",
-    strip_prefix = "rules_python-0.31.0",
-    url = "https://github.com/bazelbuild/rules_python/releases/download/0.31.0/rules_python-0.31.0.tar.gz",
-)
-
 load("@rules_python//python:repositories.bzl", "py_repositories", "python_register_toolchains")
 
 py_repositories()
@@ -121,7 +123,11 @@ install_mypy_deps()
 load("@pip_deps//:requirements.bzl", "install_deps")
 
 # Call it to define repos for your requirements.
-install_deps()
+install_deps(
+    whl_patches = {
+        "//bazel/patches:pip_torch.patch": '{"whls": ["torch-2.1.0-cp310-cp310-manylinux1_x86_64.whl"],"patch_strip": 1}',
+    },
+)
 
 go_repository(
     name = "org_golang_google_genproto_googleapis_rpc",
@@ -450,7 +456,18 @@ distroless_dependencies()
 
 http_archive(
     name = "aspect_rules_py",
-    sha256 = "e1d1023bc9ba8545dc87c6df10508d9d7c20f489f5e5c5c1e16380b33c013485",
-    strip_prefix = "rules_py-0.5.0",
-    url = "https://github.com/aspect-build/rules_py/releases/download/v0.5.0/rules_py-v0.5.0.tar.gz",
+    # patch_args = ["-p1"],
+    # patches = ["//bazel/patches:rules_py.patch"],
+    sha256 = "6b47e3e20afef68c33fb0e103462d6ca35a33423c637429566c412ade555a778",
+    strip_prefix = "rules_py-0.7.1",
+    url = "https://github.com/aspect-build/rules_py/releases/download/v0.7.1/rules_py-v0.7.1.tar.gz",
 )
+
+# Fetches the rules_py dependencies.
+# If you want to have a different version of some dependency,
+# you should fetch it *before* calling this.
+# Alternatively, you can skip calling this function, so long as you've
+# already fetched all the dependencies.
+load("@aspect_rules_py//py:repositories.bzl", "rules_py_dependencies")
+
+rules_py_dependencies()
