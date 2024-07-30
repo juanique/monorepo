@@ -333,7 +333,7 @@ http_archive(
     sha256 = "7c35dd1f37c280b8a78bd6815b1b62ab2043a566396b0168ec8e91aa46d88fc3",
     strip_prefix = "rules_perl-0.2.3",
     urls = [
-	"https://github.com/bazelbuild/rules_perl/archive/refs/tags/0.2.3.tar.gz",
+        "https://github.com/bazelbuild/rules_perl/archive/refs/tags/0.2.3.tar.gz",
     ],
 )
 
@@ -347,9 +347,9 @@ perl_register_toolchains()
 # rules OCI
 http_archive(
     name = "rules_oci",
-    sha256 = "6ae66ccc6261d3d297fef1d830a9bb852ddedd3920bbd131021193ea5cb5af77",
-    strip_prefix = "rules_oci-1.7.0",
-    url = "https://github.com/bazel-contrib/rules_oci/releases/download/v1.7.0/rules_oci-v1.7.0.tar.gz",
+    sha256 = "bac146b80d80e2b941965a1b983dd0e3499d4fc49f003319d6de04e9c2f687ac",
+    strip_prefix = "rules_oci-e389ddeed00139eaec9ca24689fa71079725d8ab",
+    url = "https://github.com/bazel-contrib/rules_oci/archive/e389ddeed00139eaec9ca24689fa71079725d8ab.zip",
 )
 
 load("@rules_oci//oci:dependencies.bzl", "rules_oci_dependencies")
