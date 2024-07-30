@@ -112,9 +112,20 @@ debian_image(
     env = {"LANG": "C.UTF-8"},
 )
 
+debian_image(
+    name = "build_base_cpp",
+    base = ":build_base",
+    debian_packages = [
+        "@debian12//autotools-dev",
+        "@debian12//automake",
+        "@debian12//binutils",
+        "@debian12//g++",
+    ],
+)
+
 image(
     name = "build",
-    base = "build_base",
+    base = "build_base_cpp",
     tars = [
         ":symlinks_layer",
         ":docker_layer",
