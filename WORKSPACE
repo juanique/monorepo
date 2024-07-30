@@ -356,11 +356,10 @@ load("@rules_oci//oci:dependencies.bzl", "rules_oci_dependencies")
 
 rules_oci_dependencies()
 
-load("@rules_oci//oci:repositories.bzl", "LATEST_CRANE_VERSION", "oci_register_toolchains")
+load("@rules_oci//oci:repositories.bzl", "oci_register_toolchains")
 
 oci_register_toolchains(
     name = "oci",
-    crane_version = LATEST_CRANE_VERSION,
 )
 
 load("//third_party:oci_containers.bzl", "load_oci_images")
