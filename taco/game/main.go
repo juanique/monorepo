@@ -7,7 +7,7 @@ import (
 	"github.com/juanique/monorepo/taco"
 	"github.com/juanique/monorepo/taco/core"
 	"github.com/veandco/go-sdl2/sdl"
-	"github.com/veandco/go-sdl2/ttf"
+	// "github.com/veandco/go-sdl2/ttf"
 )
 
 const (
@@ -23,10 +23,10 @@ func main() {
 		return
 	}
 
-	if err := ttf.Init(); err != nil {
-		fmt.Println("initializing SDL_FONT:", err)
-		return
-	}
+	// if err := ttf.Init(); err != nil {
+	// fmt.Println("initializing SDL_FONT:", err)
+	// return
+	// }
 
 	window, err := sdl.CreateWindow(
 		"Gaming in Go Episode 2",

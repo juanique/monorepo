@@ -4,6 +4,7 @@ load("//third_party/pcre:repositories.bzl", "pcre_repositories")
 load("//third_party/openssl:repositories.bzl", "openssl_repositories")
 load("//third_party/binaries:repositories.bzl", "binary_repositories")
 load("//third_party/sdl2:repositories.bzl", "sdl2_repositories")
+load("//third_party/alsa:repositories.bzl", "alsa_repositories")
 
 def third_party_repositories():
     libgit2_repositories()
@@ -12,3 +13,4 @@ def third_party_repositories():
     openssl_repositories()
     binary_repositories()
     sdl2_repositories()
+    alsa_repositories()

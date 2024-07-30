@@ -8,8 +8,13 @@ filegroup(
 
 cmake(
     name = "sdl2",
-    # configure_command = "configure",
+    build_args = ["-DALSA=ON"],
+    defines = [
+        "ALSA=ON",
+        # Add other options as needed
+    ],
     # configure_in_place = True,
+
     # configure_options = [],
     env = select({
         "@platforms//os:macos": {
@@ -18,6 +23,8 @@ cmake(
         },
         "//conditions:default": {
             "PERL": "$$EXT_BUILD_ROOT$$/$(PERL)",
+            "ALSA_INCLUDE_DIR": "$$EXT_BUILD_DEPS/alsa_dynamic_link/include",
+            "ALSA_LIBRARY": "$$EXT_BUILD_DEPS/alsa_dynamic_link/lib/libasound.so",
         },
     }),
     lib_name = "sdl2",
@@ -25,8 +32,13 @@ cmake(
     out_include_dir = "include/SDL2",
     out_shared_libs = [
         "libSDL2.so",
+        "libSDL2-2.0.so.0",
     ],
     targets = [],
     toolchains = ["@rules_perl//:current_toolchain"],
     visibility = ["//visibility:public"],
+    deps = [
+        "@alsa//:alsa_dynamic_link",
+        "@alsa//:alsa_static_link",
+    ],
 )

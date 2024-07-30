@@ -9,7 +9,6 @@ go_library(
         "//taco",
         "//taco/core",
         "@com_github_veandco_go_sdl2//sdl",
-        "@com_github_veandco_go_sdl2//ttf",
     ],
 )
 

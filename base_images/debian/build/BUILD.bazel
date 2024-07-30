@@ -119,6 +119,9 @@ image(
         debian_package_layer("python3.11-minimal"),
         debian_package_layer("libpython3.11-stdlib"),
         debian_package_layer("python3-distutils"),
+        debian_package_layer("binutils"),  # to install ld, required for build C++
+        debian_package_layer("automake"),  # to install ld, required for build C++
+        debian_package_layer("autotools-dev"),  # to install ld, required for build C++
         ":symlinks_layer",
         ":docker_layer",
         ":passwd",

@@ -37,6 +37,9 @@
     - python3-distutils
     - python3.11-minimal
     - libpython3.11-stdlib
+    - binutils
+    - automake
+    - autotools-dev
   exclude_packages:
     # generally excluded from distroless
     - debconf

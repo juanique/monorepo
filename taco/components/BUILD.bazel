@@ -15,6 +15,5 @@ go_library(
     deps = [
         "//taco/core",
         "@com_github_veandco_go_sdl2//sdl",
-        "@com_github_veandco_go_sdl2//ttf",
     ],
 )
