@@ -1,12 +1,36 @@
-load("@rules_debian_packages//debian_packages:defs.bzl", "debian_packages_lockfile")
+load("//base_images/debian:debian12.bzl", "debian_image")
 
-# Generate lockfile with:
-# bazel run :debian_packages.generate
-# Update snapshots with:
-# bazel run :debian_packages.update
-debian_packages_lockfile(
-    name = "debian_packages",
-    lock_file = "packages.lock",
-    packages_file = "packages.yaml",
-    snapshots_file = "snapshots.yaml",
+package(default_visibility = ["//visibility:public"])
+
+debian_image(
+    name = "debian",
+    debian_packages = [
+        # core packages
+        "@debian12//ncurses-base",
+        "@debian12//libncurses6",
+        "@debian12//bash",
+        "@debian12//dpkg",
+        "@debian12//libstdc++6",
+        "@debian12//curl",
+        "@debian12//coreutils",
+        "@debian12//base-files",
+        "@debian12//netbase",
+        "@debian12//tzdata",
+        "@debian12//ca-certificates",
+        "@debian12//libc6",
+        "@debian12//libssl3",
+        "@debian12//openssl",
+        "@debian12//libgomp1",
+
+        # Random utilities
+        "@debian12//grep",
+        "@debian12//sed",
+        "@debian12//findutils",
+    ],
+    tars = [
+        "//base_images/debian/core:passwd",
+        "//base_images/debian/core:group",
+        "//base_images/debian/core:symlinks_layer",
+        "//base_images/debian/core:cacerts",
+    ],
 )

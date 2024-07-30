@@ -347,9 +347,9 @@ perl_register_toolchains()
 # rules OCI
 http_archive(
     name = "rules_oci",
-    sha256 = "6ae66ccc6261d3d297fef1d830a9bb852ddedd3920bbd131021193ea5cb5af77",
-    strip_prefix = "rules_oci-1.7.0",
-    url = "https://github.com/bazel-contrib/rules_oci/releases/download/v1.7.0/rules_oci-v1.7.0.tar.gz",
+    sha256 = "46ce9edcff4d3d7b3a550774b82396c0fa619cc9ce9da00c1b09a08b45ea5a14",
+    strip_prefix = "rules_oci-1.8.0",
+    url = "https://github.com/bazel-contrib/rules_oci/releases/download/v1.8.0/rules_oci-v1.8.0.tar.gz",
 )
 
 load("@rules_oci//oci:dependencies.bzl", "rules_oci_dependencies")
@@ -404,43 +404,32 @@ load("@apko_wolfi_base//:repositories.bzl", "apko_repositories")
 
 apko_repositories()
 
-##############
-# Rules debian
-
-http_archive(
-    name = "rules_debian_packages",
-    sha256 = "0ae3b332f9d894e57693ce900769d2bd1b693e1f5ea1d9cdd82fa4479c93bcc8",
-    strip_prefix = "rules_debian_packages-0.2.0",
-    url = "https://github.com/betaboon/rules_debian_packages/releases/download/v0.2.0/rules_debian_packages-v0.2.0.tar.gz",
-)
-
-load("@rules_debian_packages//debian_packages:repositories.bzl", "rules_debian_packages_dependencies")
-
-rules_debian_packages_dependencies(python_interpreter_target = interpreter)
-
-load("@rules_debian_packages//debian_packages:defs.bzl", "debian_packages_repository")
-
-debian_packages_repository(
-    name = "debian_packages",
-    default_arch = "amd64",
-    default_distro = "debian12",
-    lock_file = "//base_images/debian:packages.lock",
-)
-
-load("@debian_packages//:packages.bzl", install_debian_deps = "install_deps")
-
-install_debian_deps()
-
 ############
 # Rules distroless
 
 http_archive(
     name = "rules_distroless",
-    sha256 = "4b6d6a4bd03431f4f680ff5f6feea0b8ccf52c0296a12818d2c9595392e45543",
-    strip_prefix = "rules_distroless-0.2.0",
-    url = "https://github.com/GoogleContainerTools/rules_distroless/releases/download/v0.2.0/rules_distroless-v0.2.0.tar.gz",
+    patch_args = ["-p1"],
+    patches = ["//bazel/patches:rules_distroless.01.duplicated_deps.patch"],
+    sha256 = "4c5e98aa15e3684b580ea2e2bc8b95bac6e23a26b25ec8747c39e74ced2305da",
+    strip_prefix = "rules_distroless-0.3.4",
+    url = "https://github.com/GoogleContainerTools/rules_distroless/releases/download/v0.3.4/rules_distroless-v0.3.4.tar.gz",
 )
 
 load("@rules_distroless//distroless:dependencies.bzl", "distroless_dependencies")
 
 distroless_dependencies()
+
+########## debian images
+load("@rules_distroless//apt:index.bzl", "deb_index")
+
+# bazel run @debian12//:lock
+deb_index(
+    name = "debian12",
+    lock = "@//base_images/debian:debian12.lock.json",
+    manifest = "//base_images/debian:debian12.yaml",
+)
+
+load("@debian12//:packages.bzl", "debian12_packages")
+
+debian12_packages()
