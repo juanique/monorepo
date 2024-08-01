@@ -1,0 +1,82 @@
+version: 1
+sources:
+- channel: bookworm main
+  url: https://snapshot-cloudflare.debian.org/archive/debian/20240728T080209Z
+- channel: bookworm-security main
+  url: https://snapshot-cloudflare.debian.org/archive/debian-security/20240728T080209Z
+- channel: bookworm-updates main
+  url: https://snapshot-cloudflare.debian.org/archive/debian/20240728T080209Z
+archs:
+- amd64
+- arm64
+packages:
+- libpython3.11-stdlib
+- fonts-freefont-ttf
+- fonts-noto
+- fonts-terminus
+- fonts-dejavu
+- libcairo2
+- fontconfig
+- libcrypt1
+- sed
+- curl
+- findutils
+- python3
+- netbase
+- tzdata
+- ca-certificates
+- bash
+- dash
+- libzstd-dev
+- libc-bin
+- ncurses-base
+- libncurses6
+- coreutils
+- dpkg
+- libstdc++6
+- findutils
+- grep
+- libpango-1.0-0
+- libharfbuzz0b
+- libpangoft2-1.0-0
+- libpangocairo-1.0-0
+- libglib2.0-0
+- libglib2.0-dev
+- python3
+- poppler-utils
+- python3-cffi
+- python3-pip
+- python3-brotli
+- python3-gi
+- weasyprint
+- base-files
+- python3.11-minimal
+- libwebp-dev
+- libx264-dev
+- git
+- gnupg
+- libssl3
+- openssh-client
+- jq
+- zip
+- liblz4-dev
+- diffutils
+- gawk
+- procps
+- file
+- libstdc++6
+- librocksdb-dev
+- python3-certbot-dns-route53
+- g++
+- build-essential
+- libsnappy-dev
+- libbz2-dev
+- libturbojpeg0
+- lcov
+- autotools-dev
+- automake
+- llvm
+- fuse-overlayfs
+- thin-provisioning-tools
+- iptables
+- gawk

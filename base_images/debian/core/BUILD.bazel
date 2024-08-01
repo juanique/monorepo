@@ -1,0 +1,100 @@
+load("@rules_pkg//pkg:mappings.bzl", "pkg_mklink")
+load("@rules_distroless//distroless:defs.bzl", "cacerts", "group", "passwd")
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
+
+package(default_visibility = ["//visibility:public"])
+
+cacerts(
+    name = "cacerts",
+    package = select({
+        "@platforms//cpu:arm64": "@debian12//ca-certificates/arm64:data",
+        "@platforms//cpu:x86_64": "@debian12//ca-certificates/amd64:data",
+    }),
+)
+
+passwd(
+    name = "passwd",
+    entries = [
+        {
+            "uid": 0,
+            "gid": 0,
+            "home": "/root",
+            "shell": "/bin/bash",
+            "username": "root",
+        },
+    ],
+)
+
+group(
+    name = "group",
+    entries = [
+        {
+            "name": "root",
+            "gid": 0,
+        },
+    ],
+)
+
+pkg_mklink(
+    name = "etc_ssl_cert_pem_symlink",
+    link_name = "/etc/ssl/cert.pem",
+    target = "/etc/ssl/certs/ca-certificates.crt",
+)
+
+pkg_mklink(
+    name = "usr_bin_python_symlink",
+    link_name = "/usr/bin/python",
+    target = "/usr/bin/python3.11",
+)
+
+pkg_mklink(
+    name = "usr_bin_python3_symlink",
+    link_name = "/usr/bin/python3",
+    target = "/usr/bin/python3.11",
+)
+
+pkg_mklink(
+    name = "usr_sbin_iptables",
+    link_name = "/usr/sbin/iptables",
+    target = "/usr/sbin/iptables-legacy",
+)
+
+pkg_mklink(
+    name = "usr_sbin_ip6tables",
+    link_name = "/usr/sbin/ip6tables",
+    target = "/usr/sbin/ip6tables-legacy",
+)
+
+# needed as dpkg assumes sh is installed in a typical debian installation.
+pkg_mklink(
+    name = "sh",
+    link_name = "/bin/sh",
+    target = "/bin/bash",
+)
+
+pkg_tar(
+    name = "symlinks_layer",
+    srcs = [
+        ":etc_ssl_cert_pem_symlink",
+        ":sh",
+        ":usr_bin_python3_symlink",
+        ":usr_bin_python_symlink",
+        ":usr_sbin_ip6tables",
+        ":usr_sbin_iptables",
+    ],
+)
+
+pkg_tar(
+    name = "docker_layer",
+    srcs = [
+        "@docker//:containerd-bin",
+        "@docker//:containerd-shim-runc-v2-bin",
+        "@docker//:ctr-bin",
+        "@docker//:docker-bin",
+        "@docker//:docker-init-bin",
+        "@docker//:docker-proxy-bin",
+        "@docker//:dockerd-bin",
+        "@docker//:runc-bin",
+    ],
+    package_dir = "/usr/bin",
+)
