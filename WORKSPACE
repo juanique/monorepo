@@ -234,33 +234,19 @@ buildbuddy(name = "buildbuddy_toolchain")
 
 ##############
 # Uber zig GCC toolchain
-
-HERMETIC_CC_TOOLCHAIN_VERSION = "v3.0.1"
-
 http_archive(
-    name = "hermetic_cc_toolchain",
-    sha256 = "3bc6ec127622fdceb4129cb06b6f7ab098c4d539124dde96a6318e7c32a53f7a",
-    urls = [
-        "https://mirror.bazel.build/github.com/uber/hermetic_cc_toolchain/releases/download/{0}/hermetic_cc_toolchain-{0}.tar.gz".format(HERMETIC_CC_TOOLCHAIN_VERSION),
-        "https://github.com/uber/hermetic_cc_toolchain/releases/download/{0}/hermetic_cc_toolchain-{0}.tar.gz".format(HERMETIC_CC_TOOLCHAIN_VERSION),
-    ],
+    name = "musl_toolchains",
+    sha256 = "1e6cf99f35277dbb9c3b341a9986d0f33cf70e0cc76a58f062d2d9b7ab56eeeb",
+    url = "https://github.com/bazel-contrib/musl-toolchain/releases/download/v0.1.17/musl_toolchain-v0.1.17.tar.gz",
 )
 
-load("@hermetic_cc_toolchain//toolchain:defs.bzl", zig_toolchains = "toolchains")
+load("@musl_toolchains//:repositories.bzl", "load_musl_toolchains")
 
-register_toolchains(
-    "@zig_sdk//toolchain:linux_amd64_gnu.2.28",
-    "@zig_sdk//toolchain:linux_arm64_gnu.2.28",
-    "@zig_sdk//toolchain:darwin_amd64",
-    "@zig_sdk//toolchain:darwin_arm64",
-    "@zig_sdk//toolchain:windows_amd64",
-    "@zig_sdk//toolchain:windows_arm64",
-)
+load_musl_toolchains()
 
-# Plain zig_toolchains() will pick reasonable defaults. See
-# toolchain/defs.bzl:toolchains on how to change the Zig SDK version and
-# download URL.
-zig_toolchains()
+load("@musl_toolchains//:toolchains.bzl", "register_musl_toolchains")
+
+register_musl_toolchains()
 
 ###############################
 ## Buildifier
@@ -333,7 +319,7 @@ http_archive(
     sha256 = "7c35dd1f37c280b8a78bd6815b1b62ab2043a566396b0168ec8e91aa46d88fc3",
     strip_prefix = "rules_perl-0.2.3",
     urls = [
-	"https://github.com/bazelbuild/rules_perl/archive/refs/tags/0.2.3.tar.gz",
+        "https://github.com/bazelbuild/rules_perl/archive/refs/tags/0.2.3.tar.gz",
     ],
 )
 
