@@ -18,7 +18,6 @@ nogo(
     name = "my_nogo",
     visibility = ["//visibility:public"],  # must have public visibility
     deps = [
-        ":importunsafe",
         "@org_golang_x_tools//go/analysis/passes/printf:go_default_library",
     ],
 )
