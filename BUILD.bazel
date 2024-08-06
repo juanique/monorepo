@@ -5,6 +5,7 @@ load("@rules_python_gazelle_plugin//manifest:defs.bzl", "gazelle_python_manifest
 load("@rules_python_gazelle_plugin//modules_mapping:def.bzl", "modules_mapping")
 load("@pip_deps//:requirements.bzl", "all_whl_requirements")
 load("@rules_apko//apko:defs.bzl", "apko_bazelrc")
+load("@io_bazel_rules_go//go:def.bzl", "nogo")
 
 exports_files([
     "pyproject.toml",
@@ -12,6 +13,15 @@ exports_files([
 ])
 
 apko_bazelrc()
+
+nogo(
+    name = "my_nogo",
+    visibility = ["//visibility:public"],  # must have public visibility
+    deps = [
+        ":importunsafe",
+        "@org_golang_x_tools//go/analysis/passes/printf:go_default_library",
+    ],
+)
 
 ### Proto resolve
 # gazelle:resolve py examples.grpc.protos.helloworld_pb2 //examples/grpc/protos:helloworld_py_proto

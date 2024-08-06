@@ -23,7 +23,7 @@ http_archive(
     ],
 )
 
-load("@io_bazel_rules_go//go:deps.bzl", "go_download_sdk", "go_register_toolchains", "go_rules_dependencies")
+load("@io_bazel_rules_go//go:deps.bzl", "go_download_sdk", "go_register_nogo", "go_register_toolchains", "go_rules_dependencies")
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
 load("//:deps.bzl", "go_repositories")
 
@@ -33,6 +33,12 @@ go_repositories()
 go_rules_dependencies()
 
 go_register_toolchains(go_version = "1.21.6")
+
+go_register_nogo(
+    excludes = ["@//generated:__subpackages__"],  # Labels to exclude.
+    includes = ["@//:__subpackages__"],  # Labels to lint. By default only lints code in workspace.
+    nogo = "@//:my_nogo",  # my_nogo is in the top-level BUILD file of this workspace
+)
 
 go_download_sdk(
     name = "go_sdk_amd64",
