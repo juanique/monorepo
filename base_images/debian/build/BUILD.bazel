@@ -120,6 +120,7 @@ debian_image(
         "@debian12//automake",
         "@debian12//binutils",
         "@debian12//g++",
+        "@debian12//musl",
     ],
 )
 

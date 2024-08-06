@@ -10006,6 +10006,15 @@
 			"version": "1.8.9-2"
 		},
 		{
+			"arch": "amd64",
+			"dependencies": [],
+			"key": "musl_1.2.3-1_amd64",
+			"name": "musl",
+			"sha256": "4fc1e3d9b579f5c682ca99a4d45aec08d72a2e6b82b4c2e1bbcb7095466ae96d",
+			"url": "https://snapshot-cloudflare.debian.org/archive/debian/20240728T080209Z/pool/main/m/musl/musl_1.2.3-1_amd64.deb",
+			"version": "1.2.3-1"
+		},
+		{
 			"arch": "arm64",
 			"dependencies": [
 				{
@@ -20009,6 +20018,15 @@
 			"sha256": "fc5b488a30f697d13c8547ca32cebf53880141af77ec36c58b04f899b5708208",
 			"url": "https://snapshot-cloudflare.debian.org/archive/debian/20240728T080209Z/pool/main/i/iptables/libip4tc2_1.8.9-2_arm64.deb",
 			"version": "1.8.9-2"
+		},
+		{
+			"arch": "arm64",
+			"dependencies": [],
+			"key": "musl_1.2.3-1_arm64",
+			"name": "musl",
+			"sha256": "6ccf2bf0f479b00411cb8e1eeb048e648718170db5d63bbb4bf4a89350b81468",
+			"url": "https://snapshot-cloudflare.debian.org/archive/debian/20240728T080209Z/pool/main/m/musl/musl_1.2.3-1_arm64.deb",
+			"version": "1.2.3-1"
 		}
 	],
 	"version": 1

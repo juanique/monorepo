@@ -80,3 +80,4 @@ packages:
 - thin-provisioning-tools
 - iptables
 - gawk
+- musl
