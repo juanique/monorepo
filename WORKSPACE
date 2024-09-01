@@ -32,20 +32,20 @@ go_repositories()
 
 go_rules_dependencies()
 
-go_register_toolchains(go_version = "1.21.6")
+go_register_toolchains(go_version = "1.23.0")
 
 go_download_sdk(
     name = "go_sdk_amd64",
     goarch = "amd64",
     goos = "linux",
-    version = "1.21.6",
+    version = "1.23.0",
 )
 
 go_download_sdk(
     name = "go_sdk_arm64",
     goarch = "arm64",
     goos = "linux",
-    version = "1.21.6",
+    version = "1.23.0",
 )
 
 gazelle_dependencies(go_sdk = "go_sdk")
@@ -141,15 +141,15 @@ go_repository(
 go_repository(
     name = "org_golang_x_net",
     importpath = "golang.org/x/net",
-    sum = "h1:BONx9s002vGdD9umnlX1Po8vOZmrgH34qlHcD1MfK14=",
-    version = "v0.14.0",
+    sum = "h1:a9JDOJc5GMUJ0+UDqmLT86WiEy7iWyIhz8gz8E4e5hE=",
+    version = "v0.28.0",
 )
 
 go_repository(
     name = "org_golang_x_text",
     importpath = "golang.org/x/text",
-    sum = "h1:k+n5B8goJNdU7hSvEtMUz3d1Q6D/XW4COJSJR6fN0mc=",
-    version = "v0.12.0",
+    sum = "h1:XtiM5bkSOt+ewxlOE/aE/AKEHibwj/6gvWMl9Rsh0Qc=",
+    version = "v0.17.0",
 )
 
 http_archive(

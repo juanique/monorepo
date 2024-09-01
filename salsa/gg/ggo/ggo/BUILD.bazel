@@ -18,6 +18,8 @@ go_test(
         ":ggo",
         "//engprod/testfs",
         "//git:git_lib",
+        "@com_github_onsi_ginkgo_v2//:ginkgo",
+        "@com_github_onsi_gomega//:gomega",
         "@com_github_stretchr_testify//assert",
         "@com_github_stretchr_testify//require",
     ],
