@@ -1,6 +1,8 @@
+load("//:bazel/python.bzl", "py_test")
+
 py_test(
-    name = "grpc_import",
-    srcs = ["grpc_import.py"],
+    name = "grpc_import_test",
+    srcs = ["grpc_import_test.py"],
     deps = [
         "//examples/grpc/protos:helloworld_py_grpc",
         "//examples/grpc/protos:helloworld_py_proto",
