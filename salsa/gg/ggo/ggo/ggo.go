@@ -222,11 +222,13 @@ func MakeHostedRepo(repoMetadata RepoMetadata) (HostedRepo, error) {
 }
 
 func Clone(remotePath string, localPath string, opts CloneOpts) (*GitGud, error) {
-	if opts.GlobalConfig == (GlobalConfig{}) {
+	if opts.GlobalConfig.ConfigRoot == "" {
 		opts.GlobalConfig.ConfigRoot = "~/.config/gg"
 	}
 
-	var repoState RepoState
+	repoState := RepoState{
+		Commits: make(map[string]GudCommit),
+	}
 	if strings.Contains(remotePath, "github") {
 		githubMetadata, err := ParseGithubRepoUrl(remotePath)
 		if err != nil {
