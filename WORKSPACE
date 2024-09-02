@@ -32,20 +32,20 @@ go_repositories()
 
 go_rules_dependencies()
 
-go_register_toolchains(go_version = "1.23.0")
+go_register_toolchains(go_version = "1.22.6")
 
 go_download_sdk(
     name = "go_sdk_amd64",
     goarch = "amd64",
     goos = "linux",
-    version = "1.23.0",
+    version = "1.22.6",
 )
 
 go_download_sdk(
     name = "go_sdk_arm64",
     goarch = "arm64",
     goos = "linux",
-    version = "1.23.0",
+    version = "1.22.6",
 )
 
 gazelle_dependencies(go_sdk = "go_sdk")
