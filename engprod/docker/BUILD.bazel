@@ -20,8 +20,8 @@ py_library(
     visibility = ["//:__subpackages__"],
     deps = [
         "//salsa/docker/testing:docker_service",
-        "@pip_deps//docker",
-        "@pip_deps//psycopg2_binary",
+        "@pip//docker",
+        "@pip//psycopg2_binary",
     ],
 )
 
@@ -31,6 +31,6 @@ py_test(
     firecracker = True,
     deps = [
         ":postgres_service",
-        "@pip_deps//docker",
+        "@pip//docker",
     ],
 )

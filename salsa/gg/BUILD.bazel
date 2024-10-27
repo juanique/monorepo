@@ -10,12 +10,12 @@ py_library(
     visibility = ["//:__subpackages__"],
     deps = [
         "//salsa/os:environ_ctx",
-        "@pip_deps//gitpython",
-        "@pip_deps//humanize",
-        "@pip_deps//pydantic",
-        "@pip_deps//pygithub",
-        "@pip_deps//rich",
-        "@pip_deps//unidecode",
+        "@pip//gitpython",
+        "@pip//humanize",
+        "@pip//pydantic",
+        "@pip//pygithub",
+        "@pip//rich",
+        "@pip//unidecode",
     ],
 )
 
@@ -25,7 +25,7 @@ py_test(
     deps = [
         ":gg",
         "//salsa/util:subsets",
-        "@pip_deps//gitpython",
+        "@pip//gitpython",
     ],
 )
 
@@ -37,9 +37,9 @@ py_binary(
     visibility = ["//:__subpackages__"],
     deps = [
         ":gg",
-        "@pip_deps//click",
-        "@pip_deps//gitpython",
-        "@pip_deps//rich",
+        "@pip//click",
+        "@pip//gitpython",
+        "@pip//rich",
     ],
 )
 
@@ -49,7 +49,7 @@ py_binary(
     visibility = ["//:__subpackages__"],
     deps = [
         ":gg",
-        "@pip_deps//gitpython",
+        "@pip//gitpython",
     ],
 )
 

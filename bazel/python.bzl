@@ -1,4 +1,4 @@
-load("@pip_deps//:requirements.bzl", "requirement")
+load("@pip//:requirements.bzl", "requirement")
 
 FIRECRACKER_EXEC_PROPERTIES = {
     # Tell BuildBuddy to run this test using a Firecracker microVM.
@@ -9,7 +9,7 @@ FIRECRACKER_EXEC_PROPERTIES = {
     "test.init-dockerd": "true",
     # Tell BuildBuddy to preserve the microVM state across test runs.
     "test.recycle-runner": "true",
-    "container-image": "docker://docker.io/juanzolotoochin/ubuntu-build-v2@sha256:4a898ae754ac575962392232dc0154937427bbd52f5b79cd65c0992b2ed6cc84",
+    "container-image": "docker://docker.io/juanzolotoochin/ubuntu-build-v2@sha256:914be27a442cb76a62c8288fece5f761a46b6792e1e2228467fde57eab060476",
 }
 
 def py_binary(name, srcs, **kwargs):

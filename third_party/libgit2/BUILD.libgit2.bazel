@@ -37,8 +37,8 @@ cmake(
     }),
     visibility = ["//visibility:public"],
     deps = [
-        "@libssh2",
-        "@openssl",
+        "@@libssh2",
+        "@@openssl",
         "@zlib",
     ] + select({
         "@platforms//os:linux": ["@pcre"],
