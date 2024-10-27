@@ -55,9 +55,9 @@ gazelle_dependencies(go_sdk = "go_sdk")
 
 http_archive(
     name = "aspect_bazel_lib",
-    sha256 = "a59096e01b43d86c6667a869f0e90e0c4b1d4cb03c3d3a972a32ff687c750ac2",
-    strip_prefix = "bazel-lib-2.5.1",
-    url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.5.1/bazel-lib-v2.5.1.tar.gz",
+    sha256 = "c780120ab99a4ca9daac69911eb06434b297214743ee7e0a1f1298353ef686db",
+    strip_prefix = "bazel-lib-2.7.9",
+    url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.7.9/bazel-lib-v2.7.9.tar.gz",
 )
 
 #########################
@@ -235,11 +235,11 @@ buildbuddy(name = "buildbuddy_toolchain")
 ##############
 # Uber zig GCC toolchain
 
-HERMETIC_CC_TOOLCHAIN_VERSION = "v2.2.1"
+HERMETIC_CC_TOOLCHAIN_VERSION = "v3.0.1"
 
 http_archive(
     name = "hermetic_cc_toolchain",
-    sha256 = "3b8107de0d017fe32e6434086a9568f97c60a111b49dc34fc7001e139c30fdea",
+    sha256 = "3bc6ec127622fdceb4129cb06b6f7ab098c4d539124dde96a6318e7c32a53f7a",
     urls = [
         "https://mirror.bazel.build/github.com/uber/hermetic_cc_toolchain/releases/download/{0}/hermetic_cc_toolchain-{0}.tar.gz".format(HERMETIC_CC_TOOLCHAIN_VERSION),
         "https://github.com/uber/hermetic_cc_toolchain/releases/download/{0}/hermetic_cc_toolchain-{0}.tar.gz".format(HERMETIC_CC_TOOLCHAIN_VERSION),
@@ -333,7 +333,7 @@ http_archive(
     sha256 = "7c35dd1f37c280b8a78bd6815b1b62ab2043a566396b0168ec8e91aa46d88fc3",
     strip_prefix = "rules_perl-0.2.3",
     urls = [
-	"https://github.com/bazelbuild/rules_perl/archive/refs/tags/0.2.3.tar.gz",
+        "https://github.com/bazelbuild/rules_perl/archive/refs/tags/0.2.3.tar.gz",
     ],
 )
 
@@ -347,9 +347,9 @@ perl_register_toolchains()
 # rules OCI
 http_archive(
     name = "rules_oci",
-    sha256 = "6ae66ccc6261d3d297fef1d830a9bb852ddedd3920bbd131021193ea5cb5af77",
-    strip_prefix = "rules_oci-1.7.0",
-    url = "https://github.com/bazel-contrib/rules_oci/releases/download/v1.7.0/rules_oci-v1.7.0.tar.gz",
+    sha256 = "46ce9edcff4d3d7b3a550774b82396c0fa619cc9ce9da00c1b09a08b45ea5a14",
+    strip_prefix = "rules_oci-1.8.0",
+    url = "https://github.com/bazel-contrib/rules_oci/releases/download/v1.8.0/rules_oci-v1.8.0.tar.gz",
 )
 
 load("@rules_oci//oci:dependencies.bzl", "rules_oci_dependencies")
@@ -404,43 +404,32 @@ load("@apko_wolfi_base//:repositories.bzl", "apko_repositories")
 
 apko_repositories()
 
-##############
-# Rules debian
-
-http_archive(
-    name = "rules_debian_packages",
-    sha256 = "0ae3b332f9d894e57693ce900769d2bd1b693e1f5ea1d9cdd82fa4479c93bcc8",
-    strip_prefix = "rules_debian_packages-0.2.0",
-    url = "https://github.com/betaboon/rules_debian_packages/releases/download/v0.2.0/rules_debian_packages-v0.2.0.tar.gz",
-)
-
-load("@rules_debian_packages//debian_packages:repositories.bzl", "rules_debian_packages_dependencies")
-
-rules_debian_packages_dependencies(python_interpreter_target = interpreter)
-
-load("@rules_debian_packages//debian_packages:defs.bzl", "debian_packages_repository")
-
-debian_packages_repository(
-    name = "debian_packages",
-    default_arch = "amd64",
-    default_distro = "debian12",
-    lock_file = "//base_images/debian:packages.lock",
-)
-
-load("@debian_packages//:packages.bzl", install_debian_deps = "install_deps")
-
-install_debian_deps()
-
 ############
 # Rules distroless
 
 http_archive(
     name = "rules_distroless",
-    sha256 = "4b6d6a4bd03431f4f680ff5f6feea0b8ccf52c0296a12818d2c9595392e45543",
-    strip_prefix = "rules_distroless-0.2.0",
-    url = "https://github.com/GoogleContainerTools/rules_distroless/releases/download/v0.2.0/rules_distroless-v0.2.0.tar.gz",
+    patch_args = ["-p1"],
+    patches = ["//bazel/patches:rules_distroless.01.duplicated_deps.patch"],
+    sha256 = "4c5e98aa15e3684b580ea2e2bc8b95bac6e23a26b25ec8747c39e74ced2305da",
+    strip_prefix = "rules_distroless-0.3.4",
+    url = "https://github.com/GoogleContainerTools/rules_distroless/releases/download/v0.3.4/rules_distroless-v0.3.4.tar.gz",
 )
 
 load("@rules_distroless//distroless:dependencies.bzl", "distroless_dependencies")
 
 distroless_dependencies()
+
+########## debian images
+load("@rules_distroless//apt:index.bzl", "deb_index")
+
+# bazel run @debian12//:lock
+deb_index(
+    name = "debian12",
+    lock = "@//base_images/debian:debian12.lock.json",
+    manifest = "//base_images/debian:debian12.yaml",
+)
+
+load("@debian12//:packages.bzl", "debian12_packages")
+
+debian12_packages()
