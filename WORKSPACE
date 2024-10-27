@@ -60,69 +60,6 @@ http_archive(
     url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.7.9/bazel-lib-v2.7.9.tar.gz",
 )
 
-#########################
-## rules_ python
-
-http_archive(
-    name = "rules_python",
-    sha256 = "c68bdc4fbec25de5b5493b8819cfc877c4ea299c0dcb15c244c5a00208cde311",
-    strip_prefix = "rules_python-0.31.0",
-    url = "https://github.com/bazelbuild/rules_python/releases/download/0.31.0/rules_python-0.31.0.tar.gz",
-)
-
-load("@rules_python//python:repositories.bzl", "py_repositories", "python_register_toolchains")
-
-py_repositories()
-
-http_archive(
-    name = "rules_python_gazelle_plugin",
-    sha256 = "d71d2c67e0bce986e1c5a7731b4693226867c45bfe0b7c5e0067228a536fc580",
-    strip_prefix = "rules_python-0.29.0/gazelle",
-    url = "https://github.com/bazelbuild/rules_python/releases/download/0.29.0/rules_python-0.29.0.tar.gz",
-)
-
-# To compile the rules_python gazelle extension from source,
-# we must fetch some third-party go dependencies that it uses.
-
-load("@rules_python_gazelle_plugin//:deps.bzl", _py_gazelle_deps = "gazelle_deps")
-
-_py_gazelle_deps()
-
-# pip dependencies
-load("@rules_python//python:pip.bzl", "pip_parse")
-
-python_register_toolchains(
-    name = "python3_10",
-    # Available versions are listed in @rules_python//python:versions.bzl.
-    # We recommend using the same version your team is already standardized on.
-    python_version = "3.10",
-)
-
-load("@python3_10//:defs.bzl", "interpreter")
-
-pip_parse(
-    name = "pip_deps",
-    python_interpreter_target = interpreter,
-    requirements_lock = "//:requirements_lock.txt",
-)
-
-# mypy:
-pip_parse(
-    name = "mypy_integration_pip_deps",
-    python_interpreter_target = interpreter,
-    requirements_lock = "//bazel/workspace:mypy_version.txt",
-)
-
-load("@mypy_integration_pip_deps//:requirements.bzl", install_mypy_deps = "install_deps")
-
-install_mypy_deps()
-
-# Load the starlark macro which will define your dependencies.
-load("@pip_deps//:requirements.bzl", "install_deps")
-
-# Call it to define repos for your requirements.
-install_deps()
-
 go_repository(
     name = "org_golang_google_genproto_googleapis_rpc",
     importpath = "google.golang.org/genproto/googleapis/rpc",

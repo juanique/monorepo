@@ -8,5 +8,5 @@ py_binary(
     name = "pytest_wrapper",
     srcs = ["pytest_wrapper.py"],
     visibility = ["//:__subpackages__"],
-    deps = ["@pip_deps//pytest"],
+    deps = ["@pip//pytest"],
 )

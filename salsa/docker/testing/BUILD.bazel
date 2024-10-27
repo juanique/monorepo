@@ -1,5 +1,4 @@
 load("//:bazel/python.bzl", "py_library")
-load("@pip_deps//:requirements.bzl", "requirement")
 
 package(default_visibility = [
     "//engprod:__subpackages__",
@@ -13,6 +12,6 @@ py_library(
     visibility = ["//:__subpackages__"],
     deps = [
         "@bazel_tools//tools/python/runfiles",
-        "@pip_deps//docker",
+        "@pip//docker",
     ],
 )

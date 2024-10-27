@@ -9,5 +9,5 @@ py_binary(
     name = "pylint_test_wrapper",
     srcs = ["pylint_test_wrapper.py"],
     visibility = ["//:__subpackages__"],
-    deps = ["@pip_deps//pytest"],
+    deps = ["@pip//pytest"],
 )

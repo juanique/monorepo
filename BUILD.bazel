@@ -3,7 +3,7 @@ load("@rules_python//python:pip.bzl", "compile_pip_requirements")
 load("@buildifier_prebuilt//:rules.bzl", "buildifier")
 load("@rules_python_gazelle_plugin//manifest:defs.bzl", "gazelle_python_manifest")
 load("@rules_python_gazelle_plugin//modules_mapping:def.bzl", "modules_mapping")
-load("@pip_deps//:requirements.bzl", "all_whl_requirements")
+load("@pip//:requirements.bzl", "all_whl_requirements")
 load("@rules_apko//apko:defs.bzl", "apko_bazelrc")
 
 exports_files([
