@@ -3,53 +3,6 @@ workspace(name = "monorepo")
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-##################
-# Golang support
-http_archive(
-    name = "io_bazel_rules_go",
-    sha256 = "6734a719993b1ba4ebe9806e853864395a8d3968ad27f9dd759c196b3eb3abe8",
-    urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.45.1/rules_go-v0.45.1.zip",
-        "https://github.com/bazelbuild/rules_go/releases/download/v0.45.1/rules_go-v0.45.1.zip",
-    ],
-)
-
-http_archive(
-    name = "bazel_gazelle",
-    sha256 = "32938bda16e6700063035479063d9d24c60eda8d79fd4739563f50d331cb3209",
-    urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.35.0/bazel-gazelle-v0.35.0.tar.gz",
-        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.35.0/bazel-gazelle-v0.35.0.tar.gz",
-    ],
-)
-
-load("@io_bazel_rules_go//go:deps.bzl", "go_download_sdk", "go_register_toolchains", "go_rules_dependencies")
-load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
-load("//:deps.bzl", "go_repositories")
-
-# gazelle:repository_macro deps.bzl%go_repositories
-go_repositories()
-
-go_rules_dependencies()
-
-go_register_toolchains(go_version = "1.21.6")
-
-go_download_sdk(
-    name = "go_sdk_amd64",
-    goarch = "amd64",
-    goos = "linux",
-    version = "1.21.6",
-)
-
-go_download_sdk(
-    name = "go_sdk_arm64",
-    goarch = "arm64",
-    goos = "linux",
-    version = "1.21.6",
-)
-
-gazelle_dependencies(go_sdk = "go_sdk")
-
 ###########
 # Aspect bazel lib
 
@@ -59,77 +12,6 @@ http_archive(
     strip_prefix = "bazel-lib-2.7.9",
     url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.7.9/bazel-lib-v2.7.9.tar.gz",
 )
-
-go_repository(
-    name = "org_golang_google_genproto_googleapis_rpc",
-    importpath = "google.golang.org/genproto/googleapis/rpc",
-    sum = "h1:eSaPbMR4T7WfH9FvABk36NBMacoTUKdWCvV0dx+KfOg=",
-    version = "v0.0.0-20230803162519-f966b187b2e5",
-)
-
-go_repository(
-    name = "org_golang_google_grpc",
-    build_file_proto_mode = "disable_global",
-    importpath = "google.golang.org/grpc",
-    sum = "h1:fPVVDxY9w++VjTZsYvXWqEf9Rqar/e+9zYfxKK+W+YU=",
-    version = "v1.50.0",
-)
-
-go_repository(
-    name = "org_golang_x_net",
-    importpath = "golang.org/x/net",
-    sum = "h1:BONx9s002vGdD9umnlX1Po8vOZmrgH34qlHcD1MfK14=",
-    version = "v0.14.0",
-)
-
-go_repository(
-    name = "org_golang_x_text",
-    importpath = "golang.org/x/text",
-    sum = "h1:k+n5B8goJNdU7hSvEtMUz3d1Q6D/XW4COJSJR6fN0mc=",
-    version = "v0.12.0",
-)
-
-http_archive(
-    name = "com_google_protobuf",
-    sha256 = "c2c71ebc90af9796e8834f65093f2fab88b0a82b2a3e805b34842645a2afc4b0",
-    strip_prefix = "protobuf-26.0",
-    urls = ["https://github.com/protocolbuffers/protobuf/archive/refs/tags/v26.0.zip"],
-)
-
-http_archive(
-    name = "rules_proto",
-    sha256 = "dc3fb206a2cb3441b485eb1e423165b231235a1ea9b031b4433cf7bc1fa460dd",
-    strip_prefix = "rules_proto-5.3.0-21.7",
-    urls = [
-        "https://github.com/bazelbuild/rules_proto/archive/refs/tags/5.3.0-21.7.tar.gz",
-    ],
-)
-
-load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
-
-rules_proto_dependencies()
-
-rules_proto_toolchains()
-
-# grpc
-http_archive(
-    name = "com_github_grpc_grpc",
-    patch_args = ["-p1"],
-    patches = ["//bazel/patches:grpc.patch"],
-    sha256 = "c9f9ae6e4d6f40464ee9958be4068087881ed6aa37e30d0e64d40ed7be39dd01",
-    strip_prefix = "grpc-1.62.1",
-    urls = ["https://github.com/grpc/grpc/archive/refs/tags/v1.62.1.tar.gz"],
-)
-
-load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
-
-grpc_deps(
-    python_headers = "@python3_10//:python_headers",
-)
-
-load("@com_github_grpc_grpc//bazel:grpc_extra_deps.bzl", "grpc_extra_deps")
-
-grpc_extra_deps()
 
 # mypy integration
 http_archive(
@@ -213,10 +95,6 @@ http_archive(
 load("@buildifier_prebuilt//:deps.bzl", "buildifier_prebuilt_deps")
 
 buildifier_prebuilt_deps()
-
-load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
-
-bazel_skylib_workspace()
 
 load("@buildifier_prebuilt//:defs.bzl", "buildifier_prebuilt_register_toolchains")
 

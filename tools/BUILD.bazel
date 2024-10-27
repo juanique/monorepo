@@ -1,11 +1,11 @@
-load("@python3_10//:defs.bzl", "interpreter")
+# load("@python3_11//:defs.bzl", "interpreter")
 
 sh_binary(
     name = "go-get",
     srcs = ["go-get.sh"],
 )
 
-alias(
-    name = "python",
-    actual = interpreter,
-)
+# alias(
+# name = "python",
+# actual = interpreter,
+# )

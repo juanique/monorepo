@@ -1,4 +1,4 @@
-load("@bazel_gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary")
+load("@gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
 load("@buildifier_prebuilt//:rules.bzl", "buildifier")
 load("@rules_python_gazelle_plugin//manifest:defs.bzl", "gazelle_python_manifest")
