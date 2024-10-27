@@ -5,8 +5,8 @@
  go_library(
      name = "git2go",
 +    cdeps = [
-+        "@libgit2//:libgit2",
-+        "@openssl//:openssl",
++        "@@libgit2//:libgit2",
++        "@@openssl//:openssl",
 +    ],
      srcs = [
          "Build_system_dynamic.go",
