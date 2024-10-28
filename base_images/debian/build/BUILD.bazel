@@ -1,3 +1,4 @@
+load("@aspect_bazel_lib//lib:transitions.bzl", "platform_transition_filegroup")
 load("@rules_distroless//distroless:defs.bzl", "passwd")
 load("@rules_pkg//pkg:mappings.bzl", "pkg_mklink")
 load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
@@ -120,6 +121,7 @@ debian_image(
         "@debian12//automake",
         "@debian12//binutils",
         "@debian12//g++",
+        "@debian12//libpq-dev",
     ],
 )
 
@@ -134,9 +136,15 @@ image(
     visibility = ["//visibility:private"],
 )
 
+platform_transition_filegroup(
+    name = "build.amd64",
+    srcs = [":build"],
+    target_platform = "//:linux_amd64",
+)
+
 oci_push(
     name = "push",
-    image = ":build",
+    image = ":build.amd64",
     remote_tags = ["latest"],
     repository = "index.docker.io/juanzolotoochin/ubuntu-build-v2",
 )

@@ -13,7 +13,7 @@ build --experimental_profile_include_primary_output
 build --remote_download_outputs=minimal
 build --remote_cache=grpcs://remote.buildbuddy.io
 build --experimental_remote_cache_compression
-build --experimental_remote_build_event_upload=minimal
+build --remote_build_event_upload=minimal
 build --nolegacy_important_outputs
 build --remote_instance_name=instance_name_1
 build --noremote_upload_local_results
