@@ -22,6 +22,20 @@ passwd(
     ],
 )
 
+passwd(
+    name = "buildbuddy_user",
+    entries = [
+        dict(
+            gecos = ["buildbuddy"],
+            gid = 1000,
+            home = "/home/buildbuddy",
+            shell = "/usr/bin/bash",
+            uid = 1000,
+            username = "buildbuddy",
+        ),
+    ],
+)
+
 pkg_mklink(
     name = "usr_bin_python_symlink",
     link_name = "/usr/bin/python",
@@ -132,6 +146,7 @@ image(
         ":symlinks_layer",
         ":docker_layer",
         ":passwd",
+        ":buildbuddy_user",
     ],
     visibility = ["//visibility:private"],
 )
