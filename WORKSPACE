@@ -23,8 +23,8 @@ http_archive(
     ],
 )
 
-load("@io_bazel_rules_go//go:deps.bzl", "go_download_sdk", "go_register_toolchains", "go_rules_dependencies")
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
+load("@io_bazel_rules_go//go:deps.bzl", "go_download_sdk", "go_register_toolchains", "go_rules_dependencies")
 load("//:deps.bzl", "go_repositories")
 
 # gazelle:repository_macro deps.bzl%go_repositories
@@ -433,3 +433,33 @@ deb_index(
 load("@debian12//:packages.bzl", "debian12_packages")
 
 debian12_packages()
+
+######### Rules JS
+
+http_archive(
+    name = "aspect_rules_js",
+    sha256 = "91655ebd3178f979fcacd018f8f42aa9d3bc79c4fbddb7be9521971ec77e6aee",
+    strip_prefix = "rules_js-2.0.2",
+    url = "https://github.com/aspect-build/rules_js/releases/download/v2.0.2/rules_js-v2.0.2.tar.gz",
+)
+
+load("@aspect_rules_js//js:repositories.bzl", "rules_js_dependencies")
+
+rules_js_dependencies()
+
+load("@aspect_rules_js//js:toolchains.bzl", "DEFAULT_NODE_VERSION", "rules_js_register_toolchains")
+
+rules_js_register_toolchains(node_version = DEFAULT_NODE_VERSION)
+
+load("@aspect_rules_js//npm:repositories.bzl", "npm_translate_lock")
+
+npm_translate_lock(
+    name = "npm",
+    npmrc = "//:.npmrc",
+    pnpm_lock = "//:pnpm-lock.yaml",
+    verify_node_modules_ignored = "//:.bazelignore",
+)
+
+load("@npm//:repositories.bzl", "npm_repositories")
+
+npm_repositories()
