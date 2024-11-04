@@ -17,7 +17,18 @@ npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm", dev_dependenc
 
 npm.npm_translate_lock(
     name = "npm",
+    # Disable lifecycle hooks for hermeticity.
+    lifecycle_hooks = {
+        "*": [],
+    },
+    # This is important to prevent downloading prebuilt binaries for every platform
+    # *cough cough* swc/esbuild/etc.
+    no_optional = True,
+    npmrc = "//:.npmrc",
+    patch_args = {"*": ["-p1"]},
     pnpm_lock = "//:pnpm-lock.yaml",
+    quiet = False,
+    use_home_npmrc = False,
     verify_node_modules_ignored = "//:.bazelignore",
 )
 
