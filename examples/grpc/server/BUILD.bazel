@@ -10,10 +10,10 @@ py_binary(
     deps = [
         "//examples/grpc/protos:helloworld_py_grpc",
         "//examples/grpc/protos:helloworld_py_proto",
-        "@pip_deps//grpcio",
-        "@pip_deps//grpcio_reflection",
-        "@pip_deps//grpclib",  # keep
-        "@pip_deps//protobuf",  # keep
+        "@pip//grpcio",
+        "@pip//grpcio_reflection",
+        "@pip//grpclib",  # keep
+        "@pip//protobuf",  # keep
     ],
 )
 

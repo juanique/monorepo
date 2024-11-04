@@ -20,4 +20,4 @@ done
 export GOPACKAGESDRIVER_BAZEL_FLAGS="--output_base=$HOME/.cache/bazel/gopackagesdriver"
 export USE_BAZEL_VERSION=$(tail -n1 .bazelversion)
 export GOPACKAGESDRIVER_BAZEL_BUILD_FLAGS="--bes_results_url= --bes_backend= --remote_cache= --workspace_status_command="
-exec bazel --output_base=$HOME/.cache/bazel/gopackagesdriver run --config=full_local --tool_tag=gopackagesdriver @io_bazel_rules_go//go/tools/gopackagesdriver "${NEW_ARGS[@]}"
+exec bazel --output_base=$HOME/.cache/bazel/gopackagesdriver run --config=full_local --tool_tag=gopackagesdriver @rules_go//go/tools/gopackagesdriver "${NEW_ARGS[@]}"

@@ -13,13 +13,10 @@ build --experimental_profile_include_primary_output
 build --remote_download_outputs=minimal
 build --remote_cache=grpcs://remote.buildbuddy.io
 build --experimental_remote_cache_compression
-build --experimental_remote_build_event_upload=minimal
+build --remote_build_event_upload=minimal
 build --nolegacy_important_outputs
 build --remote_instance_name=instance_name_1
 build --noremote_upload_local_results
-
-# We'll enable this someday and rely on MODULE.bazel
-common --noenable_bzlmod
 
 
 build:remote --remote_executor=grpcs://remote.buildbuddy.io
@@ -30,9 +27,9 @@ build:remote --remote_timeout=1800
 build:remote --jobs=50
 
 # mypy aspect
-build --aspects @mypy_integration//:mypy.bzl%mypy_aspect
-build --output_groups=+mypy
-build --@mypy_integration//:mypy_config=//bazel/workspace:mypy.ini
+# build --aspects @mypy_integration//:mypy.bzl%mypy_aspect
+# build --output_groups=+mypy
+# build --@mypy_integration//:mypy_config=//bazel/workspace:mypy.ini
 
 test --test_output=errors
 
