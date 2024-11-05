@@ -241,7 +241,6 @@ manifest:
     docker.transport.npipeconn: docker
     docker.transport.npipesocket: docker
     docker.transport.sshconn: docker
-    docker.transport.ssladapter: docker
     docker.transport.unixconn: docker
     docker.types: docker
     docker.types.base: docker
@@ -1521,7 +1520,6 @@ manifest:
     urllib3.util.url: urllib3
     urllib3.util.util: urllib3
     urllib3.util.wait: urllib3
-    websocket: websocket_client
     wrapt: wrapt
     wrapt.arguments: wrapt
     wrapt.decorators: wrapt
@@ -1531,4 +1529,4 @@ manifest:
     wrapt.wrappers: wrapt
   pip_repository:
     name: pip_deps
-integrity: 8e291df724445d9942cab284af837d3ec03f31d88a550e9e64bc458c27844f40
+integrity: 8e441119bc09308f7d0f712e886f6c6d5bd4959c42e1ad07a0faeb119f61d98c
