@@ -1,0 +1,24 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "ggo",
+    srcs = ["ggo.go"],
+    importpath = "github.com/juanique/monorepo/salsa/gg/ggo/ggo",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//git:git_lib",
+        "//github",
+    ],
+)
+
+go_test(
+    name = "ggo_test",
+    srcs = ["ggo_test.go"],
+    deps = [
+        ":ggo",
+        "//engprod/testfs",
+        "//git:git_lib",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+    ],
+)

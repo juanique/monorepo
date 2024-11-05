@@ -45,7 +45,7 @@ class DockerService:
     def _load_from_loader_bin(self) -> None:
         assert self.loader_target
 
-        loader_bin = "monorepo/" + (
+        loader_bin = "_main/" + (
             self.loader_target.replace(
                 "//",
                 "",
