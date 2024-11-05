@@ -19,8 +19,8 @@ manifest:
     astroid.brain.brain_ctypes: astroid
     astroid.brain.brain_curses: astroid
     astroid.brain.brain_dataclasses: astroid
+    astroid.brain.brain_datetime: astroid
     astroid.brain.brain_dateutil: astroid
-    astroid.brain.brain_fstrings: astroid
     astroid.brain.brain_functools: astroid
     astroid.brain.brain_gi: astroid
     astroid.brain.brain_hashlib: astroid
@@ -70,15 +70,12 @@ manifest:
     astroid.exceptions: astroid
     astroid.filter_statements: astroid
     astroid.helpers: astroid
-    astroid.inference: astroid
     astroid.inference_tip: astroid
     astroid.interpreter: astroid
     astroid.interpreter.dunder_lookup: astroid
     astroid.interpreter.objectmodel: astroid
     astroid.manager: astroid
-    astroid.mixins: astroid
     astroid.modutils: astroid
-    astroid.node_classes: astroid
     astroid.nodes: astroid
     astroid.nodes.as_string: astroid
     astroid.nodes.const: astroid
@@ -93,7 +90,6 @@ manifest:
     astroid.protocols: astroid
     astroid.raw_building: astroid
     astroid.rebuilder: astroid
-    astroid.scoped_nodes: astroid
     astroid.test_utils: astroid
     astroid.transforms: astroid
     astroid.typing: astroid
@@ -118,10 +114,8 @@ manifest:
     cffi.verifier: cffi
     charset_normalizer: charset_normalizer
     charset_normalizer.api: charset_normalizer
-    charset_normalizer.assets: charset_normalizer
     charset_normalizer.cd: charset_normalizer
     charset_normalizer.cli: charset_normalizer
-    charset_normalizer.cli.normalizer: charset_normalizer
     charset_normalizer.constant: charset_normalizer
     charset_normalizer.legacy: charset_normalizer
     charset_normalizer.md: charset_normalizer
@@ -247,7 +241,6 @@ manifest:
     docker.transport.npipeconn: docker
     docker.transport.npipesocket: docker
     docker.transport.sshconn: docker
-    docker.transport.ssladapter: docker
     docker.transport.unixconn: docker
     docker.types: docker
     docker.types.base: docker
@@ -461,6 +454,7 @@ manifest:
     google.protobuf.internal.extension_dict: protobuf
     google.protobuf.internal.field_mask: protobuf
     google.protobuf.internal.message_listener: protobuf
+    google.protobuf.internal.python_edition_defaults: protobuf
     google.protobuf.internal.python_message: protobuf
     google.protobuf.internal.testing_refleaks: protobuf
     google.protobuf.internal.type_checkers: protobuf
@@ -469,15 +463,19 @@ manifest:
     google.protobuf.json_format: protobuf
     google.protobuf.message: protobuf
     google.protobuf.message_factory: protobuf
+    google.protobuf.proto: protobuf
     google.protobuf.proto_builder: protobuf
+    google.protobuf.proto_json: protobuf
     google.protobuf.pyext: protobuf
     google.protobuf.pyext.cpp_message: protobuf
     google.protobuf.reflection: protobuf
+    google.protobuf.runtime_version: protobuf
     google.protobuf.service: protobuf
     google.protobuf.service_reflection: protobuf
     google.protobuf.source_context_pb2: protobuf
     google.protobuf.struct_pb2: protobuf
     google.protobuf.symbol_database: protobuf
+    google.protobuf.testdata: protobuf
     google.protobuf.text_encoding: protobuf
     google.protobuf.text_format: protobuf
     google.protobuf.timestamp_pb2: protobuf
@@ -624,6 +622,7 @@ manifest:
     isort.stdlibs.py3: isort
     isort.stdlibs.py310: isort
     isort.stdlibs.py311: isort
+    isort.stdlibs.py312: isort
     isort.stdlibs.py36: isort
     isort.stdlibs.py37: isort
     isort.stdlibs.py38: isort
@@ -643,12 +642,6 @@ manifest:
     jwt.types: PyJWT
     jwt.utils: PyJWT
     jwt.warnings: PyJWT
-    lazy_object_proxy: lazy_object_proxy
-    lazy_object_proxy.cext: lazy_object_proxy
-    lazy_object_proxy.compat: lazy_object_proxy
-    lazy_object_proxy.simple: lazy_object_proxy
-    lazy_object_proxy.slots: lazy_object_proxy
-    lazy_object_proxy.utils: lazy_object_proxy
     mccabe: mccabe
     multidict: multidict
     nacl: PyNaCl
@@ -744,291 +737,303 @@ manifest:
     pydantic.utils: pydantic
     pydantic.validators: pydantic
     pydantic.version: pydantic
-    pygments: Pygments
-    pygments.cmdline: Pygments
-    pygments.console: Pygments
-    pygments.filter: Pygments
-    pygments.filters: Pygments
-    pygments.formatter: Pygments
-    pygments.formatters: Pygments
-    pygments.formatters.bbcode: Pygments
-    pygments.formatters.groff: Pygments
-    pygments.formatters.html: Pygments
-    pygments.formatters.img: Pygments
-    pygments.formatters.irc: Pygments
-    pygments.formatters.latex: Pygments
-    pygments.formatters.other: Pygments
-    pygments.formatters.pangomarkup: Pygments
-    pygments.formatters.rtf: Pygments
-    pygments.formatters.svg: Pygments
-    pygments.formatters.terminal: Pygments
-    pygments.formatters.terminal256: Pygments
-    pygments.lexer: Pygments
-    pygments.lexers: Pygments
-    pygments.lexers.actionscript: Pygments
-    pygments.lexers.ada: Pygments
-    pygments.lexers.agile: Pygments
-    pygments.lexers.algebra: Pygments
-    pygments.lexers.ambient: Pygments
-    pygments.lexers.amdgpu: Pygments
-    pygments.lexers.ampl: Pygments
-    pygments.lexers.apdlexer: Pygments
-    pygments.lexers.apl: Pygments
-    pygments.lexers.archetype: Pygments
-    pygments.lexers.arrow: Pygments
-    pygments.lexers.arturo: Pygments
-    pygments.lexers.asc: Pygments
-    pygments.lexers.asm: Pygments
-    pygments.lexers.asn1: Pygments
-    pygments.lexers.automation: Pygments
-    pygments.lexers.bare: Pygments
-    pygments.lexers.basic: Pygments
-    pygments.lexers.bdd: Pygments
-    pygments.lexers.berry: Pygments
-    pygments.lexers.bibtex: Pygments
-    pygments.lexers.blueprint: Pygments
-    pygments.lexers.boa: Pygments
-    pygments.lexers.bqn: Pygments
-    pygments.lexers.business: Pygments
-    pygments.lexers.c_cpp: Pygments
-    pygments.lexers.c_like: Pygments
-    pygments.lexers.capnproto: Pygments
-    pygments.lexers.carbon: Pygments
-    pygments.lexers.cddl: Pygments
-    pygments.lexers.chapel: Pygments
-    pygments.lexers.clean: Pygments
-    pygments.lexers.comal: Pygments
-    pygments.lexers.compiled: Pygments
-    pygments.lexers.configs: Pygments
-    pygments.lexers.console: Pygments
-    pygments.lexers.cplint: Pygments
-    pygments.lexers.crystal: Pygments
-    pygments.lexers.csound: Pygments
-    pygments.lexers.css: Pygments
-    pygments.lexers.d: Pygments
-    pygments.lexers.dalvik: Pygments
-    pygments.lexers.data: Pygments
-    pygments.lexers.dax: Pygments
-    pygments.lexers.devicetree: Pygments
-    pygments.lexers.diff: Pygments
-    pygments.lexers.dns: Pygments
-    pygments.lexers.dotnet: Pygments
-    pygments.lexers.dsls: Pygments
-    pygments.lexers.dylan: Pygments
-    pygments.lexers.ecl: Pygments
-    pygments.lexers.eiffel: Pygments
-    pygments.lexers.elm: Pygments
-    pygments.lexers.elpi: Pygments
-    pygments.lexers.email: Pygments
-    pygments.lexers.erlang: Pygments
-    pygments.lexers.esoteric: Pygments
-    pygments.lexers.ezhil: Pygments
-    pygments.lexers.factor: Pygments
-    pygments.lexers.fantom: Pygments
-    pygments.lexers.felix: Pygments
-    pygments.lexers.fift: Pygments
-    pygments.lexers.floscript: Pygments
-    pygments.lexers.forth: Pygments
-    pygments.lexers.fortran: Pygments
-    pygments.lexers.foxpro: Pygments
-    pygments.lexers.freefem: Pygments
-    pygments.lexers.func: Pygments
-    pygments.lexers.functional: Pygments
-    pygments.lexers.futhark: Pygments
-    pygments.lexers.gcodelexer: Pygments
-    pygments.lexers.gdscript: Pygments
-    pygments.lexers.go: Pygments
-    pygments.lexers.grammar_notation: Pygments
-    pygments.lexers.graph: Pygments
-    pygments.lexers.graphics: Pygments
-    pygments.lexers.graphql: Pygments
-    pygments.lexers.graphviz: Pygments
-    pygments.lexers.gsql: Pygments
-    pygments.lexers.haskell: Pygments
-    pygments.lexers.haxe: Pygments
-    pygments.lexers.hdl: Pygments
-    pygments.lexers.hexdump: Pygments
-    pygments.lexers.html: Pygments
-    pygments.lexers.idl: Pygments
-    pygments.lexers.igor: Pygments
-    pygments.lexers.inferno: Pygments
-    pygments.lexers.installers: Pygments
-    pygments.lexers.int_fiction: Pygments
-    pygments.lexers.iolang: Pygments
-    pygments.lexers.j: Pygments
-    pygments.lexers.javascript: Pygments
-    pygments.lexers.jmespath: Pygments
-    pygments.lexers.jslt: Pygments
-    pygments.lexers.jsonnet: Pygments
-    pygments.lexers.julia: Pygments
-    pygments.lexers.jvm: Pygments
-    pygments.lexers.kuin: Pygments
-    pygments.lexers.lilypond: Pygments
-    pygments.lexers.lisp: Pygments
-    pygments.lexers.macaulay2: Pygments
-    pygments.lexers.make: Pygments
-    pygments.lexers.markup: Pygments
-    pygments.lexers.math: Pygments
-    pygments.lexers.matlab: Pygments
-    pygments.lexers.maxima: Pygments
-    pygments.lexers.meson: Pygments
-    pygments.lexers.mime: Pygments
-    pygments.lexers.minecraft: Pygments
-    pygments.lexers.mips: Pygments
-    pygments.lexers.ml: Pygments
-    pygments.lexers.modeling: Pygments
-    pygments.lexers.modula2: Pygments
-    pygments.lexers.monte: Pygments
-    pygments.lexers.mosel: Pygments
-    pygments.lexers.ncl: Pygments
-    pygments.lexers.nimrod: Pygments
-    pygments.lexers.nit: Pygments
-    pygments.lexers.nix: Pygments
-    pygments.lexers.oberon: Pygments
-    pygments.lexers.objective: Pygments
-    pygments.lexers.ooc: Pygments
-    pygments.lexers.openscad: Pygments
-    pygments.lexers.other: Pygments
-    pygments.lexers.parasail: Pygments
-    pygments.lexers.parsers: Pygments
-    pygments.lexers.pascal: Pygments
-    pygments.lexers.pawn: Pygments
-    pygments.lexers.perl: Pygments
-    pygments.lexers.phix: Pygments
-    pygments.lexers.php: Pygments
-    pygments.lexers.pointless: Pygments
-    pygments.lexers.pony: Pygments
-    pygments.lexers.praat: Pygments
-    pygments.lexers.procfile: Pygments
-    pygments.lexers.prolog: Pygments
-    pygments.lexers.promql: Pygments
-    pygments.lexers.ptx: Pygments
-    pygments.lexers.python: Pygments
-    pygments.lexers.q: Pygments
-    pygments.lexers.qlik: Pygments
-    pygments.lexers.qvt: Pygments
-    pygments.lexers.r: Pygments
-    pygments.lexers.rdf: Pygments
-    pygments.lexers.rebol: Pygments
-    pygments.lexers.resource: Pygments
-    pygments.lexers.ride: Pygments
-    pygments.lexers.rita: Pygments
-    pygments.lexers.rnc: Pygments
-    pygments.lexers.roboconf: Pygments
-    pygments.lexers.robotframework: Pygments
-    pygments.lexers.ruby: Pygments
-    pygments.lexers.rust: Pygments
-    pygments.lexers.sas: Pygments
-    pygments.lexers.savi: Pygments
-    pygments.lexers.scdoc: Pygments
-    pygments.lexers.scripting: Pygments
-    pygments.lexers.sgf: Pygments
-    pygments.lexers.shell: Pygments
-    pygments.lexers.sieve: Pygments
-    pygments.lexers.slash: Pygments
-    pygments.lexers.smalltalk: Pygments
-    pygments.lexers.smithy: Pygments
-    pygments.lexers.smv: Pygments
-    pygments.lexers.snobol: Pygments
-    pygments.lexers.solidity: Pygments
-    pygments.lexers.sophia: Pygments
-    pygments.lexers.special: Pygments
-    pygments.lexers.spice: Pygments
-    pygments.lexers.sql: Pygments
-    pygments.lexers.srcinfo: Pygments
-    pygments.lexers.stata: Pygments
-    pygments.lexers.supercollider: Pygments
-    pygments.lexers.tal: Pygments
-    pygments.lexers.tcl: Pygments
-    pygments.lexers.teal: Pygments
-    pygments.lexers.templates: Pygments
-    pygments.lexers.teraterm: Pygments
-    pygments.lexers.testing: Pygments
-    pygments.lexers.text: Pygments
-    pygments.lexers.textedit: Pygments
-    pygments.lexers.textfmts: Pygments
-    pygments.lexers.theorem: Pygments
-    pygments.lexers.thingsdb: Pygments
-    pygments.lexers.tlb: Pygments
-    pygments.lexers.tls: Pygments
-    pygments.lexers.tnt: Pygments
-    pygments.lexers.trafficscript: Pygments
-    pygments.lexers.typoscript: Pygments
-    pygments.lexers.ul4: Pygments
-    pygments.lexers.unicon: Pygments
-    pygments.lexers.urbi: Pygments
-    pygments.lexers.usd: Pygments
-    pygments.lexers.varnish: Pygments
-    pygments.lexers.verification: Pygments
-    pygments.lexers.verifpal: Pygments
-    pygments.lexers.web: Pygments
-    pygments.lexers.webassembly: Pygments
-    pygments.lexers.webidl: Pygments
-    pygments.lexers.webmisc: Pygments
-    pygments.lexers.wgsl: Pygments
-    pygments.lexers.whiley: Pygments
-    pygments.lexers.wowtoc: Pygments
-    pygments.lexers.wren: Pygments
-    pygments.lexers.x10: Pygments
-    pygments.lexers.xorg: Pygments
-    pygments.lexers.yang: Pygments
-    pygments.lexers.yara: Pygments
-    pygments.lexers.zig: Pygments
-    pygments.modeline: Pygments
-    pygments.plugin: Pygments
-    pygments.regexopt: Pygments
-    pygments.scanner: Pygments
-    pygments.sphinxext: Pygments
-    pygments.style: Pygments
-    pygments.styles: Pygments
-    pygments.styles.abap: Pygments
-    pygments.styles.algol: Pygments
-    pygments.styles.algol_nu: Pygments
-    pygments.styles.arduino: Pygments
-    pygments.styles.autumn: Pygments
-    pygments.styles.borland: Pygments
-    pygments.styles.bw: Pygments
-    pygments.styles.colorful: Pygments
-    pygments.styles.default: Pygments
-    pygments.styles.dracula: Pygments
-    pygments.styles.emacs: Pygments
-    pygments.styles.friendly: Pygments
-    pygments.styles.friendly_grayscale: Pygments
-    pygments.styles.fruity: Pygments
-    pygments.styles.gh_dark: Pygments
-    pygments.styles.gruvbox: Pygments
-    pygments.styles.igor: Pygments
-    pygments.styles.inkpot: Pygments
-    pygments.styles.lightbulb: Pygments
-    pygments.styles.lilypond: Pygments
-    pygments.styles.lovelace: Pygments
-    pygments.styles.manni: Pygments
-    pygments.styles.material: Pygments
-    pygments.styles.monokai: Pygments
-    pygments.styles.murphy: Pygments
-    pygments.styles.native: Pygments
-    pygments.styles.nord: Pygments
-    pygments.styles.onedark: Pygments
-    pygments.styles.paraiso_dark: Pygments
-    pygments.styles.paraiso_light: Pygments
-    pygments.styles.pastie: Pygments
-    pygments.styles.perldoc: Pygments
-    pygments.styles.rainbow_dash: Pygments
-    pygments.styles.rrt: Pygments
-    pygments.styles.sas: Pygments
-    pygments.styles.solarized: Pygments
-    pygments.styles.staroffice: Pygments
-    pygments.styles.stata_dark: Pygments
-    pygments.styles.stata_light: Pygments
-    pygments.styles.tango: Pygments
-    pygments.styles.trac: Pygments
-    pygments.styles.vim: Pygments
-    pygments.styles.vs: Pygments
-    pygments.styles.xcode: Pygments
-    pygments.styles.zenburn: Pygments
-    pygments.token: Pygments
-    pygments.unistring: Pygments
-    pygments.util: Pygments
+    pygments: pygments
+    pygments.cmdline: pygments
+    pygments.console: pygments
+    pygments.filter: pygments
+    pygments.filters: pygments
+    pygments.formatter: pygments
+    pygments.formatters: pygments
+    pygments.formatters.bbcode: pygments
+    pygments.formatters.groff: pygments
+    pygments.formatters.html: pygments
+    pygments.formatters.img: pygments
+    pygments.formatters.irc: pygments
+    pygments.formatters.latex: pygments
+    pygments.formatters.other: pygments
+    pygments.formatters.pangomarkup: pygments
+    pygments.formatters.rtf: pygments
+    pygments.formatters.svg: pygments
+    pygments.formatters.terminal: pygments
+    pygments.formatters.terminal256: pygments
+    pygments.lexer: pygments
+    pygments.lexers: pygments
+    pygments.lexers.actionscript: pygments
+    pygments.lexers.ada: pygments
+    pygments.lexers.agile: pygments
+    pygments.lexers.algebra: pygments
+    pygments.lexers.ambient: pygments
+    pygments.lexers.amdgpu: pygments
+    pygments.lexers.ampl: pygments
+    pygments.lexers.apdlexer: pygments
+    pygments.lexers.apl: pygments
+    pygments.lexers.archetype: pygments
+    pygments.lexers.arrow: pygments
+    pygments.lexers.arturo: pygments
+    pygments.lexers.asc: pygments
+    pygments.lexers.asm: pygments
+    pygments.lexers.asn1: pygments
+    pygments.lexers.automation: pygments
+    pygments.lexers.bare: pygments
+    pygments.lexers.basic: pygments
+    pygments.lexers.bdd: pygments
+    pygments.lexers.berry: pygments
+    pygments.lexers.bibtex: pygments
+    pygments.lexers.blueprint: pygments
+    pygments.lexers.boa: pygments
+    pygments.lexers.bqn: pygments
+    pygments.lexers.business: pygments
+    pygments.lexers.c_cpp: pygments
+    pygments.lexers.c_like: pygments
+    pygments.lexers.capnproto: pygments
+    pygments.lexers.carbon: pygments
+    pygments.lexers.cddl: pygments
+    pygments.lexers.chapel: pygments
+    pygments.lexers.clean: pygments
+    pygments.lexers.comal: pygments
+    pygments.lexers.compiled: pygments
+    pygments.lexers.configs: pygments
+    pygments.lexers.console: pygments
+    pygments.lexers.cplint: pygments
+    pygments.lexers.crystal: pygments
+    pygments.lexers.csound: pygments
+    pygments.lexers.css: pygments
+    pygments.lexers.d: pygments
+    pygments.lexers.dalvik: pygments
+    pygments.lexers.data: pygments
+    pygments.lexers.dax: pygments
+    pygments.lexers.devicetree: pygments
+    pygments.lexers.diff: pygments
+    pygments.lexers.dns: pygments
+    pygments.lexers.dotnet: pygments
+    pygments.lexers.dsls: pygments
+    pygments.lexers.dylan: pygments
+    pygments.lexers.ecl: pygments
+    pygments.lexers.eiffel: pygments
+    pygments.lexers.elm: pygments
+    pygments.lexers.elpi: pygments
+    pygments.lexers.email: pygments
+    pygments.lexers.erlang: pygments
+    pygments.lexers.esoteric: pygments
+    pygments.lexers.ezhil: pygments
+    pygments.lexers.factor: pygments
+    pygments.lexers.fantom: pygments
+    pygments.lexers.felix: pygments
+    pygments.lexers.fift: pygments
+    pygments.lexers.floscript: pygments
+    pygments.lexers.forth: pygments
+    pygments.lexers.fortran: pygments
+    pygments.lexers.foxpro: pygments
+    pygments.lexers.freefem: pygments
+    pygments.lexers.func: pygments
+    pygments.lexers.functional: pygments
+    pygments.lexers.futhark: pygments
+    pygments.lexers.gcodelexer: pygments
+    pygments.lexers.gdscript: pygments
+    pygments.lexers.go: pygments
+    pygments.lexers.grammar_notation: pygments
+    pygments.lexers.graph: pygments
+    pygments.lexers.graphics: pygments
+    pygments.lexers.graphql: pygments
+    pygments.lexers.graphviz: pygments
+    pygments.lexers.gsql: pygments
+    pygments.lexers.haskell: pygments
+    pygments.lexers.haxe: pygments
+    pygments.lexers.hdl: pygments
+    pygments.lexers.hexdump: pygments
+    pygments.lexers.html: pygments
+    pygments.lexers.idl: pygments
+    pygments.lexers.igor: pygments
+    pygments.lexers.inferno: pygments
+    pygments.lexers.installers: pygments
+    pygments.lexers.int_fiction: pygments
+    pygments.lexers.iolang: pygments
+    pygments.lexers.j: pygments
+    pygments.lexers.javascript: pygments
+    pygments.lexers.jmespath: pygments
+    pygments.lexers.jslt: pygments
+    pygments.lexers.jsonnet: pygments
+    pygments.lexers.jsx: pygments
+    pygments.lexers.julia: pygments
+    pygments.lexers.jvm: pygments
+    pygments.lexers.kuin: pygments
+    pygments.lexers.kusto: pygments
+    pygments.lexers.ldap: pygments
+    pygments.lexers.lean: pygments
+    pygments.lexers.lilypond: pygments
+    pygments.lexers.lisp: pygments
+    pygments.lexers.macaulay2: pygments
+    pygments.lexers.make: pygments
+    pygments.lexers.markup: pygments
+    pygments.lexers.math: pygments
+    pygments.lexers.matlab: pygments
+    pygments.lexers.maxima: pygments
+    pygments.lexers.meson: pygments
+    pygments.lexers.mime: pygments
+    pygments.lexers.minecraft: pygments
+    pygments.lexers.mips: pygments
+    pygments.lexers.ml: pygments
+    pygments.lexers.modeling: pygments
+    pygments.lexers.modula2: pygments
+    pygments.lexers.mojo: pygments
+    pygments.lexers.monte: pygments
+    pygments.lexers.mosel: pygments
+    pygments.lexers.ncl: pygments
+    pygments.lexers.nimrod: pygments
+    pygments.lexers.nit: pygments
+    pygments.lexers.nix: pygments
+    pygments.lexers.oberon: pygments
+    pygments.lexers.objective: pygments
+    pygments.lexers.ooc: pygments
+    pygments.lexers.openscad: pygments
+    pygments.lexers.other: pygments
+    pygments.lexers.parasail: pygments
+    pygments.lexers.parsers: pygments
+    pygments.lexers.pascal: pygments
+    pygments.lexers.pawn: pygments
+    pygments.lexers.perl: pygments
+    pygments.lexers.phix: pygments
+    pygments.lexers.php: pygments
+    pygments.lexers.pointless: pygments
+    pygments.lexers.pony: pygments
+    pygments.lexers.praat: pygments
+    pygments.lexers.procfile: pygments
+    pygments.lexers.prolog: pygments
+    pygments.lexers.promql: pygments
+    pygments.lexers.prql: pygments
+    pygments.lexers.ptx: pygments
+    pygments.lexers.python: pygments
+    pygments.lexers.q: pygments
+    pygments.lexers.qlik: pygments
+    pygments.lexers.qvt: pygments
+    pygments.lexers.r: pygments
+    pygments.lexers.rdf: pygments
+    pygments.lexers.rebol: pygments
+    pygments.lexers.resource: pygments
+    pygments.lexers.ride: pygments
+    pygments.lexers.rita: pygments
+    pygments.lexers.rnc: pygments
+    pygments.lexers.roboconf: pygments
+    pygments.lexers.robotframework: pygments
+    pygments.lexers.ruby: pygments
+    pygments.lexers.rust: pygments
+    pygments.lexers.sas: pygments
+    pygments.lexers.savi: pygments
+    pygments.lexers.scdoc: pygments
+    pygments.lexers.scripting: pygments
+    pygments.lexers.sgf: pygments
+    pygments.lexers.shell: pygments
+    pygments.lexers.sieve: pygments
+    pygments.lexers.slash: pygments
+    pygments.lexers.smalltalk: pygments
+    pygments.lexers.smithy: pygments
+    pygments.lexers.smv: pygments
+    pygments.lexers.snobol: pygments
+    pygments.lexers.solidity: pygments
+    pygments.lexers.soong: pygments
+    pygments.lexers.sophia: pygments
+    pygments.lexers.special: pygments
+    pygments.lexers.spice: pygments
+    pygments.lexers.sql: pygments
+    pygments.lexers.srcinfo: pygments
+    pygments.lexers.stata: pygments
+    pygments.lexers.supercollider: pygments
+    pygments.lexers.tact: pygments
+    pygments.lexers.tal: pygments
+    pygments.lexers.tcl: pygments
+    pygments.lexers.teal: pygments
+    pygments.lexers.templates: pygments
+    pygments.lexers.teraterm: pygments
+    pygments.lexers.testing: pygments
+    pygments.lexers.text: pygments
+    pygments.lexers.textedit: pygments
+    pygments.lexers.textfmts: pygments
+    pygments.lexers.theorem: pygments
+    pygments.lexers.thingsdb: pygments
+    pygments.lexers.tlb: pygments
+    pygments.lexers.tls: pygments
+    pygments.lexers.tnt: pygments
+    pygments.lexers.trafficscript: pygments
+    pygments.lexers.typoscript: pygments
+    pygments.lexers.typst: pygments
+    pygments.lexers.ul4: pygments
+    pygments.lexers.unicon: pygments
+    pygments.lexers.urbi: pygments
+    pygments.lexers.usd: pygments
+    pygments.lexers.varnish: pygments
+    pygments.lexers.verification: pygments
+    pygments.lexers.verifpal: pygments
+    pygments.lexers.vip: pygments
+    pygments.lexers.vyper: pygments
+    pygments.lexers.web: pygments
+    pygments.lexers.webassembly: pygments
+    pygments.lexers.webidl: pygments
+    pygments.lexers.webmisc: pygments
+    pygments.lexers.wgsl: pygments
+    pygments.lexers.whiley: pygments
+    pygments.lexers.wowtoc: pygments
+    pygments.lexers.wren: pygments
+    pygments.lexers.x10: pygments
+    pygments.lexers.xorg: pygments
+    pygments.lexers.yang: pygments
+    pygments.lexers.yara: pygments
+    pygments.lexers.zig: pygments
+    pygments.modeline: pygments
+    pygments.plugin: pygments
+    pygments.regexopt: pygments
+    pygments.scanner: pygments
+    pygments.sphinxext: pygments
+    pygments.style: pygments
+    pygments.styles: pygments
+    pygments.styles.abap: pygments
+    pygments.styles.algol: pygments
+    pygments.styles.algol_nu: pygments
+    pygments.styles.arduino: pygments
+    pygments.styles.autumn: pygments
+    pygments.styles.borland: pygments
+    pygments.styles.bw: pygments
+    pygments.styles.coffee: pygments
+    pygments.styles.colorful: pygments
+    pygments.styles.default: pygments
+    pygments.styles.dracula: pygments
+    pygments.styles.emacs: pygments
+    pygments.styles.friendly: pygments
+    pygments.styles.friendly_grayscale: pygments
+    pygments.styles.fruity: pygments
+    pygments.styles.gh_dark: pygments
+    pygments.styles.gruvbox: pygments
+    pygments.styles.igor: pygments
+    pygments.styles.inkpot: pygments
+    pygments.styles.lightbulb: pygments
+    pygments.styles.lilypond: pygments
+    pygments.styles.lovelace: pygments
+    pygments.styles.manni: pygments
+    pygments.styles.material: pygments
+    pygments.styles.monokai: pygments
+    pygments.styles.murphy: pygments
+    pygments.styles.native: pygments
+    pygments.styles.nord: pygments
+    pygments.styles.onedark: pygments
+    pygments.styles.paraiso_dark: pygments
+    pygments.styles.paraiso_light: pygments
+    pygments.styles.pastie: pygments
+    pygments.styles.perldoc: pygments
+    pygments.styles.rainbow_dash: pygments
+    pygments.styles.rrt: pygments
+    pygments.styles.sas: pygments
+    pygments.styles.solarized: pygments
+    pygments.styles.staroffice: pygments
+    pygments.styles.stata_dark: pygments
+    pygments.styles.stata_light: pygments
+    pygments.styles.tango: pygments
+    pygments.styles.trac: pygments
+    pygments.styles.vim: pygments
+    pygments.styles.vs: pygments
+    pygments.styles.xcode: pygments
+    pygments.styles.zenburn: pygments
+    pygments.token: pygments
+    pygments.unistring: pygments
+    pygments.util: pygments
     pylint: pylint
     pylint.checkers: pylint
     pylint.checkers.async: pylint
@@ -1038,6 +1043,7 @@ manifest:
     pylint.checkers.base.basic_error_checker: pylint
     pylint.checkers.base.comparison_checker: pylint
     pylint.checkers.base.docstring_checker: pylint
+    pylint.checkers.base.function_checker: pylint
     pylint.checkers.base.name_checker: pylint
     pylint.checkers.base.name_checker.checker: pylint
     pylint.checkers.base.name_checker.naming_style: pylint
@@ -1046,6 +1052,7 @@ manifest:
     pylint.checkers.classes: pylint
     pylint.checkers.classes.class_checker: pylint
     pylint.checkers.classes.special_methods_checker: pylint
+    pylint.checkers.dataclass_checker: pylint
     pylint.checkers.deprecated: pylint
     pylint.checkers.design_analysis: pylint
     pylint.checkers.dunder_methods: pylint
@@ -1055,7 +1062,6 @@ manifest:
     pylint.checkers.imports: pylint
     pylint.checkers.lambda_expressions: pylint
     pylint.checkers.logging: pylint
-    pylint.checkers.mapreduce_checker: pylint
     pylint.checkers.method_args: pylint
     pylint.checkers.misc: pylint
     pylint.checkers.modified_iterating_checker: pylint
@@ -1068,10 +1074,10 @@ manifest:
     pylint.checkers.refactoring.not_checker: pylint
     pylint.checkers.refactoring.recommendation_checker: pylint
     pylint.checkers.refactoring.refactoring_checker: pylint
-    pylint.checkers.similar: pylint
     pylint.checkers.spelling: pylint
     pylint.checkers.stdlib: pylint
     pylint.checkers.strings: pylint
+    pylint.checkers.symilar: pylint
     pylint.checkers.threading_checker: pylint
     pylint.checkers.typecheck: pylint
     pylint.checkers.unicode: pylint
@@ -1085,26 +1091,18 @@ manifest:
     pylint.config.callback_actions: pylint
     pylint.config.config_file_parser: pylint
     pylint.config.config_initialization: pylint
-    pylint.config.configuration_mixin: pylint
     pylint.config.deprecation_actions: pylint
-    pylint.config.environment_variable: pylint
     pylint.config.exceptions: pylint
     pylint.config.find_default_config_files: pylint
     pylint.config.help_formatter: pylint
-    pylint.config.option: pylint
-    pylint.config.option_manager_mixin: pylint
-    pylint.config.option_parser: pylint
-    pylint.config.options_provider_mixin: pylint
     pylint.config.utils: pylint
     pylint.constants: pylint
-    pylint.epylint: pylint
     pylint.exceptions: pylint
     pylint.extensions: pylint
     pylint.extensions.bad_builtin: pylint
     pylint.extensions.broad_try_clause: pylint
     pylint.extensions.check_elif: pylint
     pylint.extensions.code_style: pylint
-    pylint.extensions.comparetozero: pylint
     pylint.extensions.comparison_placement: pylint
     pylint.extensions.confusing_elif: pylint
     pylint.extensions.consider_refactoring_into_while_condition: pylint
@@ -1114,7 +1112,6 @@ manifest:
     pylint.extensions.docstyle: pylint
     pylint.extensions.dunder: pylint
     pylint.extensions.empty_comment: pylint
-    pylint.extensions.emptystring: pylint
     pylint.extensions.eq_without_hash: pylint
     pylint.extensions.for_any_all: pylint
     pylint.extensions.magic_value: pylint
@@ -1155,7 +1152,6 @@ manifest:
     pylint.pyreverse.printer: pylint
     pylint.pyreverse.printer_factory: pylint
     pylint.pyreverse.utils: pylint
-    pylint.pyreverse.vcg_printer: pylint
     pylint.pyreverse.writer: pylint
     pylint.reporters: pylint
     pylint.reporters.base_reporter: pylint
@@ -1177,7 +1173,6 @@ manifest:
     pylint.testutils.functional.find_functional_tests: pylint
     pylint.testutils.functional.lint_module_output_update: pylint
     pylint.testutils.functional.test_file: pylint
-    pylint.testutils.functional_test_file: pylint
     pylint.testutils.get_test_info: pylint
     pylint.testutils.global_test_linter: pylint
     pylint.testutils.lint_module_test: pylint
@@ -1497,12 +1492,19 @@ manifest:
     urllib3.connection: urllib3
     urllib3.connectionpool: urllib3
     urllib3.contrib: urllib3
+    urllib3.contrib.emscripten: urllib3
+    urllib3.contrib.emscripten.connection: urllib3
+    urllib3.contrib.emscripten.fetch: urllib3
+    urllib3.contrib.emscripten.request: urllib3
+    urllib3.contrib.emscripten.response: urllib3
     urllib3.contrib.pyopenssl: urllib3
-    urllib3.contrib.securetransport: urllib3
     urllib3.contrib.socks: urllib3
     urllib3.exceptions: urllib3
     urllib3.fields: urllib3
     urllib3.filepost: urllib3
+    urllib3.http2: urllib3
+    urllib3.http2.connection: urllib3
+    urllib3.http2.probe: urllib3
     urllib3.poolmanager: urllib3
     urllib3.response: urllib3
     urllib3.util: urllib3
@@ -1518,12 +1520,13 @@ manifest:
     urllib3.util.url: urllib3
     urllib3.util.util: urllib3
     urllib3.util.wait: urllib3
-    websocket: websocket_client
     wrapt: wrapt
     wrapt.arguments: wrapt
     wrapt.decorators: wrapt
     wrapt.importer: wrapt
+    wrapt.patches: wrapt
+    wrapt.weakrefs: wrapt
     wrapt.wrappers: wrapt
   pip_repository:
     name: pip_deps
-integrity: bf2854838279f44156dcc6fb67627c1c87d3518f249043b56e203ff1d917cbe3
+integrity: 8e441119bc09308f7d0f712e886f6c6d5bd4959c42e1ad07a0faeb119f61d98c

@@ -6,7 +6,7 @@ genrule(
     cmd = """
         echo '#!/bin/bash' > $@
         echo 'echo TEST_SRCDIR = $$TEST_SRCDIR' >> $@
-        echo 'exec $$TEST_SRCDIR/monorepo/examples/cc/cc_version' >> $@
+        echo 'exec $$TEST_SRCDIR/_main/examples/cc/cc_version' >> $@
         chmod +x $@
     """,
 )

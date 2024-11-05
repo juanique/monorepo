@@ -18,10 +18,6 @@ build --nolegacy_important_outputs
 build --remote_instance_name=instance_name_1
 build --noremote_upload_local_results
 
-# We'll enable this someday and rely on MODULE.bazel
-common --noenable_bzlmod
-
-
 build:remote --remote_executor=grpcs://remote.buildbuddy.io
 build:remote --extra_execution_platforms=//:docker_image_platform
 build:remote --host_platform=//:docker_image_platform

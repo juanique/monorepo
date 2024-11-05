@@ -49,7 +49,7 @@ def _oci_entrypoint_impl(ctx):
     script = """#!/usr/bin/env bash
 exec env --chdir /{chdir} RUNFILES_DIR=.. {bin_path} "$@"
 """.format(
-        chdir = ctx.executable.binary.short_path + ".runfiles/monorepo",
+        chdir = ctx.executable.binary.short_path + ".runfiles/_main",
         bin_path = ctx.executable.binary.short_path,
     )
 
