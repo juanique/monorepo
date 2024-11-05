@@ -1,0 +1,10 @@
+load("//bazel/js:js.bzl", "js_binary")
+
+js_binary(
+    name = "main",
+    data = [
+        "main.mjs",
+        "//examples/js/js_deps/formatter",
+    ],
+    entry_point = ":main.mjs",
+)
