@@ -153,13 +153,6 @@ go_repository(
 )
 
 http_archive(
-    name = "com_google_protobuf",
-    sha256 = "c2c71ebc90af9796e8834f65093f2fab88b0a82b2a3e805b34842645a2afc4b0",
-    strip_prefix = "protobuf-26.0",
-    urls = ["https://github.com/protocolbuffers/protobuf/archive/refs/tags/v26.0.zip"],
-)
-
-http_archive(
     name = "rules_proto",
     sha256 = "dc3fb206a2cb3441b485eb1e423165b231235a1ea9b031b4433cf7bc1fa460dd",
     strip_prefix = "rules_proto-5.3.0-21.7",
@@ -173,26 +166,6 @@ load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_
 rules_proto_dependencies()
 
 rules_proto_toolchains()
-
-# grpc
-http_archive(
-    name = "com_github_grpc_grpc",
-    patch_args = ["-p1"],
-    patches = ["//bazel/patches:grpc.patch"],
-    sha256 = "c9f9ae6e4d6f40464ee9958be4068087881ed6aa37e30d0e64d40ed7be39dd01",
-    strip_prefix = "grpc-1.62.1",
-    urls = ["https://github.com/grpc/grpc/archive/refs/tags/v1.62.1.tar.gz"],
-)
-
-load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
-
-grpc_deps(
-    python_headers = "@python3_10//:python_headers",
-)
-
-load("@com_github_grpc_grpc//bazel:grpc_extra_deps.bzl", "grpc_extra_deps")
-
-grpc_extra_deps()
 
 # mypy integration
 http_archive(
