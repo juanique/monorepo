@@ -9,7 +9,6 @@ ts_project(
     transpiler = partial.make(
         swc,
         args = ["--env-name=test"],
-        out_dir = "build-swc",
         source_maps = "true",
         swcrc = "//:.swcrc",
     ),
@@ -23,5 +22,5 @@ ts_project(
 js_binary(
     name = "main",
     data = [":lib"],
-    entry_point = "build-swc/main.js",
+    entry_point = "main.js",
 )
