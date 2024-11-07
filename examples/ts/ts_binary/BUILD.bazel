@@ -1,0 +1,18 @@
+load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
+load("@aspect_rules_js//js:defs.bzl", "js_binary")
+
+ts_project(
+    name = "lib",
+    srcs = ["main.ts"],
+    tsconfig = {
+        "compilerOptions": {
+            "inlineSourceMap": True,
+        },
+    },
+)
+
+js_binary(
+    name = "main",
+    data = ["main.js"],
+    entry_point = ":main.js",
+)
