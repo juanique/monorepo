@@ -1,9 +1,18 @@
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@aspect_rules_js//js:defs.bzl", "js_binary")
+load("@aspect_rules_swc//swc:defs.bzl", "swc")
+load("@bazel_skylib//lib:partial.bzl", "partial")
 
 ts_project(
     name = "lib",
     srcs = ["main.ts"],
+    transpiler = partial.make(
+        swc,
+        args = ["--env-name=test"],
+        out_dir = "build-swc",
+        source_maps = "true",
+        swcrc = "//:.swcrc",
+    ),
     tsconfig = {
         "compilerOptions": {
             "inlineSourceMap": True,
@@ -13,6 +22,6 @@ ts_project(
 
 js_binary(
     name = "main",
-    data = ["main.js"],
-    entry_point = ":main.js",
+    data = ["build-swc/main.js"],
+    entry_point = "build-swc/main.js",
 )
