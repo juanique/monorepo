@@ -9,6 +9,7 @@ load("@rules_apko//apko:defs.bzl", "apko_bazelrc")
 exports_files([
     "pyproject.toml",
     "mypy.ignore",
+    ".swcrc",
 ])
 
 apko_bazelrc()
