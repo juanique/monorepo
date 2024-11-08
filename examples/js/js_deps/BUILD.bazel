@@ -8,3 +8,12 @@ js_binary(
     ],
     entry_point = ":main.mjs",
 )
+
+js_binary(
+    name = "main2",
+    data = [
+        "main2.cjs",
+        "//examples/js/js_deps/formatter:formatter2",
+    ],
+    entry_point = ":main2.cjs",
+)

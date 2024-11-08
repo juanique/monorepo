@@ -8,3 +8,10 @@ js_library(
         "formatter.mjs",
     ],
 )
+
+js_library(
+    name = "formatter2",
+    srcs = [
+        "formatter2.cjs",
+    ],
+)
