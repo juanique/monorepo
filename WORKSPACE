@@ -298,24 +298,6 @@ load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_depende
 # https://bazelbuild.github.io/rules_foreign_cc/0.9.0/flatten.html#rules_foreign_cc_dependencies
 rules_foreign_cc_dependencies()
 
-############
-# rules perl
-
-http_archive(
-    name = "rules_perl",
-    sha256 = "7c35dd1f37c280b8a78bd6815b1b62ab2043a566396b0168ec8e91aa46d88fc3",
-    strip_prefix = "rules_perl-0.2.3",
-    urls = [
-        "https://github.com/bazelbuild/rules_perl/archive/refs/tags/0.2.3.tar.gz",
-    ],
-)
-
-load("@rules_perl//perl:deps.bzl", "perl_register_toolchains", "perl_rules_dependencies")
-
-perl_rules_dependencies()
-
-perl_register_toolchains()
-
 ###################
 # rules OCI
 http_archive(
