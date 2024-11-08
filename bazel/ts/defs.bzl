@@ -8,8 +8,28 @@ def ts_binary(name, srcs = [], deps = [], **kwargs):
         fail("ts_binary must have exactly one src which is the entrypoint")
 
     lib_name = "_" + name + ".lib"
-    ts_project(
+    ts_library(
         name = lib_name,
+        srcs = srcs,
+        deps = deps,
+    )
+
+    entrypoint = srcs[0]
+    if entrypoint.endswith(".ts"):
+        entrypoint = entrypoint[:-3] + ".js"
+
+    js_binary(
+        name = "main",
+        data = [":" + lib_name],
+        entry_point = entrypoint,
+    )
+
+def ts_library(name, srcs = [], deps = [], **kwargs):
+    if len(srcs) != 1:
+        fail("ts_binary must have exactly one src which is the entrypoint")
+
+    ts_project(
+        name = name,
         srcs = srcs,
         deps = deps,
         transpiler = partial.make(
@@ -23,14 +43,4 @@ def ts_binary(name, srcs = [], deps = [], **kwargs):
             },
         },
         **kwargs
-    )
-
-    entrypoint = srcs[0]
-    if entrypoint.endswith(".ts"):
-        entrypoint = entrypoint[:-3] + ".js"
-
-    js_binary(
-        name = "main",
-        data = [":" + lib_name],
-        entry_point = entrypoint,
     )
