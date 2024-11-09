@@ -25,9 +25,6 @@ def ts_binary(name, srcs = [], deps = [], **kwargs):
     )
 
 def ts_library(name, srcs = [], deps = [], **kwargs):
-    if len(srcs) != 1:
-        fail("ts_binary must have exactly one src which is the entrypoint")
-
     ts_project(
         name = name,
         srcs = srcs,
