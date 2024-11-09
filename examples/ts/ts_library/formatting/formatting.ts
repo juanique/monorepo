@@ -1,4 +1,8 @@
-export type NameStyle = "fancy" | "uppercase" | "lowercase";
+export enum NameStyle {
+    Fancy = "fancy",
+    Uppercase = "uppercase",
+    Lowercase = "lowercase"
+}
 
 export function formatNamePretty(name: string, style: NameStyle): string {
     const fancyLetters: Record<string, string> = {
@@ -13,11 +17,11 @@ export function formatNamePretty(name: string, style: NameStyle): string {
         w: '𝓌', x: '𝓍', y: '𝓎', z: '𝓏'
     };
 
-    if (style === "fancy") {
+    if (style === NameStyle.Fancy) {
         return name.split('').map(char => fancyLetters[char] || char).join('');
-    } else if (style === "uppercase") {
+    } else if (style === NameStyle.Uppercase) {
         return name.toUpperCase();
-    } else if (style === "lowercase") {
+    } else if (style === NameStyle.Lowercase) {
         return name.toLowerCase();
     }
 
