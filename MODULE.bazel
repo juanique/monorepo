@@ -14,12 +14,12 @@ bazel_dep(name = "rules_perl", version = "0.2.4")
 # By default you get the node version from DEFAULT_NODE_VERSION in @rules_nodejs//nodejs:repositories.bzl
 # Optionally you can pin a different node version:
 bazel_dep(name = "rules_nodejs", version = "6.3.0")
+
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node", dev_dependency = True)
 node.toolchain(node_version = "16.14.2")
 #################################
 
 npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm", dev_dependency = True)
-
 npm.npm_translate_lock(
     name = "npm",
     # Disable lifecycle hooks for hermeticity.
@@ -36,7 +36,6 @@ npm.npm_translate_lock(
     use_home_npmrc = False,
     verify_node_modules_ignored = "//:.bazelignore",
 )
-
 use_repo(npm, "npm")
 
 pnpm = use_extension("@aspect_rules_js//npm:extensions.bzl", "pnpm")
