@@ -34,10 +34,6 @@ def ts_library(name, srcs = [], deps = [], **kwargs):
             source_maps = "true",
             swcrc = "//:.swcrc",
         ),
-        tsconfig = {
-            "compilerOptions": {
-                "inlineSourceMap": True,
-            },
-        },
+        tsconfig = "//:tsconfig",
         **kwargs
     )
