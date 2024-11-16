@@ -29,6 +29,7 @@ def ts_library(name, srcs = [], deps = [], **kwargs):
         name = name,
         srcs = srcs,
         deps = deps,
+        declaration = True,
         transpiler = partial.make(
             swc,
             source_maps = "true",
