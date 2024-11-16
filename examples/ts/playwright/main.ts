@@ -7,7 +7,7 @@ async function runPlaywrightTest() {
     // Launch a Chromium browser
     const browser = await chromium.launch({
         headless: true,
-        executablePath: '/home/juanique/bin/chromedriver',
+        executablePath: '/home/juanique/bin/chromium',
     });
     console.log('Chromium browser launched');
     const context = await browser.newContext();
