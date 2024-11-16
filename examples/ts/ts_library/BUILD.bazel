@@ -1,0 +1,7 @@
+load("//bazel/ts:defs.bzl", "ts_binary")
+
+ts_binary(
+    name = "main",
+    srcs = ["main.ts"],
+    deps = ["//examples/ts/ts_library/formatting"],
+)
