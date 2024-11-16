@@ -6,5 +6,6 @@ ts_binary(
     deps = [
         "//:node_modules/chalk",
         "//:node_modules/figlet",
+        "//:node_modules/@types/figlet",
     ],
 )
