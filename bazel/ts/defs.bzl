@@ -17,6 +17,8 @@ def ts_binary(name, srcs = [], deps = [], **kwargs):
     entrypoint = srcs[0]
     if entrypoint.endswith(".ts"):
         entrypoint = entrypoint[:-3] + ".js"
+    if entrypoint.endswith(".tsx"):
+        entrypoint = entrypoint[:-4] + ".js"
 
     js_binary(
         name = "main",
@@ -36,5 +38,6 @@ def ts_library(name, srcs = [], deps = [], **kwargs):
             swcrc = "//:.swcrc",
         ),
         tsconfig = "//:tsconfig",
+        preserve_jsx = True,
         **kwargs
     )
