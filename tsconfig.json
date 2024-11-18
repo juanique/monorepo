@@ -7,7 +7,7 @@
       "dom",
       "esnext"
     ],
-    "moduleResolution": "node",
+    "moduleResolution": "Bundler",
     "baseUrl": ".",
     "paths": {
       "*": [

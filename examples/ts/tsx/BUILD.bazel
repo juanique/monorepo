@@ -4,6 +4,7 @@ ts_binary(
     name = "main",
     srcs = ["main.tsx"],
     deps = [
+        "//:node_modules/@types/react",
         "//:node_modules/ink",
         "//:node_modules/ink-big-text",
         "//:node_modules/ink-gradient",
