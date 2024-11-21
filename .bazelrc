@@ -33,8 +33,8 @@ build --@mypy_integration//:mypy_config=//bazel/workspace:mypy.ini
 test --test_output=errors
 
 # Hermetic C++ toolchain
-build --incompatible_enable_cc_toolchain_resolution
-build --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
+# build --incompatible_enable_cc_toolchain_resolution
+# build --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
 build --cxxopt='-std=c++14'
 build --host_cxxopt=-std=c++14
 
