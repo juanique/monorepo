@@ -1,0 +1,32 @@
+load("//bazel/js:js.bzl", "js_library", "js_run_devserver")
+load("@npm//:vite/package_json.bzl", "bin")
+
+# Produces targets:
+#  - :webapp.start : Fast developer round-trip, intended for use with ibazel
+#  - :webapp.build : Create production release artifacts
+#  - :webapp.preview : Runs a devserver against the production-bundled application
+# webapp(
+# name = "webapp",
+# srcs = ["index.html"],
+# )
+
+js_library(
+    name = "vite.config",
+    srcs = ["vite.config.js"],
+    data = [
+        "//:node_modules/@vitejs/plugin-react",
+    ],
+)
+
+bin.vite_binary(
+    name = "vite",
+    chdir = package_name(),
+    data = ["vite.config"],
+)
+
+js_run_devserver(
+    name = "start",
+    args = ["."],
+    data = ["index.html"],
+    tool = ":vite",
+)

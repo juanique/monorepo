@@ -4,6 +4,7 @@
     "dependencies": {
         "@types/ink": "^2.0.3",
         "@types/react": "^18.3.12",
+        "@vitejs/plugin-react": "^4.3.3",
         "chalk": "^5.3.0",
         "figlet": "^1.8.0",
         "ink": "^5.0.1",
@@ -12,7 +13,8 @@
         "ink-spinner": "^5.0.0",
         "react": "^18.3.1",
         "ts-node": "^10.9.2",
-        "typescript": "5.6.2"
+        "typescript": "5.6.2",
+        "vite": "^5.4.11"
     },
     "devDependencies": {
         "@types/figlet": "^1.7.0"
