@@ -3,11 +3,12 @@ load("@aspect_rules_js//js:defs.bzl", _js_binary = "js_binary", _js_library = "j
 def js_binary(data = [], node_options = [], **kwargs):
     _js_binary(
         data = [
-            "//bazel/js/node:js_binary_init",
+            "//bazel/js/node:launcher",
+            "//bazel/js/node:loader",
         ] + data,
         node_options = [
-            "-r",
-            "./$(rootpath //bazel/js/node:js_binary_init)",
+            "--import",
+            "./$(rootpath //bazel/js/node:launcher)",
         ] + node_options,
         **kwargs
     )

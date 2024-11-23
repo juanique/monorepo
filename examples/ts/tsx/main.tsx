@@ -4,6 +4,7 @@ import Gradient from 'ink-gradient';
 import BigText from 'ink-big-text';
 import Spinner from 'ink-spinner';
 
+// Example of using react for a terminal app
 const FancyTerminal: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [progress, setProgress] = useState(0);
