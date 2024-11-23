@@ -28,7 +28,7 @@ npm.npm_translate_lock(
     },
     # This is important to prevent downloading prebuilt binaries for every platform
     # *cough cough* swc/esbuild/etc.
-    no_optional = True,
+    # no_optional = True,
     npmrc = "//:.npmrc",
     patch_args = {"*": ["-p1"]},
     pnpm_lock = "//:pnpm-lock.yaml",

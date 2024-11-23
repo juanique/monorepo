@@ -18,5 +18,8 @@
     },
     "devDependencies": {
         "@types/figlet": "^1.7.0"
+    },
+    "pnpm": {
+        "onlyBuiltDependencies": []
     }
 }
