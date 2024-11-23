@@ -1,29 +1,26 @@
-import React, { useEffect, useState } from 'react';
-import { render, Text } from 'ink';
+import React, { useState, useEffect } from 'react';
+import { render, Text, Box } from 'ink';
+import Gradient from 'ink-gradient';
+import BigText from 'ink-big-text';
+import Spinner from 'ink-spinner';
 
 const FancyTerminal: React.FC = () => {
-    const [lines, setLines] = useState<string[]>([
-        'Welcome to the Fancy Terminal!',
-        'Initializing...',
-        'Loading components...'
-    ]);
+    const [loading, setLoading] = useState(true);
+    const [progress, setProgress] = useState(0);
 
     useEffect(() => {
-        const newLines = [
-            'System check: OK',
-            'Starting services...',
-            'All systems operational!'
-        ];
-
-        let index = 0;
+        // Simulate loading progress
         const interval = setInterval(() => {
-            if (index < newLines.length) {
-                setLines((prevLines) => [...prevLines, newLines[index]]);
-                index++;
-            } else {
-                clearInterval(interval);
-            }
-        }, 1000);
+            setProgress((prev) => {
+                if (prev < 100) {
+                    return prev + 10;
+                } else {
+                    setLoading(false);
+                    clearInterval(interval);
+                    return 100;
+                }
+            });
+        }, 500);
 
         return () => clearInterval(interval);
     }, []);

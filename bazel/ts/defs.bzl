@@ -1,7 +1,7 @@
-load("//bazel/js:js.bzl", "js_binary")
 load("@aspect_rules_swc//swc:defs.bzl", "swc")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@bazel_skylib//lib:partial.bzl", "partial")
+load("//bazel/js:js.bzl", "js_binary")
 
 def ts_binary(name, srcs = [], deps = [], **kwargs):
     if len(srcs) != 1:
@@ -17,6 +17,8 @@ def ts_binary(name, srcs = [], deps = [], **kwargs):
     entrypoint = srcs[0]
     if entrypoint.endswith(".ts"):
         entrypoint = entrypoint[:-3] + ".js"
+    if entrypoint.endswith(".tsx"):
+        entrypoint = entrypoint[:-4] + ".js"
 
     js_binary(
         name = "main",
