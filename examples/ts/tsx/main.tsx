@@ -4,6 +4,7 @@ import Gradient from 'ink-gradient';
 import BigText from 'ink-big-text';
 import Spinner from 'ink-spinner';
 
+// Example of using react for a terminal app
 const FancyTerminal: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [progress, setProgress] = useState(0);
@@ -26,13 +27,36 @@ const FancyTerminal: React.FC = () => {
     }, []);
 
     return (
-        <Text>
-            {lines.map((line, index) => (
-                <Text key={index}>{line}\n</Text>
-            ))}
-            <Text>Terminal ready!</Text>
-        </Text>
+        <Box flexDirection="column" alignItems="center">
+            <Gradient name="rainbow">
+                <BigText text="Fancy Terminal" />
+            </Gradient>
+
+            <Box marginTop={1}>
+                <Text color="green">Initializing...</Text>
+            </Box>
+
+            {loading ? (
+                <>
+                    <Box marginTop={1}>
+                        <Text color="yellow">
+                            <Spinner type="dots" /> Loading components...
+                        </Text>
+                    </Box>
+                    <Box marginTop={1} width={40}>
+                        <Text>
+                            Progress: [{`#`.repeat(progress / 10)}{` `.repeat(10 - progress / 10)}] {progress}%
+                        </Text>
+                    </Box>
+                </>
+            ) : (
+                <Box marginTop={1}>
+                    <Text color="cyanBright">All systems operational! Terminal ready!</Text>
+                </Box>
+            )}
+        </Box>
     );
 };
 
+// Render the Ink component
 render(<FancyTerminal />);
