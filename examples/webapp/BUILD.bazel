@@ -1,4 +1,6 @@
-load("//bazel/js:js.bzl", "js_library", "js_run_devserver")
+load("//bazel/js:js.bzl", "js_library", "vite_build")
+
+load("@aspect_rules_js//js:defs.bzl", "js_run_binary")
 load("@npm//:vite/package_json.bzl", "bin")
 
 # Produces targets:
@@ -14,19 +16,67 @@ js_library(
     name = "vite.config",
     srcs = ["vite.config.js"],
     data = [
+        "//:node_modules/vite",
         "//:node_modules/@vitejs/plugin-react",
     ],
 )
 
 bin.vite_binary(
     name = "vite",
-    chdir = package_name(),
-    data = ["vite.config"],
+    # chdir = package_name(),
+    data = [
+        ":vite.config",
+        "index.html",
+        "style/style.css",
+    ],
+    args = ["--config", "$(rootpath :vite.config)"],
+    tags = ["ibazel_notify_changes"],
 )
 
-js_run_devserver(
-    name = "start",
-    args = ["."],
-    data = ["index.html"],
-    tool = ":vite",
+bin.vite_binary(
+    name = "vite.bin",
 )
+
+bin.vite_binary(
+    name = "vite.build",
+    data = [
+        ":vite.config",
+        "index.html",
+        "style/style.css",
+    ],
+    copy_data_to_bin = True,
+    args = ["build", "--config", "$(rootpath :vite.config)"],
+    tags = ["ibazel_notify_changes"],
+)
+
+js_run_binary(
+    name = "build",
+    srcs = [
+        ":vite.config",
+        "index.html",
+        "style/style.css",
+    ],
+    stdout = "build.output.log",
+    # out_dirs = ["examples/webapp/dist"],
+    out_dirs = ["dist"],
+    tool = ":vite.build",
+    args = ["build", "--config", "$(rootpath :vite.config)"],
+    include_transitive_sources = True,
+    silent_on_success = False,
+)
+
+bin.vite_binary(
+    name = "vite.preview",
+    args = ["preview"],
+    chdir = package_name(),
+    data = [":build"],
+)
+
+vite_build(
+    name = "vbuild",
+    config = ":vite.config",
+    data = [
+        "index.html",
+    ],
+)
+
