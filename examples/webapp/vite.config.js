@@ -53,7 +53,6 @@ export default defineConfig({
                                 console.log(file);
                             }
                         }
-                        // throw new Error('buildEnd');
                     },
                 },
             ],

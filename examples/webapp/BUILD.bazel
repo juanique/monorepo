@@ -1,4 +1,4 @@
-load("//bazel/js:js.bzl", "js_library", "vite_build")
+load("//bazel/js:js.bzl", "js_library", "vite_build", "js_run_devserver")
 
 load("@aspect_rules_js//js:defs.bzl", "js_run_binary")
 load("@npm//:vite/package_json.bzl", "bin")
@@ -28,6 +28,7 @@ bin.vite_binary(
         ":vite.config",
         "index.html",
         "style/style.css",
+        "style/background.css",
     ],
     args = ["--config", "$(rootpath :vite.config)"],
     tags = ["ibazel_notify_changes"],
@@ -35,6 +36,12 @@ bin.vite_binary(
 
 bin.vite_binary(
     name = "vite.bin",
+    data = [
+        ":vite.config",
+        "index.html",
+        "style/style.css",
+    ],
+    copy_data_to_bin = True,
 )
 
 bin.vite_binary(
@@ -55,6 +62,7 @@ js_run_binary(
         ":vite.config",
         "index.html",
         "style/style.css",
+        "style/background.css",
     ],
     stdout = "build.output.log",
     # out_dirs = ["examples/webapp/dist"],
@@ -65,18 +73,18 @@ js_run_binary(
     silent_on_success = False,
 )
 
-bin.vite_binary(
-    name = "vite.preview",
-    args = ["preview"],
-    chdir = package_name(),
-    data = [":build"],
-)
-
-vite_build(
-    name = "vbuild",
-    config = ":vite.config",
-    data = [
+js_run_devserver(
+    name = "start",
+    data= [
+        ":vite.config",
         "index.html",
+        "style/style.css",
+        "//:node_modules/vite",
+        "//:node_modules/@vitejs/plugin-react",
+        "style/background.css",
     ],
+    tool = ":vite.bin",
+    args = ["--config", "$(rootpath :vite.config)"],
+    include_transitive_sources = True,
+    tags = ["ibazel_notify_changes"],
 )
-
