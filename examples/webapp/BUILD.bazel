@@ -1,90 +1,11 @@
-load("//bazel/js:js.bzl", "js_library", "vite_build", "js_run_devserver")
+load("//bazel/js:js.bzl", "vite_webapp")
 
-load("@aspect_rules_js//js:defs.bzl", "js_run_binary")
-load("@npm//:vite/package_json.bzl", "bin")
-
-# Produces targets:
-#  - :webapp.start : Fast developer round-trip, intended for use with ibazel
-#  - :webapp.build : Create production release artifacts
-#  - :webapp.preview : Runs a devserver against the production-bundled application
-# webapp(
-# name = "webapp",
-# srcs = ["index.html"],
-# )
-
-js_library(
-    name = "vite.config",
-    srcs = ["vite.config.js"],
-    data = [
-        "//:node_modules/vite",
-        "//:node_modules/@vitejs/plugin-react",
-    ],
-)
-
-bin.vite_binary(
-    name = "vite",
-    # chdir = package_name(),
-    data = [
-        ":vite.config",
-        "index.html",
-        "style/style.css",
-        "style/background.css",
-    ],
-    args = ["--config", "$(rootpath :vite.config)"],
-    tags = ["ibazel_notify_changes"],
-)
-
-bin.vite_binary(
-    name = "vite.bin",
-    data = [
-        ":vite.config",
-        "index.html",
-        "style/style.css",
-    ],
-    copy_data_to_bin = True,
-)
-
-bin.vite_binary(
-    name = "vite.build",
-    data = [
-        ":vite.config",
-        "index.html",
-        "style/style.css",
-    ],
-    copy_data_to_bin = True,
-    args = ["build", "--config", "$(rootpath :vite.config)"],
-    tags = ["ibazel_notify_changes"],
-)
-
-js_run_binary(
-    name = "build",
+vite_webapp(
+    name = "webapp",
     srcs = [
-        ":vite.config",
         "index.html",
         "style/style.css",
         "style/background.css",
     ],
-    stdout = "build.output.log",
-    # out_dirs = ["examples/webapp/dist"],
-    out_dirs = ["dist"],
-    tool = ":vite.build",
-    args = ["build", "--config", "$(rootpath :vite.config)"],
-    include_transitive_sources = True,
-    silent_on_success = False,
 )
 
-js_run_devserver(
-    name = "start",
-    data= [
-        ":vite.config",
-        "index.html",
-        "style/style.css",
-        "//:node_modules/vite",
-        "//:node_modules/@vitejs/plugin-react",
-        "style/background.css",
-    ],
-    tool = ":vite.bin",
-    args = ["--config", "$(rootpath :vite.config)"],
-    include_transitive_sources = True,
-    tags = ["ibazel_notify_changes"],
-)

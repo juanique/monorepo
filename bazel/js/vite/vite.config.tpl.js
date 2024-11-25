@@ -1,9 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { resolve } from 'path';
 
 import fs from 'fs/promises'; // Import the file system module
-import { hasUncaughtExceptionCaptureCallback } from 'process';
 
 console.log('***********************************');
 const projectRoot = process.cwd(); // Current working directory
@@ -24,7 +22,7 @@ export default defineConfig({
                     buildStart: async () => {
                         try {
                             // 1. Read the index.html file
-                            const htmlContent = await fs.readFile('./examples/webapp/index.html', 'utf-8');
+                            const htmlContent = await fs.readFile('./{PACKAGE}/index.html', 'utf-8');
 
                             // 2. Write the file to the destination (project root)
                             await fs.writeFile('./index.html', htmlContent);
@@ -37,8 +35,7 @@ export default defineConfig({
                     writeBundle: async () => {
                         // List all files in the dist directory, recursively
 
-                        // Move ./dist to examples/webapp/dist
-                        await fs.rename('./dist', 'examples/webapp/dist');
+                        await fs.rename('./dist', '{PACKAGE}/dist');
                         // create dist directory
                         // await fs.mkdir('examples/webapp/dist', { recursive: true });
                         // write something to it
@@ -66,9 +63,11 @@ export default defineConfig({
             configureServer(server) {
                 server.middlewares.use((req, res, next) => {
                     if (req.url === '/') {
-                        req.url = '/examples/webapp/index.html'; // Redirect to the desired file
+                        res.writeHead(302, { Location: '/{PACKAGE}/index.html' });
+                        res.end();
+                    } else {
+                        next();
                     }
-                    next();
                 });
             },
         },
