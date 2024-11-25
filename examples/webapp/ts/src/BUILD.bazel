@@ -1,0 +1,14 @@
+load("//bazel/ts:defs.bzl", "ts_library")
+package(default_visibility = ["//visibility:public"])
+
+exports_files(["main.ts"])
+
+ts_library(
+    name = "main",
+    srcs = ["main.ts"],
+    deps = [
+        "//:node_modules/chart.js",
+        "//:node_modules/@types/chart.js",
+        "//examples/ts/ts_library/formatting",
+    ],
+)

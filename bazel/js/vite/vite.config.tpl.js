@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import fs from 'fs/promises';
 
 export default defineConfig({
+    clearScreen: false,
     root: '.',
     server: {
         port: 3000,
@@ -22,6 +23,18 @@ export default defineConfig({
                         } catch (err) {
                             console.error('Error copying index.html:', err);
                         }
+                    },
+                },
+                {
+                    name: 'resolve-ts-to-js',
+                    apply: 'build', // Only apply this plugin during the build
+                    resolveId(source) {
+                        const result = source.startsWith('/') ? source.slice(1) : source;
+
+                        if (result.endsWith('.ts')) {
+                            return result.replace(/\.ts$/, '.js');
+                        }
+                        return null; // Let Vite handle other resolutions
                     },
                 },
             ],
@@ -44,5 +57,35 @@ export default defineConfig({
                 });
             },
         },
+        {
+            name: 'redirect-ts-to-js',
+            configureServer(server) {
+                server.middlewares.use((req, res, next) => {
+                    if (req.url.endsWith('.ts')) {
+                        const newUrl = req.url.replace(/\.ts$/, '.js');
+                        res.writeHead(302, { Location: newUrl });
+                        res.end();
+                    } else {
+                        next();
+                    }
+                });
+            },
+        },
+        {
+            name: 'custom-import-loader',
+            async resolveId(source, importer, options) {
+                const currentDir = process.cwd();
+                const candidate = currentDir + "/" + source + ".js"
+
+                // If candidate file exists, return it.
+                try {
+                    await fs.access(candidate);
+                    return candidate;
+                } catch (err) {
+                    // File does not exist, fallback to default behavior.
+                    return null;
+                }
+            },
+        }
     ],
 });
