@@ -24,12 +24,6 @@ bin.vite_binary(
     visibility = ["//visibility:public"],
     name = "vite.bin",
 )
-
-js_run_binary(
-    tool = ":vite.bin",
-    visibility = ["//visibility:public"],
-    name = "vite.build",
-)
 ### Proto resolve
 # gazelle:resolve py examples.grpc.protos.helloworld_pb2 //examples/grpc/protos:helloworld_py_proto
 # gazelle:resolve py examples.grpc.protos.helloworld_pb2_grpc //examples/grpc/protos:helloworld_py_grpc

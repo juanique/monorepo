@@ -1,54 +1,26 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-
-import fs from 'fs/promises'; // Import the file system module
-
-console.log('***********************************');
-const projectRoot = process.cwd(); // Current working directory
-console.log('Vite Project Root:', projectRoot);
-
+import fs from 'fs/promises';
 
 export default defineConfig({
     root: '.',
     server: {
-        port: 3000, // Specify the port number
+        port: 3000,
     },
     build: {
-        outDir: './dist', // Specify the output directory for the build
+        outDir: './{PACKAGE}/dist', // Specify the output directory for the build
         rollupOptions: {
             plugins: [
                 {
                     name: 'copy-html-plugin',
                     buildStart: async () => {
                         try {
-                            // 1. Read the index.html file
+                            // Move index.html to the root of the project so vite can find it.
                             const htmlContent = await fs.readFile('./{PACKAGE}/index.html', 'utf-8');
-
-                            // 2. Write the file to the destination (project root)
                             await fs.writeFile('./index.html', htmlContent);
                             console.log('index.html copied to vite project root');
-                            // await fs.writeFile('./dist/index.html', htmlContent);
                         } catch (err) {
                             console.error('Error copying index.html:', err);
-                        }
-                    },
-                    writeBundle: async () => {
-                        // List all files in the dist directory, recursively
-
-                        await fs.rename('./dist', '{PACKAGE}/dist');
-                        // create dist directory
-                        // await fs.mkdir('examples/webapp/dist', { recursive: true });
-                        // write something to it
-                        // await fs.writeFile('examples/webapp/dist/test.txt', 'test');
-                        console.log('Current working directory is :', process.cwd());
-                        // console.log("pp")
-
-                        const files = await fs.readdir('./', { recursive: true });
-                        for (const file of files) {
-                            // If contains dist, log the file and not node_modules
-                            if (file.includes('dist') && !file.includes('node_modules')) {
-                                console.log(file);
-                            }
                         }
                     },
                 },
@@ -62,6 +34,7 @@ export default defineConfig({
             name: 'redirect-root',
             configureServer(server) {
                 server.middlewares.use((req, res, next) => {
+                    // Redirect root to the index file in the package.
                     if (req.url === '/') {
                         res.writeHead(302, { Location: '/{PACKAGE}/index.html' });
                         res.end();
