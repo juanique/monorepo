@@ -24,6 +24,18 @@ export default defineConfig({
                         }
                     },
                 },
+                {
+                    name: 'resolve-ts-to-js',
+                    apply: 'build', // Only apply this plugin during the build
+                    resolveId(source) {
+                        const result = source.startsWith('/') ? source.slice(1) : source;
+
+                        if (result.endsWith('.ts')) {
+                            return result.replace(/\.ts$/, '.js');
+                        }
+                        return null; // Let Vite handle other resolutions
+                    },
+                },
             ],
         },
     },
@@ -37,6 +49,20 @@ export default defineConfig({
                     // Redirect root to the index file in the package.
                     if (req.url === '/') {
                         res.writeHead(302, { Location: '/{PACKAGE}/index.html' });
+                        res.end();
+                    } else {
+                        next();
+                    }
+                });
+            },
+        },
+        {
+            name: 'redirect-ts-to-js',
+            configureServer(server) {
+                server.middlewares.use((req, res, next) => {
+                    if (req.url.endsWith('.ts')) {
+                        const newUrl = req.url.replace(/\.ts$/, '.js');
+                        res.writeHead(302, { Location: newUrl });
                         res.end();
                     } else {
                         next();
