@@ -1,28 +1,55 @@
-// Select the app container
-const app = document.querySelector<HTMLDivElement>('#app');
+import { Chart, registerables } from 'chart.js';
 
-if (app) {
-    // Render initial content
-    app.innerHTML = `
-    <h1>Hello World</h1>
-    <p>Click the button below to change the message:</p>
-    <button id="changeMessage">Click Me!!!</button>
-    <div id="message" style="margin-top: 1em; font-size: 1.2em; color: blue;"></div>
-  `;
+// Register components for Chart.js
+Chart.register(...registerables);
 
-    // Handle button click
-    const button = document.querySelector<HTMLButtonElement>('#changeMessage');
-    const messageDiv = document.querySelector<HTMLDivElement>('#message');
+// Create the chart
+const ctx = document.getElementById('myChart') as HTMLCanvasElement;
+const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+        datasets: [
+            {
+                label: 'Sales',
+                data: [10, 20, 15, 25, 30, 40],
+                borderColor: 'rgba(255, 192, 192, 1)',
+                borderWidth: 2,
+                fill: false,
+            },
+        ],
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top',
+            },
+        },
+        scales: {
+            x: {
+                title: {
+                    display: true,
+                    text: 'Months',
+                },
+            },
+            y: {
+                title: {
+                    display: true,
+                    text: 'Sales (in $1000)',
+                },
+                beginAtZero: true,
+            },
+        },
+    },
+});
 
-    button?.addEventListener('click', () => {
-        const messages = [
-            'Hello, TypeScript!',
-            'Vite is awesome!',
-            'You clicked the button!',
-            'Dynamic content rocks!',
-        ];
-        const randomMessage =
-            messages[Math.floor(Math.random() * messages.length)];
-        if (messageDiv) messageDiv.textContent = randomMessage;
-    });
-}
+// Add an event listener to update chart data dynamically
+const updateButton = document.getElementById('updateData');
+updateButton?.addEventListener('click', () => {
+    chart.data.datasets[0].data = chart.data.datasets[0].data.map(() =>
+        Math.floor(Math.random() * 50)
+    );
+    chart.update();
+});

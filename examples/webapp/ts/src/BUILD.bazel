@@ -6,4 +6,8 @@ exports_files(["main.ts"])
 ts_library(
     name = "main",
     srcs = ["main.ts"],
+    deps = [
+        "//:node_modules/chart.js",
+        "//:node_modules/@types/chart.js",
+    ],
 )

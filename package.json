@@ -6,6 +6,7 @@
         "@types/react": "^18.3.12",
         "@vitejs/plugin-react": "^4.3.3",
         "chalk": "^5.3.0",
+        "chart.js": "^4.4.6",
         "figlet": "^1.8.0",
         "ink": "^5.0.1",
         "ink-big-text": "^2.0.0",
@@ -17,6 +18,7 @@
         "vite": "^5.4.11"
     },
     "devDependencies": {
+        "@types/chart.js": "^2.9.41",
         "@types/figlet": "^1.7.0"
     },
     "pnpm": {

@@ -54,11 +54,6 @@ def vite_webapp_config(name):
 
 
 def vite_webapp(name, srcs = []):
-    native.filegroup(
-        name = name + ".app_files",
-        srcs = srcs,
-    )
-
     vite_webapp_config(
         name = name + ".vite.config",
     )
@@ -68,8 +63,7 @@ def vite_webapp(name, srcs = []):
         name = name + ".build",
         srcs = [
             ":" + name + ".vite.config",
-            ":" + name + ".app_files",
-        ],
+        ] + srcs,
         stdout = "build.output.log",
         out_dirs = ["dist"],
         tool = "//:vite.bin",
@@ -82,8 +76,7 @@ def vite_webapp(name, srcs = []):
         name = name,
         data= [
             ":" + name + ".vite.config",
-            ":" + name + ".app_files",
-        ],
+        ] + srcs,
         tool = "//:vite.bin",
         args = ["--config", "$(rootpath :" + name + ".vite.config)"],
         include_transitive_sources = True,
