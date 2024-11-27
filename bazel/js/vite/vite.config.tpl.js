@@ -61,13 +61,20 @@ export default defineConfig({
             name: 'redirect-ts-to-js',
             configureServer(server) {
                 server.middlewares.use((req, res, next) => {
+                    let newUrl = ""
                     if (req.url.endsWith('.ts')) {
-                        const newUrl = req.url.replace(/\.ts$/, '.js');
+                        newUrl = req.url.replace(/\.ts$/, '.js');
+                    } else if (req.url.endsWith('.tsx')) {
+                        newUrl = req.url.replace(/\.tsx$/, '.js');
+                    }
+
+                    console.log("redirecting " + req.url + " to " + newUrl);
+                    if (newUrl != "") {
                         res.writeHead(302, { Location: newUrl });
                         res.end();
-                    } else {
-                        next();
+                        return
                     }
+                    next();
                 });
             },
         },

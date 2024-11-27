@@ -1,0 +1,26 @@
+load("//bazel/ts:defs.bzl", "ts_library")
+load("//bazel/js:js.bzl", "js_library")
+
+package(default_visibility = ["//visibility:public"])
+
+js_library(
+    name = "assets",
+    srcs = [
+        "index.css",
+    ]
+)
+
+
+ts_library(
+    name = "main",
+    srcs = [
+        "main.tsx",
+        "App.tsx",
+        "index.css",
+    ],
+    data = [":assets"],
+    deps  = [
+        "//:node_modules/react",
+        "//:node_modules/react-dom",
+    ]
+)
