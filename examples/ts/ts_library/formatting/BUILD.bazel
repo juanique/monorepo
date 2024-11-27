@@ -5,4 +5,7 @@ package(default_visibility = ["//visibility:public"])
 ts_library(
     name = "formatting",
     srcs = ["formatting.ts"],
+    data = [
+        "message.txt",
+    ],
 )

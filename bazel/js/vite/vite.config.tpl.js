@@ -81,6 +81,16 @@ export default defineConfig({
         {
             name: 'custom-import-loader',
             async resolveId(source, importer, options) {
+                console.log("resolving " + source);
+                try {
+                    console.log("checking " + source);
+                    await fs.access(source);
+                    console.log("resolved " + source);
+                    return source;
+                } catch (err) {
+                    // File does not exist, fallback to default behavior.
+                    console.log("not found " + source);
+                }
                 const currentDir = process.cwd();
                 const candidate = currentDir + "/" + source + ".js"
 
