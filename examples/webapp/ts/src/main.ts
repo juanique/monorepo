@@ -1,4 +1,5 @@
 import { Chart, registerables } from 'chart.js';
+import { formatNamePretty, NameStyle } from 'examples/ts/ts_library/formatting/formatting';
 
 // Register components for Chart.js
 Chart.register(...registerables);
@@ -11,7 +12,7 @@ const chart = new Chart(ctx, {
         labels: ['January', 'February', 'March', 'April', 'May', 'June'],
         datasets: [
             {
-                label: 'Sales',
+                label: formatNamePretty('Sales', NameStyle.Fancy),
                 data: [10, 20, 15, 25, 30, 40],
                 borderColor: 'rgba(255, 192, 192, 1)',
                 borderWidth: 2,

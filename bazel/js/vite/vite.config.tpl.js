@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import fs from 'fs/promises';
 
 export default defineConfig({
+    clearScreen: false,
     root: '.',
     server: {
         port: 3000,
@@ -70,5 +71,21 @@ export default defineConfig({
                 });
             },
         },
+        {
+            name: 'custom-import-loader',
+            async resolveId(source, importer, options) {
+                const currentDir = process.cwd();
+                const candidate = currentDir + "/" + source + ".js"
+
+                // If candidate file exists, return it.
+                try {
+                    await fs.access(candidate);
+                    return candidate;
+                } catch (err) {
+                    // File does not exist, fallback to default behavior.
+                    return null;
+                }
+            },
+        }
     ],
 });

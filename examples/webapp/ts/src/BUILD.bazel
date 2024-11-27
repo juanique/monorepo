@@ -9,5 +9,6 @@ ts_library(
     deps = [
         "//:node_modules/chart.js",
         "//:node_modules/@types/chart.js",
+        "//examples/ts/ts_library/formatting",
     ],
 )
