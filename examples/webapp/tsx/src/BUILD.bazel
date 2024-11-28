@@ -1,5 +1,4 @@
 load("//bazel/ts:defs.bzl", "ts_library")
-load("//bazel/js:js.bzl", "js_library")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -16,5 +15,6 @@ ts_library(
     deps  = [
         "//:node_modules/react",
         "//:node_modules/react-dom",
-    ]
+        "//examples/ts/ts_library/formatting",
+    ],
 )

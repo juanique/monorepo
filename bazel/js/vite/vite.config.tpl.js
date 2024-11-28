@@ -1,6 +1,18 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import fs from 'fs/promises';
+import * as fs from 'fs';
+
+
+function changeExtensionToJS(filename) {
+    const parts = filename.split('.');
+    if (parts.length === 1) {
+        // No extension, add ".js" directly
+        return `${filename}.js`;
+    }
+    // Replace the last part with "js"
+    parts[parts.length - 1] = "js";
+    return parts.join('.');
+}
 
 export default defineConfig({
     clearScreen: false,
@@ -58,50 +70,34 @@ export default defineConfig({
             },
         },
         {
-            name: 'redirect-ts-to-js',
-            configureServer(server) {
-                server.middlewares.use((req, res, next) => {
-                    let newUrl = ""
-                    if (req.url.endsWith('.ts')) {
-                        newUrl = req.url.replace(/\.ts$/, '.js');
-                    } else if (req.url.endsWith('.tsx')) {
-                        newUrl = req.url.replace(/\.tsx$/, '.js');
-                    }
-
-                    console.log("redirecting " + req.url + " to " + newUrl);
-                    if (newUrl != "") {
-                        res.writeHead(302, { Location: newUrl });
-                        res.end();
-                        return
-                    }
-                    next();
-                });
-            },
-        },
-        {
             name: 'custom-import-loader',
-            async resolveId(source, importer, options) {
+            resolveId(source, importer, options) {
                 console.log("resolving " + source);
-                try {
-                    console.log("checking " + source);
-                    await fs.access(source);
-                    console.log("resolved " + source);
-                    return source;
-                } catch (err) {
-                    // File does not exist, fallback to default behavior.
-                    console.log("not found " + source);
-                }
-                const currentDir = process.cwd();
-                const candidate = currentDir + "/" + source + ".js"
+                // remove leading slash if present
+                candidate = source.startsWith('/') ? source.slice(1) : source;
+                // Check relative to root
+                candidate = process.cwd() + "/" + candidate;
 
-                // If candidate file exists, return it.
-                try {
-                    await fs.access(candidate);
-                    return candidate;
-                } catch (err) {
-                    // File does not exist, fallback to default behavior.
-                    return null;
+                if (candidate.endsWith(".ts")) {
+                    resolved = changeExtensionToJS(candidate);
+                    console.log("resolved " + source + " to " + resolved);
+                    return resolved;
                 }
+
+                if (candidate.endsWith(".tsx")) {
+                    resolved = changeExtensionToJS(candidate);
+                    console.log("resolved " + source + " to " + resolved);
+                    return resolved;
+                }
+
+                if (!candidate.includes(".")) {
+                    resolved = changeExtensionToJS(candidate);
+                    console.log("resolved " + source + " to " + resolved);
+                    return resolved;
+                }
+
+                console.log("resolved " + source + " to " + candidate);
+                return candidate;
             },
         }
     ],
