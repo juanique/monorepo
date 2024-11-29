@@ -1,26 +1,13 @@
 diff --git a/js/private/js_helpers.bzl b/js/private/js_helpers.bzl
-index f0dcdef..f1c24fa 100644
+index f0dcdef..2652273 100644
 --- a/js/private/js_helpers.bzl
 +++ b/js/private/js_helpers.bzl
-@@ -272,6 +272,11 @@ def gather_files_from_js_infos(
+@@ -272,6 +272,8 @@ def gather_files_from_js_infos(
      files_depsets = []
  
      for target in targets:
 +        info = target[DefaultInfo]
-+        print(type(info), dir(info.data_runfiles.files))
 +        files_depsets.append(info.data_runfiles.files)
-+        for x in info.data_runfiles.files.to_list():
-+            print("=>", x)
          if JsInfo in target:
              js_info = target[JsInfo]
  
-@@ -288,4 +293,9 @@ def gather_files_from_js_infos(
-             if include_npm_sources:
-                 files_depsets.append(js_info.npm_sources)
- 
-+    # for f in target[DefaultInfo].files.to_list():
-+    for d in files_depsets:
-+        for f in d.to_list():
-+            print(f)
-+
-     return depset(transitive = files_depsets)

@@ -1,17 +1,53 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import * as fs from 'fs';
+import fs from 'fs/promises';
 
 
 function changeExtensionToJS(filename) {
-    const parts = filename.split('.');
-    if (parts.length === 1) {
+    var parts = filename.split("/")
+    var dirName = parts.slice(0, -1).join("/")
+    var fileName = parts.pop()
+
+    const fileparts = fileName.split('.');
+    if (fileparts.length === 1) {
         // No extension, add ".js" directly
-        return `${filename}.js`;
+        return `${dirName}/${fileName}.js`;
     }
     // Replace the last part with "js"
-    parts[parts.length - 1] = "js";
-    return parts.join('.');
+    fileparts[fileparts.length - 1] = "js";
+    filename = fileparts.join('.');
+    return `${dirName}/${filename}`;
+}
+
+function resolveSource(source) {
+    console.log("resolving " + source);
+    // remove leading slash if present
+    var candidate = source.startsWith('/') ? source.slice(1) : source;
+    // Check relative to root
+    candidate = process.cwd() + "/" + candidate;
+
+    if (candidate.endsWith(".ts")) {
+        var resolved = changeExtensionToJS(candidate);
+        console.log("resolved " + source + " to " + resolved);
+        return resolved;
+    }
+
+    if (candidate.endsWith(".tsx")) {
+        var resolved = changeExtensionToJS(candidate);
+        console.log("resolved " + source + " to " + resolved);
+        return resolved;
+    }
+
+    var filename = candidate.split('/').pop();
+    if (!filename.includes(".")) {
+        var resolved = changeExtensionToJS(candidate);
+        console.log("resolved " + source + " to " + resolved);
+        return resolved;
+    }
+
+    console.log("resolved " + source + " to " + candidate);
+    return candidate;
+
 }
 
 export default defineConfig({
@@ -41,12 +77,7 @@ export default defineConfig({
                     name: 'resolve-ts-to-js',
                     apply: 'build', // Only apply this plugin during the build
                     resolveId(source) {
-                        const result = source.startsWith('/') ? source.slice(1) : source;
-
-                        if (result.endsWith('.ts')) {
-                            return result.replace(/\.ts$/, '.js');
-                        }
-                        return null; // Let Vite handle other resolutions
+                        return resolveSource(source);
                     },
                 },
             ],
@@ -72,32 +103,7 @@ export default defineConfig({
         {
             name: 'custom-import-loader',
             resolveId(source, importer, options) {
-                console.log("resolving " + source);
-                // remove leading slash if present
-                candidate = source.startsWith('/') ? source.slice(1) : source;
-                // Check relative to root
-                candidate = process.cwd() + "/" + candidate;
-
-                if (candidate.endsWith(".ts")) {
-                    resolved = changeExtensionToJS(candidate);
-                    console.log("resolved " + source + " to " + resolved);
-                    return resolved;
-                }
-
-                if (candidate.endsWith(".tsx")) {
-                    resolved = changeExtensionToJS(candidate);
-                    console.log("resolved " + source + " to " + resolved);
-                    return resolved;
-                }
-
-                if (!candidate.includes(".")) {
-                    resolved = changeExtensionToJS(candidate);
-                    console.log("resolved " + source + " to " + resolved);
-                    return resolved;
-                }
-
-                console.log("resolved " + source + " to " + candidate);
-                return candidate;
+                return resolveSource(source);
             },
         }
     ],
