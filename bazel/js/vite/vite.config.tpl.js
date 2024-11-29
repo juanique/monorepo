@@ -2,6 +2,54 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import fs from 'fs/promises';
 
+
+function changeExtensionToJS(filename) {
+    var parts = filename.split("/")
+    var dirName = parts.slice(0, -1).join("/")
+    var fileName = parts.pop()
+
+    const fileparts = fileName.split('.');
+    if (fileparts.length === 1) {
+        // No extension, add ".js" directly
+        return `${dirName}/${fileName}.js`;
+    }
+    // Replace the last part with "js"
+    fileparts[fileparts.length - 1] = "js";
+    filename = fileparts.join('.');
+    return `${dirName}/${filename}`;
+}
+
+function resolveSource(source) {
+    console.log("resolving " + source);
+    // remove leading slash if present
+    var candidate = source.startsWith('/') ? source.slice(1) : source;
+    // Check relative to root
+    candidate = process.cwd() + "/" + candidate;
+
+    if (candidate.endsWith(".ts")) {
+        var resolved = changeExtensionToJS(candidate);
+        console.log("resolved " + source + " to " + resolved);
+        return resolved;
+    }
+
+    if (candidate.endsWith(".tsx")) {
+        var resolved = changeExtensionToJS(candidate);
+        console.log("resolved " + source + " to " + resolved);
+        return resolved;
+    }
+
+    var filename = candidate.split('/').pop();
+    if (!filename.includes(".")) {
+        var resolved = changeExtensionToJS(candidate);
+        console.log("resolved " + source + " to " + resolved);
+        return resolved;
+    }
+
+    console.log("resolved " + source + " to " + candidate);
+    return candidate;
+
+}
+
 export default defineConfig({
     clearScreen: false,
     root: '.',
@@ -29,12 +77,7 @@ export default defineConfig({
                     name: 'resolve-ts-to-js',
                     apply: 'build', // Only apply this plugin during the build
                     resolveId(source) {
-                        const result = source.startsWith('/') ? source.slice(1) : source;
-
-                        if (result.endsWith('.ts')) {
-                            return result.replace(/\.ts$/, '.js');
-                        }
-                        return null; // Let Vite handle other resolutions
+                        return resolveSource(source);
                     },
                 },
             ],
@@ -58,33 +101,9 @@ export default defineConfig({
             },
         },
         {
-            name: 'redirect-ts-to-js',
-            configureServer(server) {
-                server.middlewares.use((req, res, next) => {
-                    if (req.url.endsWith('.ts')) {
-                        const newUrl = req.url.replace(/\.ts$/, '.js');
-                        res.writeHead(302, { Location: newUrl });
-                        res.end();
-                    } else {
-                        next();
-                    }
-                });
-            },
-        },
-        {
             name: 'custom-import-loader',
-            async resolveId(source, importer, options) {
-                const currentDir = process.cwd();
-                const candidate = currentDir + "/" + source + ".js"
-
-                // If candidate file exists, return it.
-                try {
-                    await fs.access(candidate);
-                    return candidate;
-                } catch (err) {
-                    // File does not exist, fallback to default behavior.
-                    return null;
-                }
+            resolveId(source, importer, options) {
+                return resolveSource(source);
             },
         }
     ],

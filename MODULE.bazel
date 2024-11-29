@@ -13,6 +13,15 @@ bazel_dep(name = "rules_perl", version = "0.2.4")
 # NodeJS version is determined by rules_nodejs default
 bazel_dep(name = "rules_nodejs", version = "6.3.0")
 
+archive_override(
+    module_name = "aspect_rules_js",
+    integrity = "sha256-dcJaDxWp5FkrvaRbV6oInkvxf5F2/XNTUejGRE34e1I=",
+    patches = ["//bazel/patches:rules_js.patch"],
+    patch_strip = 1,
+    strip_prefix = "rules_js-2.1.0",
+    urls = ["https://github.com/aspect-build/rules_js/releases/download/v2.1.0/rules_js-v2.1.0.tar.gz"],
+)
+
 npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm", dev_dependency = True)
 npm.npm_translate_lock(
     name = "npm",
