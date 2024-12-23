@@ -1223,7 +1223,10 @@ class GitGud:
         self._checkout(child.history_branch)
         commit_msg = commit_msg or f"Merge commit {parent.id}"
         try:
-            self.repo.git.merge("--no-ff", "-m", commit_msg, parent.history_branch)
+            self.repo.git.merge("--no-ff", "--no-commit", parent.history_branch)
+            if self.repo.index.diff(self.repo.head.commit):
+                # if there are changes to commit, do it
+                run_git_command_with_retries(self.repo.git.commit, "-m", commit_msg)
         except GitCommandError as e:
             assert "CONFLICT" in e.stdout
 
