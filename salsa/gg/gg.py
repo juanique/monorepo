@@ -320,7 +320,7 @@ def is_retryable_error(error: GitCommandError) -> Tuple:
 
 def run_git_command_with_retries(cmd: Callable, *args: Any, **kwargs: Any) -> Any:
     attempts = 0
-    last_error = None
+    last_error: Optional[Exception] = None
 
     while True:
         attempts += 1
@@ -337,7 +337,8 @@ def run_git_command_with_retries(cmd: Callable, *args: Any, **kwargs: Any) -> An
                 continue
             raise error
 
-    raise last_error
+    if last_error:
+        raise last_error
 
 
 class GitGud:
@@ -1396,7 +1397,11 @@ class GitGud:
             for state in bad_states:
                 print(f"[red]!! {state.message}[/red]")
 
-    def get_tree(self, commit: GudCommit = None, tree: Tree = None, full: bool = False) -> Tree:
+    def get_tree(
+            self,
+            commit: Optional[GudCommit] = None,
+            tree: Optional[Tree] = None,
+            full: bool = False) -> Tree:
         """Return a tree representation of the local gitgud state for printing."""
 
         commit = commit or self.root()
