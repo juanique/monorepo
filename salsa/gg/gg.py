@@ -4,7 +4,8 @@ from pathlib import Path
 from datetime import datetime
 import random
 import re
-from typing import Any, Dict, List, Optional, Callable, Set
+import time
+from typing import Any, Dict, List, Optional, Callable, Set, Tuple
 
 import os
 import logging
@@ -284,11 +285,7 @@ class GitHubHostedRepo(HostedRepo):
     ) -> GudPullRequest:
         repo = self.github.get_repo(self.repo_name)
         pr = repo.create_pull(
-            title=title,
-            body="",
-            head=remote_branch,
-            base=remote_base_branch,
-            draft=True,
+            title=title, body="", head=remote_branch, base=remote_base_branch, draft=True,
         )
         return self._convert(pr)
 
@@ -311,6 +308,36 @@ class GitHubHostedRepo(HostedRepo):
             pull_request.merge_commit_sha = pr.merge_commit_sha
 
         return pull_request
+
+
+def is_retryable_error(error: GitCommandError) -> Tuple:
+    retryable_errors = ["index.lock", "Connection reset", "Temporary failure"]
+    for retryable in retryable_errors:
+        if retryable in str(error):
+            return True, retryable
+    return False, ""
+
+
+def run_git_command_with_retries(cmd: Callable, *args: Any, **kwargs: Any) -> Any:
+    attempts = 0
+    last_error = None
+
+    while True:
+        attempts += 1
+        if attempts > 10:
+            break
+        try:
+            return cmd(*args, **kwargs)
+        except GitCommandError as error:
+            last_error = error
+            retryable, code = is_retryable_error(error)
+            if retryable:
+                logging.info("Retrying on %s error, attempt %s", code, attempts)
+                time.sleep(1)
+                continue
+            raise error
+
+    raise last_error
 
 
 class GitGud:
@@ -371,12 +398,14 @@ class GitGud:
     def get_remote_commit(repo: Repo, remote_master: str) -> GudCommit:
         """Given a repo in a checkout out remote commit, generate the corresponding GudCommit."""
 
-        hash = repo.head.commit.hexsha
-        master_commit_id = f"master@{hash[0:8]}"
+        hash_sha = repo.head.commit.hexsha
+        master_commit_id = f"master@{hash_sha[0:8]}"
         new_branch = repo.create_head(master_commit_id)
-        new_branch.checkout()
 
-        date_str = repo.git.show("-s", "--pretty=%ad", hash, "--date=iso-local")
+        run_git_command_with_retries(new_branch.checkout)
+        repo.git.submodule("update", "--init", "--recursive")
+
+        date_str = repo.git.show("-s", "--pretty=%ad", hash_sha, "--date=iso-local")
         date = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S %z")
 
         return GudCommit(
@@ -479,7 +508,7 @@ class GitGud:
         return GitGud(repo, repo_state, hosted_repo, global_config=global_config)
 
     def _checkout(self, branch_name: str) -> None:
-        self.repo.git.checkout(branch_name, "--recurse-submodules")
+        run_git_command_with_retries(self.repo.git.checkout, branch_name, "--recurse-submodules")
         self.repo.git.submodule("update", "--init", "--recursive")
 
     def get_oldest_non_remote(self, commit_id: str) -> GudCommit:
@@ -741,6 +770,7 @@ class GitGud:
 
             for commit_id, commit in self.state.commits.items():
                 if commit.parent_id == commit_to_prune_id:
+
                     if not self.state.root == commit_to_prune.id:
                         assert commit_to_prune.parent_id is not None
                         parent_of_prunned = self.get_commit(commit_to_prune.parent_id)
@@ -782,8 +812,10 @@ class GitGud:
         logging.info("Starting of more recent remote commit %s", newest_remote.id)
 
         self._checkout(self.state.master_branch)
-        self.repo.git.pull("--rebase", "origin", self.state.master_branch)
-        self.repo.git.submodule("update", "--init", "--recursive")
+        run_git_command_with_retries(
+            self.repo.git.pull, "--rebase", "origin", self.state.master_branch
+        )
+        run_git_command_with_retries(self.repo.git.submodule, "update", "--init", "--recursive")
         pulled_commit = GitGud.get_remote_commit(self.repo, self.state.master_branch)
         if pulled_commit.id == newest_remote.id:
             logging.info("Nothing to do, already at latest remote HEAD")
@@ -815,7 +847,7 @@ class GitGud:
         }
 
     def add_changes_to_index(self) -> None:
-        self.repo.git.add("-A")
+        run_git_command_with_retries(self.repo.git.add, "-A")
 
     def commit(
         self, commit_msg: str, all: bool = True, use_existing_history_branch: Optional[str] = None
@@ -884,9 +916,9 @@ class GitGud:
 
     def _copy_branch_state(self, source_branch: str, dest_branch: str) -> None:
         temp_branch_name = "temp_" + dest_branch
-        self.repo.git.switch("-c", temp_branch_name, source_branch)
-        self.repo.git.reset("--soft", dest_branch)
-        self.repo.git.branch("-M", dest_branch)
+        run_git_command_with_retries(self.repo.git.switch, "-c", temp_branch_name, source_branch)
+        run_git_command_with_retries(self.repo.git.reset, "--soft", dest_branch)
+        run_git_command_with_retries(self.repo.git.branch, "-M", dest_branch)
 
     def snapshot(self, message: str = "", commit: bool = True) -> None:
         """Take a snapshot of the current commit state and add it to the history branch."""
@@ -1106,8 +1138,12 @@ class GitGud:
 
         try:
             self.schedule_recursive_evolve(source_commit, mark_as_needed=True)
-            self.repo.git.rebase(
-                "--onto", dest_commit.hash, source_commit.parent_hash, source_commit.id
+            run_git_command_with_retries(
+                self.repo.git.rebase,
+                "--onto",
+                dest_commit.hash,
+                source_commit.parent_hash,
+                source_commit.id,
             )
             self.repo.git.submodule("update", "--init", "--recursive")
             self.continue_evolve(
@@ -1360,9 +1396,7 @@ class GitGud:
             for state in bad_states:
                 print(f"[red]!! {state.message}[/red]")
 
-    def get_tree(
-        self, commit: Optional[GudCommit] = None, tree: Optional[Tree] = None, full: bool = False
-    ) -> Tree:
+    def get_tree(self, commit: GudCommit = None, tree: Tree = None, full: bool = False) -> Tree:
         """Return a tree representation of the local gitgud state for printing."""
 
         commit = commit or self.root()
@@ -1418,7 +1452,7 @@ class GitGud:
 
         line = f"[bold {color}]{commit.id}[/bold {color}]"
         line += f"[bold red]{needs_evolve}{needs_upload}{conflict}[/bold red]{name_annotations} "
-        line += f"{url}: {date}{commit.get_oneliner()}"
+        line += f"{url} : {date}{commit.get_oneliner()}"
 
         if full:
             for snapshot in commit.snapshots:
