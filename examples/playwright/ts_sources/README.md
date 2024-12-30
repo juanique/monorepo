@@ -2,7 +2,7 @@
 
 This is in a branch:
 ```
-git checkout playwright_rules_41de5
+git checkout add_a_playwright_test_3f055
 ```
 
 There are few non hermetic dependencies that need to be installed on the machine.
