@@ -1,0 +1,35 @@
+load("@aspect_rules_swc//swc:defs.bzl", "swc")
+load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
+load("@bazel_skylib//lib:partial.bzl", "partial")
+load("@npm//:@playwright/test/package_json.bzl", "bin")
+
+ts_project(
+    name = "test_lib",
+    srcs = ["example.spec.ts"],
+    declaration = True,
+    transpiler = partial.make(
+        swc,
+        source_maps = "true",
+        swcrc = "//:.swcrc",
+    ),
+    tsconfig = "//:tsconfig",
+    deps = [
+        "//:node_modules/@playwright/test",
+        "//third_party/binaries:chromium",
+    ],
+)
+
+bin.playwright_test(
+    name = "test",
+    args = [
+        "test",
+    ],
+    data = [
+        "playwright.config.js",
+        ":test_lib",
+        "//third_party/binaries:chromium",
+    ],
+    env = {
+        "CHROMIUM_BIN": "$(rootpath //third_party/binaries:chromium)",
+    },
+)
