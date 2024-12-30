@@ -1080,8 +1080,15 @@ class GitGud:
         logging.info("Evolving %s to %s", self.head().id, child.id)
 
         try:
-            self.repo.git.rebase("--onto", self.head().hash, child.parent_hash, child.id)
-            self.repo.git.submodule("update", "--init", "--recursive")
+            run_git_command_with_retries(
+                self.repo.git.rebase,
+                "--onto",
+                self.head().hash,
+                child.parent_hash,
+                child.id,
+            )
+
+            run_git_command_with_retries(self.repo.git.submodule, "update", "--init", "--recursive")
             self.continue_evolve(
                 target_commit_id, self.head().id, f"Evolved changes from {self.head().id}"
             )
