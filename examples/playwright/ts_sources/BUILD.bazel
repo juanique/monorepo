@@ -1,0 +1,17 @@
+load("@npm//:@playwright/test/package_json.bzl", "bin")
+
+bin.playwright_test(
+    name = "test",
+    args = [
+        "test",
+    ],
+    data = [
+        "example.spec.ts",
+        "playwright.config.js",
+        "//:node_modules/@playwright/test",
+        "//third_party/binaries:chromium",
+    ],
+    env = {
+        "CHROMIUM_BIN": "$(rootpath //third_party/binaries:chromium)",
+    },
+)

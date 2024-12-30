@@ -1,0 +1,9 @@
+package(default_visibility = ["//visibility:public"])
+
+alias(
+    name = "chromium",
+    actual = select({
+        "@platforms//os:linux": "@chromium_linux_amd64//:chromium-bin",
+        "@platforms//os:macos": "@chromium_macos_arm64//:chromium-bin",
+    }),
+)

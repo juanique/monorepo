@@ -2,6 +2,7 @@
     "name": "monorepo",
     "type": "module",
     "dependencies": {
+        "@playwright/test": "^1.49.1",
         "@types/ink": "^2.0.3",
         "@types/react": "^18.3.12",
         "@vitejs/plugin-react": "^4.3.3",
