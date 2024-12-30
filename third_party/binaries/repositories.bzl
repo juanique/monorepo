@@ -3,10 +3,16 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 NATIVE_BINARY_BUILD_TPL = """
 load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
 package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "all_files",
+    srcs = glob(["**/*"]),
+)
 native_binary(
     name = "{name}",
     src = "{binary}",
     out = "{binary}",
+    data = [":all_files"],
 )
 """
 
