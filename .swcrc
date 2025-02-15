@@ -2,6 +2,11 @@
     "jsc": {
         "parser": {
             "syntax": "typescript"
+        },
+        "transform": {
+            "react": {
+                "runtime": "automatic"
+            }
         }
     },
     "module": {
