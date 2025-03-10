@@ -1,0 +1,7 @@
+load("//bazel/playwright:defs.bzl", "playwright_test")
+
+playwright_test(
+    name = "test_lib",
+    srcs = ["example.spec.ts"],
+    deps = ["//salsa/testing/playwright"],
+)
