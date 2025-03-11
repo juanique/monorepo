@@ -878,8 +878,8 @@
     },
     "@@aspect_rules_ts~//ts:extensions.bzl%ext": {
       "general": {
-        "bzlTransitiveDigest": "2dXCaSh7gTJ++Y9pJcAHVMspv1WLXZaHjfLDcf/JsCE=",
-        "usagesDigest": "ZT735hyIHe6FzViMVqKIflxZOB7WC7jop9C+Jiou36Y=",
+        "bzlTransitiveDigest": "1VHXEYol+0zgmv6xHgRlmbGFPjsZ3QG0jGc1HIrYhmU=",
+        "usagesDigest": "YdpEzhfp5+4bYhWsSMRM1EDEDHipU13mB6vLRFPvnKo=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},

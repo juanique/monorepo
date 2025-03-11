@@ -23,6 +23,7 @@ bin.playwright_test(
     name = "test",
     args = [
         "test",
+        "--config=$(rootpath :playwright.config.js)",
     ],
     data = [
         "playwright.config.js",
