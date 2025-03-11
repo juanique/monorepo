@@ -38,7 +38,7 @@ def binary_repositories():
     http_archive(
         name = "chromium_linux_arm64",
         url = "https://playwright.azureedge.net/builds/chromium/1129/chromium-linux-arm64.zip",
-        sha256 = "a6091f35f81cfbdf4fd3eb4f3f7916e841d43582f113f39f6e0d0c253485e56a",
+        sha256 = "67aab2cec5a4927667575452a2b6c57566085c154f47f924d6e3efa47f7bd777",
         build_file_content = NATIVE_BINARY_BUILD_TPL.format(
             name = "chromium-bin",
             binary = "chrome-linux/chrome",

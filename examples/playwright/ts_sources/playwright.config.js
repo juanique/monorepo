@@ -8,14 +8,19 @@ async function createConfig() {
         // Look for test files in the "tests" directory, relative to this configuration file.
         testDir: '.',
 
+        use: {
+            headless: true,
+        },
+
         // Reporter to use
         reporter: [
             ['list', { printSteps: true }],
             ['junit'],
-            ["html"],
+            ["html", { open: "never" }],
         ],
 
         outputDir: process.env.TEST_UNDECLARED_OUTPUTS_DIR + "/reports",
+        webServer: undefined,
 
         projects: [
             {
