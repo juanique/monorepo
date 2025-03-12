@@ -7,4 +7,3 @@ vite_webapp(
         "//examples/webapp/ts/src:main",
     ],
 )
-

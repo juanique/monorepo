@@ -1,0 +1,12 @@
+load("@bazel_gazelle//:def.bzl", "gazelle_generation_test")
+
+filegroup(
+    name = "test_data",
+    srcs = glob(["**/*"]),
+)
+
+gazelle_generation_test(
+    name = "gazelle_plugins_test",
+    gazelle_binary = "//:gazelle_binary",
+    test_data = [":test_data"],
+)
