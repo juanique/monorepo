@@ -1,10 +1,7 @@
 load("//bazel/js:js.bzl", "js_binary")
 
 js_binary(
-    name = "main",
-    data = [
-        "main.js",
-        "//examples/js/js_library/formatter",
-    ],
-    entry_point = ":main.js",
+    name = "js_library",
+    srcs = ["main.js"],
+    deps = ["//examples/js/js_library/formatter"],
 )

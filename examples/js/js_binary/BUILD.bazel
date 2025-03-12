@@ -1,7 +1,6 @@
-load("@aspect_rules_js//js:defs.bzl", "js_binary")
+load("//bazel/js:js.bzl", "js_binary")
 
 js_binary(
-    name = "main",
-    data = ["main.js"],
-    entry_point = ":main.js",
+    name = "js_binary",
+    srcs = ["main.js"],
 )

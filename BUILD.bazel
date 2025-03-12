@@ -1,5 +1,4 @@
 load("@npm//:vite/package_json.bzl", "bin")
-load("@aspect_rules_js//js:defs.bzl", "js_run_binary")
 load("@bazel_gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary")
 load("@buildifier_prebuilt//:rules.bzl", "buildifier")
 load("@pip_deps//:requirements.bzl", "all_whl_requirements")
@@ -10,19 +9,19 @@ load("@rules_python_gazelle_plugin//modules_mapping:def.bzl", "modules_mapping")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_config")
 load("@npm//:defs.bzl", "npm_link_all_packages")
 
-
 exports_files([
     "pyproject.toml",
     "mypy.ignore",
     ".swcrc",
     "tsconfig.json",
+    "package.json",
 ])
 
 apko_bazelrc()
 
 bin.vite_binary(
-    visibility = ["//visibility:public"],
     name = "vite.bin",
+    visibility = ["//visibility:public"],
 )
 ### Proto resolve
 # gazelle:resolve py examples.grpc.protos.helloworld_pb2 //examples/grpc/protos:helloworld_py_proto
@@ -42,6 +41,7 @@ gazelle_binary(
     name = "gazelle_binary",
     languages = DEFAULT_LANGUAGES + [
         "@rules_python_gazelle_plugin//python",
+        "//bazel/gazelle/language/ts",
     ],
     visibility = ["//visibility:public"],
 )

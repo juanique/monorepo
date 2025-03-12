@@ -1,0 +1,3 @@
+load("//bazel/ts:defs.bzl", "ts_library")
+
+# This file intentionally empty - Gazelle should generate the appropriate rule

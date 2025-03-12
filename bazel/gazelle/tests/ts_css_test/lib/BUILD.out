@@ -1,0 +1,7 @@
+load("//bazel/ts:defs.bzl", "ts_library")
+
+ts_library(
+    name = "lib",
+    srcs = ["component.ts"],
+    data = ["styles.css"],
+)
