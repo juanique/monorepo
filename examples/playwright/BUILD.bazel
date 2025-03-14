@@ -1,0 +1,8 @@
+load("//bazel/playwright:defs.bzl", "playwright_test")
+
+playwright_test(
+    name = "test_lib",
+    srcs = ["example.spec.ts"],
+    tags = ["manual"],  # We can't run this test on CI because it sends requests to the internet
+    deps = ["//salsa/testing/playwright"],
+)

@@ -1,0 +1,1 @@
+exports_files(["playwright.config.tpl.ts"])
