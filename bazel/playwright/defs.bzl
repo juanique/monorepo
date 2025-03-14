@@ -19,7 +19,7 @@ playwright_config = rule(
     },
 )
 
-def playwright_test(name, srcs, deps = []):
+def playwright_test(name, srcs, deps = [], tags = []):
     playwright_config(
         name = "playwright.config.js",
     )
@@ -45,6 +45,7 @@ def playwright_test(name, srcs, deps = []):
             "test",
             "--config=$(rootpath :playwright.config.js)",
         ],
+        tags = tags,
         node_options = [
             "--import",
             "./$(rootpath //bazel/js/node:launcher)",
