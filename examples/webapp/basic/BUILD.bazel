@@ -4,8 +4,7 @@ vite_webapp(
     name = "webapp",
     srcs = [
         "index.html",
-        "style/style.css",
         "style/background.css",
+        "style/style.css",
     ],
 )
-
