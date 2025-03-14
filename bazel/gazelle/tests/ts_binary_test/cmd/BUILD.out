@@ -1,0 +1,10 @@
+load("//bazel/ts:defs.bzl", "ts_binary")
+
+ts_binary(
+    name = "cmd",
+    srcs = [
+        "main.ts",
+        "other.ts",
+    ],
+    deps = ["//lib"],
+)

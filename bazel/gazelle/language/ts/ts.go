@@ -104,6 +104,15 @@ func (*tsLang) Kinds() map[string]rule.KindInfo {
 				"deps": true,
 			},
 		},
+		"ts_binary": {
+			NonEmptyAttrs: map[string]bool{
+				"srcs": true,
+			},
+			MergeableAttrs: map[string]bool{
+				"srcs": true,
+				"deps": true,
+			},
+		},
 	}
 }
 
@@ -111,7 +120,7 @@ func (*tsLang) Loads() []rule.LoadInfo {
 	return []rule.LoadInfo{
 		{
 			Name:    "//bazel/ts:defs.bzl",
-			Symbols: []string{"ts_library"},
+			Symbols: []string{"ts_library", "ts_binary"},
 		},
 	}
 }
@@ -120,9 +129,13 @@ func (l *tsLang) GenerateRules(args language.GenerateArgs) language.GenerateResu
 	nilImport := 0
 	// Check if there are any .ts files in the package
 	var tsFiles []string
+	hasMainTs := false
 	for _, f := range args.RegularFiles {
 		if strings.HasSuffix(f, ".ts") || strings.HasSuffix(f, ".tsx") {
 			tsFiles = append(tsFiles, f)
+			if f == "main.ts" {
+				hasMainTs = true
+			}
 		}
 	}
 
@@ -139,8 +152,15 @@ func (l *tsLang) GenerateRules(args language.GenerateArgs) language.GenerateResu
 	}
 
 	dirName := filepath.Base(args.Dir)
-	// Create ts_library rule
-	r := rule.NewRule("ts_library", dirName)
+	// Create ts_binary rule if main.ts exists, otherwise create ts_library
+	var ruleKind string
+	if hasMainTs {
+		ruleKind = "ts_binary"
+	} else {
+		ruleKind = "ts_library"
+	}
+
+	r := rule.NewRule(ruleKind, dirName)
 	r.SetAttr("srcs", tsFiles)
 
 	if len(deps) > 0 {
