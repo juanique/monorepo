@@ -1,6 +1,6 @@
 load("//bazel/ts:defs.bzl", "ts_library")
 
-package(default_visibility = ["//examples/webapp:__subpackages__"])
+package(default_visibility = ["//examples:__subpackages__"])
 
 ts_library(
     name = "formatting",

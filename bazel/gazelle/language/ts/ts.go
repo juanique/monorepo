@@ -128,7 +128,7 @@ func (l *tsLang) GenerateRules(args language.GenerateArgs) language.GenerateResu
 	for _, f := range args.RegularFiles {
 		if strings.HasSuffix(f, ".ts") || strings.HasSuffix(f, ".tsx") {
 			tsFiles = append(tsFiles, f)
-			if f == "main.ts" {
+			if f == "main.ts" || f == "main.tsx" {
 				hasMainTs = true
 			}
 		} else if strings.HasSuffix(f, ".css") {
