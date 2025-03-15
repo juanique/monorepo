@@ -1,13 +1,12 @@
-load("//bazel/ts:defs.bzl", "ts_library")
+load("//bazel/playwright:defs.bzl", "playwright_test")
 
-ts_library(
-    name = "playwright",
-    srcs = [
-        "example.spec.ts",
-        "playwright.config.js",
-    ],
+# TODO: Add playwright support to gazelle
+# gazelle:exclude ./
+
+playwright_test(
+    name = "test",
+    srcs = ["example.spec.ts"],
     deps = [
-        "//:node_modules/@playwright/test",
         "//salsa/testing/playwright",
     ],
 )
