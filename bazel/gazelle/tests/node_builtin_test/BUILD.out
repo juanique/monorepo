@@ -1,0 +1,7 @@
+load("//bazel/ts:defs.bzl", "ts_library")
+
+ts_library(
+    name = "node_builtin_test",
+    srcs = ["file.ts"],
+    deps = ["//:node_modules/@types/node"],
+)

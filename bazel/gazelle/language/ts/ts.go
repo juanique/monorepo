@@ -18,6 +18,22 @@ import (
 	"github.com/juanique/monorepo/salsa/go/files"
 )
 
+var nodeBuiltins = map[string]bool{
+	"fs":      true,
+	"path":    true,
+	"crypto":  true,
+	"http":    true,
+	"https":   true,
+	"url":     true,
+	"util":    true,
+	"os":      true,
+	"stream":  true,
+	"events":  true,
+	"buffer":  true,
+	"process": true,
+	// Add other Node.js built-in modules as needed
+}
+
 type packageJSON struct {
 	Dependencies    map[string]string `json:"dependencies"`
 	DevDependencies map[string]string `json:"devDependencies"`
@@ -245,18 +261,40 @@ func (l *tsLang) processImports(filePath string, deps map[string]bool, args lang
 
 		// Case 1: Package from package.json
 		if !strings.HasPrefix(importPath, ".") && !strings.HasPrefix(importPath, "/") {
-			packageName := strings.Split(importPath, "/")[0]
-
-			dep := l.GetThirdPartyImport(args, packageName)
-			if dep != "" {
-				deps[dep] = true
-				// Check for @types package
-				typesPackage := "@types/" + packageName
-
-				if typesDep := l.GetThirdPartyImport(args, typesPackage); typesDep != "" {
-					deps[typesDep] = true
+			// For scoped packages (e.g. @playwright/test), we need to keep the full name
+			if strings.HasPrefix(importPath, "@") {
+				parts := strings.SplitN(importPath, "/", 3)
+				if len(parts) >= 2 {
+					packageName := parts[0] + "/" + parts[1]
+					dep := l.GetThirdPartyImport(args, packageName)
+					if dep != "" {
+						deps[dep] = true
+						continue
+					}
 				}
-				continue
+			} else {
+				// For regular packages, just take the first part
+				packageName := strings.Split(importPath, "/")[0]
+
+				// Check if it's a Node.js built-in module
+				if nodeBuiltins[packageName] {
+					// Only add @types/node as dependency
+					if typesDep := l.GetThirdPartyImport(args, "@types/node"); typesDep != "" {
+						deps[typesDep] = true
+					}
+					continue
+				}
+
+				dep := l.GetThirdPartyImport(args, packageName)
+				if dep != "" {
+					deps[dep] = true
+					// Check for @types package
+					typesPackage := "@types/" + packageName
+					if typesDep := l.GetThirdPartyImport(args, typesPackage); typesDep != "" {
+						deps[typesDep] = true
+					}
+					continue
+				}
 			}
 		}
 
