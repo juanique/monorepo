@@ -7,7 +7,7 @@ ts_library(
         "playwright.config.js",
     ],
     deps = [
-        "//@playwright",
+        "//:node_modules/@playwright/test",
         "//salsa/testing/playwright",
     ],
 )
