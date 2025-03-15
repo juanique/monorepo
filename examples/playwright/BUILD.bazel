@@ -2,7 +2,10 @@ load("//bazel/ts:defs.bzl", "ts_library")
 
 ts_library(
     name = "playwright",
-    srcs = ["example.spec.ts"],
+    srcs = [
+        "example.spec.ts",
+        "playwright.config.js",
+    ],
     deps = [
         "//@playwright",
         "//salsa/testing/playwright",

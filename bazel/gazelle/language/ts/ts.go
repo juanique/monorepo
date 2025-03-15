@@ -107,6 +107,24 @@ func (*tsLang) Kinds() map[string]rule.KindInfo {
 				"deps": true,
 			},
 		},
+		"js_library": {
+			NonEmptyAttrs: map[string]bool{
+				"srcs": true,
+			},
+			MergeableAttrs: map[string]bool{
+				"srcs": true,
+				"deps": true,
+			},
+		},
+		"js_binary": {
+			NonEmptyAttrs: map[string]bool{
+				"srcs": true,
+			},
+			MergeableAttrs: map[string]bool{
+				"srcs": true,
+				"deps": true,
+			},
+		},
 	}
 }
 
@@ -116,49 +134,73 @@ func (*tsLang) Loads() []rule.LoadInfo {
 			Name:    "//bazel/ts:defs.bzl",
 			Symbols: []string{"ts_library", "ts_binary"},
 		},
+		{
+			Name:    "//bazel/js:js.bzl",
+			Symbols: []string{"js_library", "js_binary"},
+		},
 	}
 }
 
 func (l *tsLang) GenerateRules(args language.GenerateArgs) language.GenerateResult {
 	nilImport := 0
-	// Check if there are any .ts files in the package
 	var tsFiles []string
+	var jsFiles []string
 	var cssFiles []string
 	hasMainTs := false
+	hasMainJs := false
+
 	for _, f := range args.RegularFiles {
 		if strings.HasSuffix(f, ".ts") || strings.HasSuffix(f, ".tsx") {
 			tsFiles = append(tsFiles, f)
 			if f == "main.ts" || f == "main.tsx" {
 				hasMainTs = true
 			}
+		} else if strings.HasSuffix(f, ".js") || strings.HasSuffix(f, ".jsx") {
+			jsFiles = append(jsFiles, f)
+			if f == "main.js" || f == "main.jsx" {
+				hasMainJs = true
+			}
 		} else if strings.HasSuffix(f, ".css") {
 			cssFiles = append(cssFiles, f)
 		}
 	}
 
-	if len(tsFiles) == 0 {
+	if len(tsFiles) == 0 && len(jsFiles) == 0 {
 		return language.GenerateResult{}
 	}
 
 	deps := make(map[string]bool)
 
-	// Process imports in each file
-	for _, file := range tsFiles {
+	// Process imports in all files
+	for _, file := range append(tsFiles, jsFiles...) {
 		filePath := filepath.Join(args.Dir, file)
 		l.processImports(filePath, deps, args)
 	}
 
 	dirName := filepath.Base(args.Dir)
-	// Create ts_binary rule if main.ts exists, otherwise create ts_library
 	var ruleKind string
-	if hasMainTs {
-		ruleKind = "ts_binary"
+	var srcs []string
+
+	// If we have any TypeScript files, use ts_* rules
+	if len(tsFiles) > 0 {
+		srcs = append(tsFiles, jsFiles...)
+		if hasMainTs {
+			ruleKind = "ts_binary"
+		} else {
+			ruleKind = "ts_library"
+		}
 	} else {
-		ruleKind = "ts_library"
+		// JavaScript only
+		srcs = jsFiles
+		if hasMainJs {
+			ruleKind = "js_binary"
+		} else {
+			ruleKind = "js_library"
+		}
 	}
 
 	r := rule.NewRule(ruleKind, dirName)
-	r.SetAttr("srcs", tsFiles)
+	r.SetAttr("srcs", srcs)
 
 	if len(cssFiles) > 0 {
 		r.SetAttr("data", cssFiles)
