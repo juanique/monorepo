@@ -1,5 +1,7 @@
 load("@bazel_gazelle//:def.bzl", "gazelle_generation_test")
 
+# gazelle:exclude ./
+
 filegroup(
     name = "test_data",
     srcs = glob(["**/*"]),
