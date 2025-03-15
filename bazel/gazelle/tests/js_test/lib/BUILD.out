@@ -1,0 +1,6 @@
+load("//bazel/js:js.bzl", "js_library")
+
+js_library(
+    name = "lib",
+    srcs = ["utils.js"],
+)

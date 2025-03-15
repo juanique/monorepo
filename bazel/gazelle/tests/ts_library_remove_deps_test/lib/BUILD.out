@@ -1,0 +1,6 @@
+load("//bazel/ts:defs.bzl", "ts_library")
+
+ts_library(
+    name = "lig",
+    srcs = ["first.ts"],
+)

@@ -4,6 +4,6 @@ vite_webapp(
     name = "webapp",
     srcs = [
         "index.html",
-        "//examples/webapp/tsx/src:main",
+        "//examples/webapp/tsx/src",
     ],
 )

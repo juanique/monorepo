@@ -1,1 +1,3 @@
 exports_files(["playwright.config.tpl.ts"])
+
+# gazelle:exclude ./playwright.config.tpl.ts

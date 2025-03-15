@@ -1,0 +1,3 @@
+load("//bazel/js:js.bzl", "js_binary")
+
+# This file intentionally empty - Gazelle should generate the appropriate rule
