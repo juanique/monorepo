@@ -1,8 +1,10 @@
-load("//bazel/playwright:defs.bzl", "playwright_test")
+load("//bazel/ts:defs.bzl", "ts_library")
 
-playwright_test(
-    name = "test_lib",
+ts_library(
+    name = "playwright",
     srcs = ["example.spec.ts"],
-    tags = ["manual"],  # We can't run this test on CI because it sends requests to the internet
-    deps = ["//salsa/testing/playwright"],
+    deps = [
+        "//@playwright",
+        "//salsa/testing/playwright",
+    ],
 )

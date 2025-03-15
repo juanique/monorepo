@@ -27,12 +27,6 @@ type tsLang struct {
 	packageJSON *packageJSON
 }
 
-func debug(args ...any) {
-	if true {
-		log.Println(args...)
-	}
-}
-
 func NewLanguage() language.Language {
 	return &tsLang{}
 }
@@ -129,6 +123,7 @@ func (l *tsLang) GenerateRules(args language.GenerateArgs) language.GenerateResu
 	nilImport := 0
 	// Check if there are any .ts files in the package
 	var tsFiles []string
+	var cssFiles []string
 	hasMainTs := false
 	for _, f := range args.RegularFiles {
 		if strings.HasSuffix(f, ".ts") || strings.HasSuffix(f, ".tsx") {
@@ -136,6 +131,8 @@ func (l *tsLang) GenerateRules(args language.GenerateArgs) language.GenerateResu
 			if f == "main.ts" {
 				hasMainTs = true
 			}
+		} else if strings.HasSuffix(f, ".css") {
+			cssFiles = append(cssFiles, f)
 		}
 	}
 
@@ -162,6 +159,10 @@ func (l *tsLang) GenerateRules(args language.GenerateArgs) language.GenerateResu
 
 	r := rule.NewRule(ruleKind, dirName)
 	r.SetAttr("srcs", tsFiles)
+
+	if len(cssFiles) > 0 {
+		r.SetAttr("data", cssFiles)
+	}
 
 	if len(deps) > 0 {
 		depsList := make([]string, 0, len(deps))

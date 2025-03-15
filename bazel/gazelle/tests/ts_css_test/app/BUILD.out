@@ -1,6 +1,8 @@
 load("//bazel/ts:defs.bzl", "ts_binary")
 
 ts_binary(
-    name = "ts_binary",
+    name = "app",
     srcs = ["main.ts"],
+    data = ["app.css"],
+    deps = ["//lib"],
 )
