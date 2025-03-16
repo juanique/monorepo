@@ -3,9 +3,14 @@ load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@bazel_skylib//lib:partial.bzl", "partial")
 load("//bazel/js:js.bzl", "js_binary")
 
-def ts_binary(name, srcs = [], deps = [], **kwargs):
-    if len(srcs) != 1:
-        fail("ts_binary must have exactly one src which is the entrypoint")
+def ts_binary(name, srcs = [], deps = [], entry_point = "", **kwargs):
+    for src in srcs:
+        if src in ["main.ts", "main.tsx", "main.js"]:
+            entry_point = src
+            break
+
+    if not entry_point:
+        fail("Missing main.ts, main.tsx or main.js in srcs for binary")
 
     lib_name = "_" + name + ".lib"
     ts_library(
@@ -14,16 +19,15 @@ def ts_binary(name, srcs = [], deps = [], **kwargs):
         deps = deps,
     )
 
-    entrypoint = srcs[0]
-    if entrypoint.endswith(".ts"):
-        entrypoint = entrypoint[:-3] + ".js"
-    if entrypoint.endswith(".tsx"):
-        entrypoint = entrypoint[:-4] + ".js"
+    if entry_point.endswith(".ts"):
+        entry_point = entry_point[:-3] + ".js"
+    if entry_point.endswith(".tsx"):
+        entry_point = entry_point[:-4] + ".js"
 
     js_binary(
         name = "main",
         data = [":" + lib_name],
-        entry_point = entrypoint,
+        entry_point = entry_point,
     )
 
 def ts_library(name, srcs = [], deps = [], **kwargs):

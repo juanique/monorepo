@@ -1,16 +1,22 @@
 package files
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 )
 
-func FileExists(filename string) bool {
+func FileExists(filename string) (bool, error) {
 	info, err := os.Stat(filename)
 	if os.IsNotExist(err) {
-		return false
+		return false, nil
 	}
-	return !info.IsDir()
+
+	if err != nil {
+		return false, fmt.Errorf("failed to check if file exists: %w", err)
+	}
+
+	return !info.IsDir(), nil
 }
 
 // CreateSymLink creates a symbolic link from src to dest.

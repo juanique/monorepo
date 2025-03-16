@@ -268,7 +268,11 @@ func (b *ImageBuilder) Build(i Image, opts BuildOpts) (string, error) {
 	tarInputs := []string{}
 	for _, file := range b.filesToCopy {
 		if file.src != file.dst {
-			if files.FileExists(file.dst) {
+			exists, err := files.FileExists(file.dst)
+			if err != nil {
+				return "", err
+			}
+			if exists {
 				// TOOD(juan.munoz): Why does this happen sometimes? how should we handle it?
 				continue
 			}
