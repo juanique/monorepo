@@ -6,6 +6,7 @@ load("//bazel/playwright:defs.bzl", "playwright_test")
 playwright_test(
     name = "test",
     srcs = ["example.spec.ts"],
+    tags = ["manual"], # sends network requests, cant run on CI
     deps = [
         "//salsa/testing/playwright",
     ],
