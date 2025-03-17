@@ -141,6 +141,15 @@ func (*tsLang) Kinds() map[string]rule.KindInfo {
 				"deps": true,
 			},
 		},
+		"playwright_test": {
+			NonEmptyAttrs: map[string]bool{
+				"srcs": true,
+			},
+			MergeableAttrs: map[string]bool{
+				"srcs": true,
+				"deps": true,
+			},
+		},
 	}
 }
 
@@ -154,6 +163,10 @@ func (*tsLang) Loads() []rule.LoadInfo {
 			Name:    "//bazel/js:js.bzl",
 			Symbols: []string{"js_library", "js_binary"},
 		},
+		{
+			Name:    "//bazel/playwright:defs.bzl",
+			Symbols: []string{"playwright_test"},
+		},
 	}
 }
 
@@ -161,12 +174,15 @@ func (l *tsLang) GenerateRules(args language.GenerateArgs) language.GenerateResu
 	nilImport := 0
 	var tsFiles []string
 	var jsFiles []string
+	var playwrightTestFiles []string
 	var cssFiles []string
 	hasMainTs := false
 	hasMainJs := false
 
 	for _, f := range args.RegularFiles {
-		if strings.HasSuffix(f, ".ts") || strings.HasSuffix(f, ".tsx") {
+		if strings.HasSuffix(f, ".pw.spec.ts") || strings.HasSuffix(f, ".pw.spec.js") {
+			playwrightTestFiles = append(playwrightTestFiles, f)
+		} else if strings.HasSuffix(f, ".ts") || strings.HasSuffix(f, ".tsx") {
 			tsFiles = append(tsFiles, f)
 			if f == "main.ts" || f == "main.tsx" {
 				hasMainTs = true
@@ -181,58 +197,81 @@ func (l *tsLang) GenerateRules(args language.GenerateArgs) language.GenerateResu
 		}
 	}
 
-	if len(tsFiles) == 0 && len(jsFiles) == 0 {
+	if len(tsFiles) == 0 && len(jsFiles) == 0 && len(playwrightTestFiles) == 0 {
 		return language.GenerateResult{}
 	}
 
 	deps := make(map[string]bool)
+	var rules []*rule.Rule
 
 	// Process imports in all files
-	for _, file := range append(tsFiles, jsFiles...) {
+	for _, file := range append(append(tsFiles, jsFiles...), playwrightTestFiles...) {
 		filePath := filepath.Join(args.Dir, file)
 		l.processImports(filePath, deps, args)
 	}
 
-	dirName := filepath.Base(args.Dir)
-	var ruleKind string
-	var srcs []string
+	// Generate playwright test rules first
+	for _, testFile := range playwrightTestFiles {
+		testName := strings.TrimSuffix(strings.TrimSuffix(testFile, ".pw.spec.js"), ".pw.spec.ts")
 
-	// If we have any TypeScript files, use ts_* rules
-	if len(tsFiles) > 0 {
-		srcs = append(tsFiles, jsFiles...)
-		if hasMainTs {
-			ruleKind = "ts_binary"
-		} else {
-			ruleKind = "ts_library"
+		r := rule.NewRule("playwright_test", testName+"_test")
+		r.SetAttr("srcs", []string{testFile})
+
+		if len(deps) > 0 {
+			depsList := make([]string, 0, len(deps))
+			for dep := range deps {
+				depsList = append(depsList, dep)
+			}
+			r.SetAttr("deps", depsList)
 		}
-	} else {
-		// JavaScript only
-		srcs = jsFiles
-		if hasMainJs {
-			ruleKind = "js_binary"
-		} else {
-			ruleKind = "js_library"
-		}
+		rules = append(rules, r)
 	}
 
-	r := rule.NewRule(ruleKind, dirName)
-	r.SetAttr("srcs", srcs)
+	// Only generate library/binary rules if we have non-test files
+	if len(tsFiles) > 0 || len(jsFiles) > 0 {
+		dirName := filepath.Base(args.Dir)
+		var ruleKind string
+		var srcs []string
 
-	if len(cssFiles) > 0 {
-		r.SetAttr("data", cssFiles)
-	}
-
-	if len(deps) > 0 {
-		depsList := make([]string, 0, len(deps))
-		for dep := range deps {
-			depsList = append(depsList, dep)
+		// If we have any TypeScript files, use ts_* rules
+		if len(tsFiles) > 0 {
+			srcs = append(tsFiles, jsFiles...)
+			if hasMainTs {
+				ruleKind = "ts_binary"
+			} else {
+				ruleKind = "ts_library"
+			}
+		} else {
+			// JavaScript only
+			srcs = jsFiles
+			if hasMainJs {
+				ruleKind = "js_binary"
+			} else {
+				ruleKind = "js_library"
+			}
 		}
-		r.SetAttr("deps", depsList)
+
+		r := rule.NewRule(ruleKind, dirName)
+		r.SetAttr("srcs", srcs)
+
+		if len(cssFiles) > 0 {
+			r.SetAttr("data", cssFiles)
+		}
+
+		if len(deps) > 0 {
+			depsList := make([]string, 0, len(deps))
+			for dep := range deps {
+				depsList = append(depsList, dep)
+			}
+			r.SetAttr("deps", depsList)
+		}
+
+		rules = append(rules, r)
 	}
 
 	imports := []interface{}{nilImport}
 	return language.GenerateResult{
-		Gen:     []*rule.Rule{r},
+		Gen:     rules,
 		Imports: imports,
 	}
 }

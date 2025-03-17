@@ -1,13 +1,11 @@
 load("//bazel/playwright:defs.bzl", "playwright_test")
 
-# TODO: Add playwright support to gazelle
-# gazelle:exclude ./
-
 playwright_test(
-    name = "test",
-    srcs = ["example.spec.ts"],
-    tags = ["manual"], # sends network requests, cant run on CI
+    name = "example_test",
+    srcs = ["example.pw.spec.ts"],
+    tags = ["manual"],  # sends network requests, cant run on CI
     deps = [
+        "//:node_modules/@playwright/test",
         "//salsa/testing/playwright",
     ],
 )

@@ -24,6 +24,10 @@ def playwright_test(name, srcs, deps = [], tags = []):
         name = "playwright.config.js",
     )
 
+    deps = list(deps)
+    if not "//:node_modules/@playwright/test" in deps:
+        deps.append("//:node_modules/@playwright/test")
+
     ts_project(
         name = name + ".lib",
         srcs = srcs,
@@ -34,9 +38,7 @@ def playwright_test(name, srcs, deps = [], tags = []):
             swcrc = "//:.swcrc",
         ),
         tsconfig = "//:tsconfig",
-        deps = [
-            "//:node_modules/@playwright/test",
-        ] + deps,
+        deps = deps,
     )
 
     bin.playwright_test(
