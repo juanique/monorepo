@@ -141,15 +141,6 @@ func (*tsLang) Kinds() map[string]rule.KindInfo {
 				"deps": true,
 			},
 		},
-		"jest_test": {
-			NonEmptyAttrs: map[string]bool{
-				"srcs": true,
-			},
-			MergeableAttrs: map[string]bool{
-				"srcs": true,
-				"deps": true,
-			},
-		},
 		"playwright_test": {
 			NonEmptyAttrs: map[string]bool{
 				"srcs": true,
