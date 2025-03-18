@@ -1,0 +1,6 @@
+load("//bazel/ts:defs.bzl", "ts_binary")
+
+ts_binary(
+    name = "bot",
+    srcs = ["main.ts"],
+)
