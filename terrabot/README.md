@@ -1,5 +1,5 @@
 # Terrabot
 
 ```
-bazel run //terrabot/bot:main
+bazel run //terrabot/bot
 ```
