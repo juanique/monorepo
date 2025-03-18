@@ -25,7 +25,7 @@ def ts_binary(name, srcs = [], deps = [], entry_point = "", **kwargs):
         entry_point = entry_point[:-4] + ".js"
 
     js_binary(
-        name = "main",
+        name = name,
         data = [":" + lib_name],
         entry_point = entry_point,
     )
