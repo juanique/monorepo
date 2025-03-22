@@ -2,5 +2,9 @@ load("//bazel/ts:defs.bzl", "ts_binary")
 
 ts_binary(
     name = "bot",
-    srcs = ["main.ts"],
+    srcs = [
+        "bot.ts",
+        "main.ts",
+    ],
+    deps = ["//:node_modules/telegraf"],
 )
