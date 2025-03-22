@@ -1,19 +1,36 @@
 import { Telegraf } from 'telegraf';
 import { message } from 'telegraf/filters';
+import { LLMClient } from '../llm/llm';
 
 export class Terrabot {
     private bot: Telegraf;
+    private llm?: LLMClient;
 
-    constructor(apiKey: string) {
-        this.bot = new Telegraf(apiKey);
+    constructor(telegramApiKey: string, llm?: LLMClient) {
+        this.bot = new Telegraf(telegramApiKey);
+        this.llm = llm;
         this.setupHandlers();
     }
 
     private setupHandlers() {
         // Handle text messages
-        this.bot.on(message('text'), (ctx) => {
+        this.bot.on(message('text'), async (ctx) => {
             console.log('Received text:', ctx.message.text);
-            ctx.reply('Hello!');
+            
+            if (ctx.message.text.toLowerCase() === '@walk_the_terrabot tell me a joke') {
+                if (this.llm) {
+                    try {
+                        const joke = await this.llm.getCompletion('Tell me a short, funny joke');
+                        await ctx.reply(joke);
+                    } catch (error) {
+                        console.error('Error getting joke:', error);
+                        await ctx.reply('Sorry, I had trouble thinking of a joke right now 😅');
+                    }
+                } else {
+                    await ctx.reply('Sorry, I don\'t know any jokes yet! My joke module isn\'t configured 😅');
+                }
+                return;
+            }
         });
 
         // Handle stickers

@@ -1,0 +1,9 @@
+load("//bazel/ts:defs.bzl", "ts_library")
+
+package(default_visibility = ["//terrabot:__subpackages__"])
+
+ts_library(
+    name = "llm",
+    srcs = ["llm.ts"],
+    deps = ["//:node_modules/openai"],
+)

@@ -6,5 +6,9 @@ ts_binary(
         "bot.ts",
         "main.ts",
     ],
-    deps = ["//:node_modules/telegraf"],
+    deps = [
+        "//:node_modules/commander",
+        "//:node_modules/telegraf",
+        "//terrabot/llm",
+    ],
 )
