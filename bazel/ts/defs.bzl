@@ -31,6 +31,11 @@ def ts_binary(name, srcs = [], deps = [], entry_point = "", **kwargs):
     )
 
 def ts_library(name, srcs = [], deps = [], **kwargs):
+    # Not sure if there's any harm in adding this to all ts_library, in particular web targets.
+    deps = list(deps)
+    if "//:node_modules/@types/node" not in deps:
+        deps.append("//:node_modules/@types/node")
+
     ts_project(
         name = name,
         srcs = srcs,

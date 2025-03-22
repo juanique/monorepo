@@ -1,4 +1,5 @@
 import { Telegraf } from 'telegraf';
+import { message } from 'telegraf/filters';
 
 export class Terrabot {
     private bot: Telegraf;
@@ -9,17 +10,18 @@ export class Terrabot {
     }
 
     private setupHandlers() {
-        this.bot.on('message', (ctx) => {
-            if (ctx.message.text) {
-                console.log('Received message:', ctx.message.text);
-            }
+        // Handle text messages
+        this.bot.on(message('text'), (ctx) => {
+            console.log('Received text:', ctx.message.text);
             ctx.reply('Hello!');
         });
 
-        this.bot.on('sticker', (ctx) => {
+        // Handle stickers
+        this.bot.on(message('sticker'), (ctx) => {
             console.log('Received sticker:', ctx.message.sticker.emoji);
         });
 
+        // Handle channel posts
         this.bot.on('channel_post', (ctx) => {
             if ('text' in ctx.channelPost) {
                 ctx.reply(`Channel post received: ${ctx.channelPost.text}`);
