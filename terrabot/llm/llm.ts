@@ -15,16 +15,11 @@ export class LLMClient {
      * @returns The generated response text
      */
     async getCompletion(prompt: string): Promise<string> {
-        try {
-            const completion = await this.client.chat.completions.create({
-                messages: [{ role: 'user', content: prompt }],
-                model: 'gpt-3.5-turbo',
-            });
+        const completion = await this.client.chat.completions.create({
+            messages: [{ role: 'user', content: prompt }],
+            model: 'gpt-3.5-turbo',
+        });
 
-            return completion.choices[0]?.message?.content || '';
-        } catch (error) {
-            console.error('Error getting completion:', error);
-            throw error;
-        }
+        return completion.choices[0]?.message?.content || '';
     }
 }
