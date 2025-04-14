@@ -302,20 +302,19 @@ rules_foreign_cc_dependencies()
 # rules OCI
 http_archive(
     name = "rules_oci",
-    sha256 = "46ce9edcff4d3d7b3a550774b82396c0fa619cc9ce9da00c1b09a08b45ea5a14",
-    strip_prefix = "rules_oci-1.8.0",
-    url = "https://github.com/bazel-contrib/rules_oci/releases/download/v1.8.0/rules_oci-v1.8.0.tar.gz",
+    sha256 = "bac146b80d80e2b941965a1b983dd0e3499d4fc49f003319d6de04e9c2f687ac",
+    strip_prefix = "rules_oci-e389ddeed00139eaec9ca24689fa71079725d8ab",
+    url = "https://github.com/bazel-contrib/rules_oci/archive/e389ddeed00139eaec9ca24689fa71079725d8ab.zip",
 )
 
 load("@rules_oci//oci:dependencies.bzl", "rules_oci_dependencies")
 
 rules_oci_dependencies()
 
-load("@rules_oci//oci:repositories.bzl", "LATEST_CRANE_VERSION", "oci_register_toolchains")
+load("@rules_oci//oci:repositories.bzl", "oci_register_toolchains")
 
 oci_register_toolchains(
     name = "oci",
-    crane_version = LATEST_CRANE_VERSION,
 )
 
 load("//third_party:oci_containers.bzl", "load_oci_images")
