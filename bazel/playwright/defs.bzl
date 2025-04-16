@@ -1,8 +1,8 @@
 load("@aspect_rules_swc//swc:defs.bzl", "swc")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@bazel_skylib//lib:partial.bzl", "partial")
-load("@npm//:@playwright/test/package_json.bzl", "bin")
 load("@npm//:@playwright/experimental-ct-react/package_json.bzl", ct_bin = "bin")
+load("@npm//:@playwright/test/package_json.bzl", "bin")
 
 def _playwright_config_impl(ctx):
     output_file = ctx.actions.declare_file(ctx.attr.name)
@@ -46,7 +46,7 @@ def playwright_test(name, srcs, deps = [], tags = []):
         name = "test",
         args = [
             "test",
-            "--config=$(rootpath :playwright.config.js)",
+            "--config=$(rootpath :playwright.component.config.js)",
         ],
         tags = tags,
         node_options = [
@@ -87,7 +87,7 @@ def playwright_component_test(name, srcs, deps = [], tags = [], data = []):
     )
 
     ct_bin.playwright_test(
-        name = "test",
+        name = name,
         args = [
             "test",
             "-c",
