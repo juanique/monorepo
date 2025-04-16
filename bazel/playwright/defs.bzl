@@ -2,6 +2,7 @@ load("@aspect_rules_swc//swc:defs.bzl", "swc")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@bazel_skylib//lib:partial.bzl", "partial")
 load("@npm//:@playwright/test/package_json.bzl", "bin")
+load("@npm//:@playwright/experimental-ct-react/package_json.bzl", ct_bin = "bin")
 
 def _playwright_config_impl(ctx):
     output_file = ctx.actions.declare_file(ctx.attr.name)
@@ -58,6 +59,51 @@ def playwright_test(name, srcs, deps = [], tags = []):
             "//third_party/binaries:chromium",
             "//bazel/js/node:launcher",
         ],
+        env = {
+            "CHROMIUM_BIN": "$(rootpath //third_party/binaries:chromium)",
+        },
+    )
+
+def playwright_component_test(name, srcs, deps = [], tags = [], data = []):
+    playwright_config(
+        name = "playwright.config.js",
+    )
+
+    deps = list(deps)
+    if not "//:node_modules/@playwright/experimental-ct-react" in deps:
+        deps.append("//:node_modules/@playwright/experimental-ct-react")
+
+    ts_project(
+        name = name + ".lib",
+        srcs = srcs,
+        declaration = True,
+        transpiler = partial.make(
+            swc,
+            source_maps = "true",
+            swcrc = "//:.swcrc",
+        ),
+        tsconfig = "//:tsconfig",
+        deps = deps,
+    )
+
+    ct_bin.playwright_test(
+        name = "test",
+        args = [
+            "test",
+            "-c",
+            "$(rootpath :playwright.config.js)",
+        ],
+        tags = tags,
+        node_options = [
+            "--import",
+            "./$(rootpath //bazel/js/node:launcher)",
+        ],
+        data = [
+            ":playwright.config.js",
+            ":" + name + ".lib",
+            "//third_party/binaries:chromium",
+            "//bazel/js/node:launcher",
+        ] + data,
         env = {
             "CHROMIUM_BIN": "$(rootpath //third_party/binaries:chromium)",
         },
