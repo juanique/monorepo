@@ -1,0 +1,14 @@
+load("//bazel/ts:defs.bzl", "ts_binary")
+
+ts_binary(
+    name = "bot",
+    srcs = [
+        "bot.ts",
+        "main.ts",
+    ],
+    deps = [
+        "//:node_modules/commander",
+        "//:node_modules/telegraf",
+        "//terrabot/llm",
+    ],
+)
