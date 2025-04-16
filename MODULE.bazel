@@ -11,7 +11,7 @@ bazel_dep(name = "aspect_rules_ts", version = "3.3.1")
 bazel_dep(name = "rules_perl", version = "0.2.4")
 
 # NodeJS version is determined by rules_nodejs default
-bazel_dep(name = "rules_nodejs", version = "6.3.4")
+bazel_dep(name = "rules_nodejs", version = "6.3.0")
 
 archive_override(
     module_name = "aspect_rules_js",
