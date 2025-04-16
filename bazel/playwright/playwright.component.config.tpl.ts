@@ -3,6 +3,9 @@ import fs from 'fs/promises'; // Note the /promises for async/await
 
 console.log(process.version);
 
+
+// TODO: playwright component testing seems to expect an index.html file.
+// One option would be to write the file here, another option is to have bazel provide the file.
 async function createIndexHtml() {
     const content = `
 <html lang="en">
