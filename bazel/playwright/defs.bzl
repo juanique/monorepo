@@ -43,7 +43,7 @@ def playwright_test(name, srcs, deps = [], tags = []):
     )
 
     bin.playwright_test(
-        name = "test",
+        name = name,
         args = [
             "test",
             "--config=$(rootpath :playwright.component.config.js)",
