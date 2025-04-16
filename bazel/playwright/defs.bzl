@@ -7,7 +7,7 @@ load("@npm//:@playwright/test/package_json.bzl", "bin")
 def _playwright_config_impl(ctx):
     output_file = ctx.actions.declare_file(ctx.attr.name)
     ctx.actions.expand_template(
-        template = ctx.file._config_tpl,
+        template = ctx.file.config_tpl,
         output = output_file,
         substitutions = {},
     )
@@ -16,7 +16,7 @@ def _playwright_config_impl(ctx):
 playwright_config = rule(
     implementation = _playwright_config_impl,
     attrs = {
-        "_config_tpl": attr.label(allow_single_file = True, default = "//bazel/playwright:playwright.config.tpl.ts"),
+        "config_tpl": attr.label(allow_single_file = True, default = "//bazel/playwright:playwright.config.tpl.ts"),
     },
 )
 
@@ -67,6 +67,7 @@ def playwright_test(name, srcs, deps = [], tags = []):
 def playwright_component_test(name, srcs, deps = [], tags = [], data = []):
     playwright_config(
         name = "playwright.config.js",
+        config_tpl = "//bazel/playwright:playwright.component.config.tpl.ts",
     )
 
     deps = list(deps)
