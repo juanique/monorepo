@@ -46,7 +46,7 @@ def playwright_test(name, srcs, deps = [], tags = []):
         name = name,
         args = [
             "test",
-            "--config=$(rootpath :playwright.component.config.js)",
+            "--config=$(rootpath :playwright.config.js)",
         ],
         tags = tags,
         node_options = [
