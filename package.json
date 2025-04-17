@@ -2,7 +2,6 @@
     "name": "monorepo",
     "type": "module",
     "dependencies": {
-        "@playwright/test": "^1.49.1",
         "@types/ink": "^2.0.3",
         "@types/react": "^18.3.12",
         "@vitejs/plugin-react": "^4.3.3",
@@ -24,6 +23,8 @@
         "vite": "^5.4.11"
     },
     "devDependencies": {
+        "@playwright/experimental-ct-react": "^1.51.1",
+        "@playwright/test": "^1.51.0",
         "@types/chart.js": "^2.9.41",
         "@types/figlet": "^1.7.0",
         "@types/node": "^22.13.10",
