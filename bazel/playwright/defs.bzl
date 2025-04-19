@@ -65,27 +65,36 @@ def playwright_test(name, srcs, deps = [], tags = []):
     )
 
 def playwright_component_test(name, srcs, deps = [], tags = [], data = []):
+    # Note: not using `name` will lead to collisions when multiple tests in single package (if we want to support it)
     playwright_config(
         name = "playwright.config.js",
         config_tpl = "//bazel/playwright:playwright.component.config.tpl.ts",
     )
 
+    # Note: can be better to either turn the config into a js_library or to make the playwright_config rule
+    # output a JsInfo group with these deps, so the handling below can be cleaned up a bit
+
     deps = list(deps)
-    if not "//:node_modules/@playwright/experimental-ct-react" in deps:
+    if "//:node_modules/@playwright/experimental-ct-react" not in deps:
         deps.append("//:node_modules/@playwright/experimental-ct-react")
 
-    ts_project(
-        name = name + ".lib",
-        srcs = srcs,
-        declaration = True,
-        transpiler = partial.make(
-            swc,
-            source_maps = "true",
-            swcrc = "//:.swcrc",
-        ),
-        tsconfig = "//:tsconfig",
-        deps = deps,
-    )
+    # Note: playwright component testing does not work with pre-transpiled sources;
+    # it must do its own transpilation in order to convert JSX component to their custom format
+    # that feeds to `mount`. Pre-transpiling results in "object notation" for the component,
+    # which is not supported currently.
+
+    #ts_project(
+    #    name = name + ".lib",
+    #    srcs = srcs,
+    #    declaration = True,
+    #    transpiler = partial.make(
+    #        swc,
+    #        source_maps = "true",
+    #        swcrc = "//:.swcrc",
+    #    ),
+    #    tsconfig = "//:tsconfig",
+    #    deps = deps,
+    #)
 
     ct_bin.playwright_test(
         name = name,
@@ -99,9 +108,9 @@ def playwright_component_test(name, srcs, deps = [], tags = [], data = []):
             "--import",
             "./$(rootpath //bazel/js/node:launcher)",
         ],
-        data = [
+        data = srcs + deps + [
             ":playwright.config.js",
-            ":" + name + ".lib",
+            #":" + name + ".lib",
             "//third_party/binaries:chromium",
             "//bazel/js/node:launcher",
         ] + data,
