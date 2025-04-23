@@ -39,7 +39,7 @@ def ts_library(name, srcs = [], deps = [], **kwargs):
     ts_project(
         name = name,
         srcs = srcs,
-        deps = deps,
+        deps = deps + ["//:package_json"],
         declaration = True,
         transpiler = partial.make(
             swc,
