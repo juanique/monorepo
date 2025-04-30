@@ -1253,7 +1253,8 @@ class GitGud:
         self._checkout(child.history_branch)
         commit_msg = commit_msg or f"Merge commit {parent.id}"
         try:
-            run_git_command_with_retries(self.repo.git.merge, "--no-ff", "--no-commit", parent.history_branch)
+            run_git_command_with_retries(
+                self.repo.git.merge, "--no-ff", "--no-commit", parent.history_branch)
             logging.info("Will diff and commit changes")
             if self.has_staged_changes():
                 # if there are changes to commit, do it
