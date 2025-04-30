@@ -4,6 +4,7 @@ from pathlib import Path
 from datetime import datetime
 import random
 import re
+import subprocess
 import time
 from typing import Any, Dict, List, Optional, Callable, Set, Tuple
 
@@ -323,11 +324,14 @@ def run_git_command_with_retries(cmd: Callable, *args: Any, **kwargs: Any) -> An
     last_error: Optional[Exception] = None
 
     while True:
+        logging.info("Running Git command: %s", " ".join(args))
         attempts += 1
         if attempts > 10:
             break
         try:
-            return cmd(*args, **kwargs)
+            retval = cmd(*args, **kwargs)
+            logging.info("Git command completed successfully")
+            return retval
         except GitCommandError as error:
             last_error = error
             retryable, code = is_retryable_error(error)
@@ -510,7 +514,10 @@ class GitGud:
 
     def _checkout(self, branch_name: str) -> None:
         run_git_command_with_retries(self.repo.git.checkout, branch_name, "--recurse-submodules")
+        logging.info("About to update --init --recursive")
         self.repo.git.submodule("update", "--init", "--recursive")
+        self.repo.git.reset("--hard")
+        logging.info("checkout is complete")
 
     def get_oldest_non_remote(self, commit_id: str) -> GudCommit:
         """Given a commit id, find the oldest ancestor that is not remote."""
@@ -835,6 +842,7 @@ class GitGud:
     def traverse(
         self, commit_id: str, func: Callable[[GudCommit], None], skip: bool = False
     ) -> None:
+        logging.info("traversing %s", commit_id)
         commit = self.get_commit(commit_id)
         if not skip:
             func(commit)
@@ -1047,6 +1055,7 @@ class GitGud:
                     self.enqueue_op(operation)
 
         self.traverse(commit.id, f)
+        logging.info("done with schedling recrusive evolve")
 
     def evolve(self, target_commit_id: Optional[str] = None) -> None:
         """Propagate changes of amended commit onto all descendants."""
@@ -1069,7 +1078,9 @@ class GitGud:
                 raise ValueError(f"{target_commit_id} it not a child of {self.head().id}")
         else:
             self.schedule_recursive_evolve(self.head())
+            logging.info("About to execute pending ops")
             self.execute_pending_operations()
+            logging.info("Done executing pending ops")
             return
 
         assert child is not None
@@ -1080,6 +1091,7 @@ class GitGud:
         logging.info("Evolving %s to %s", self.head().id, child.id)
 
         try:
+            logging.info("About to rebase now")
             run_git_command_with_retries(
                 self.repo.git.rebase,
                 "--onto",
@@ -1146,6 +1158,7 @@ class GitGud:
 
         try:
             self.schedule_recursive_evolve(source_commit, mark_as_needed=True)
+            logging.info("About to rebase --onto now")
             run_git_command_with_retries(
                 self.repo.git.rebase,
                 "--onto",
@@ -1154,11 +1167,13 @@ class GitGud:
                 source_commit.id,
             )
             self.repo.git.submodule("update", "--init", "--recursive")
+            logging.info("Will continue evolve")
             self.continue_evolve(
                 source_commit.id,
                 dest_commit.id,
                 f"Rebased from {source_commit.parent_id} to {dest_commit.id}",
             )
+            logging.info("Will execute pending ops")
             self.execute_pending_operations()
 
             if self.state.merge_conflict_state:
@@ -1200,6 +1215,14 @@ class GitGud:
         self.state.commits.pop(commit.id)
         self.save_state()
 
+    def has_staged_changes(self) -> bool:
+        result = subprocess.run(
+            ['git', 'diff', '--cached', '--quiet'],
+            cwd=self.repo.working_tree_dir,
+        )
+        return result.returncode == 1
+
+
     def continue_evolve(self, target_commit_id: str, parent_id: str, commit_msg: str = "") -> None:
         """After changes have been propagated (potentially with conflict
         resolution), update all commit metadata to match the new state.
@@ -1230,35 +1253,43 @@ class GitGud:
         self._checkout(child.history_branch)
         commit_msg = commit_msg or f"Merge commit {parent.id}"
         try:
-            self.repo.git.merge("--no-ff", "--no-commit", parent.history_branch)
-            if self.repo.index.diff(self.repo.head.commit):
+            run_git_command_with_retries(
+                self.repo.git.merge, "--no-ff", "--no-commit", parent.history_branch)
+            logging.info("Will diff and commit changes")
+            if self.has_staged_changes():
                 # if there are changes to commit, do it
                 run_git_command_with_retries(self.repo.git.commit, "-m", commit_msg)
+            logging.info("merge is done")
         except GitCommandError as e:
             assert "CONFLICT" in e.stdout
 
             # This is just a quick way to get out the merge state, we amend this
             # commit right after. This is because we can't do `_copy_branch_state()`
             # during conflict resolution since it switches branches.
-            self.repo.git.checkout(child.id, ".")
-            self.repo.git.add("-A")
-            self.repo.git.commit("-m", commit_msg)
+            run_git_command_with_retries(self.repo.git.checkout, child.id, ".")
+            run_git_command_with_retries(self.repo.git.add, "-A")
+            run_git_command_with_retries(self.repo.git.commit, "-m", commit_msg)
 
             # We get the actual desired state.
             assert child.history_branch is not None
             self._copy_branch_state(child.id, child.history_branch)
-            self.repo.git.commit("--amend", "-a", "--no-edit")
+            run_git_command_with_retries(self.repo.git.commit, "--amend", "-a", "--no-edit")
 
         self._checkout(child.id)
+        logging.info("Taking snapshot")
         self.snapshot(commit_msg)
+        logging.info("Saving state")
         self.save_state()
+        logging.info("Will execute pending operations")
         self.execute_pending_operations()
 
         if self.state.merge_conflict_state:
             self.save_state()
             return
 
+        logging.info("Will prune commits")
         self.prune_commits()
+        logging.info("Saving state again")
         self.save_state()
 
     def patch(self, remote_branch_name: str) -> GudCommit:
