@@ -1,0 +1,13 @@
+load("//bazel/js:defs.bzl", "ts_library")
+
+package(default_visibility = ["//visibility:public"])
+
+ts_library(
+    name = "src",
+    srcs = ["app.ts"],
+    deps = [
+        "//:node_modules/@types/chart.js",
+        "//:node_modules/chart.js",
+        "//examples/ts/ts_library/formatting",
+    ],
+)

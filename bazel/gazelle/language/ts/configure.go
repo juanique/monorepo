@@ -9,7 +9,7 @@ import (
 
 	"github.com/bazelbuild/bazel-gazelle/config"
 	"github.com/bazelbuild/bazel-gazelle/rule"
-	"golang.verkada.com/vcorecommand/go/files"
+	"github.com/juanique/monorepo/salsa/go/files"
 )
 
 // packageJSON represents the structure of a package.json file.
@@ -116,7 +116,7 @@ func (l *tsLang) Configure(c *config.Config, rel string, f *rule.File) {
 // Utility functions for reading and parsing package.json can be added here
 func readPackageJSON(repoRoot string) (*packageJSON, error) {
 	filePath := filepath.Join(repoRoot, "package.json")
-	packageJsonExists, err := files.Exists(filePath)
+	packageJsonExists, err := files.FileExists(filePath)
 	if err != nil {
 		return nil, err
 	}

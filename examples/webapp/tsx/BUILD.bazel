@@ -1,0 +1,12 @@
+load("//bazel/js:defs.bzl", "react_app")
+
+react_app(
+    name = "tsx",
+    srcs = ["App.tsx"],
+    data = ["index.css"],
+    deps = [
+        "//:node_modules/@types/react",
+        "//:node_modules/react",
+        "//examples/ts/ts_library/formatting",
+    ],
+)

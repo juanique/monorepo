@@ -9,3 +9,12 @@ playwright_test(
         "//salsa/testing/playwright",
     ],
 )
+
+playwright_test(
+    name = "e2e_test",
+    srcs = ["example.pw.spec.ts"],
+    deps = [
+        "//:node_modules/@playwright/test",
+        "//salsa/testing/playwright",
+    ],
+)

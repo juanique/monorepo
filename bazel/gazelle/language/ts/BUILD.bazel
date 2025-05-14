@@ -1,4 +1,4 @@
-load("//bazel/go:defs.bzl", "go_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "ts",
@@ -9,10 +9,10 @@ go_library(
         "resolve.go",
         "ts.go",
     ],
-    importpath = "golang.verkada.com/engprod/gazelle/ts",
+    importpath = "github.com/juanique/monorepo/bazel/gazelle/language/ts",
     visibility = ["//visibility:public"],
     deps = [
-        "//vcorecommand/go/files",
+        "//salsa/go/files",
         "@bazel_gazelle//config:go_default_library",
         "@bazel_gazelle//label:go_default_library",
         "@bazel_gazelle//language:go_default_library",

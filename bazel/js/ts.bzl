@@ -3,7 +3,7 @@ load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@bazel_skylib//lib:partial.bzl", "partial")
 load("//bazel/js:js.bzl", "js_binary")
 
-def ts_binary(name, srcs = [], deps = [], entry_point = "", **kwargs):
+def ts_binary(name, srcs = [], deps = [], data = [], entry_point = "", **kwargs):
     for src in srcs:
         if src in ["main.ts", "main.tsx", "main.js"]:
             entry_point = src
@@ -17,6 +17,7 @@ def ts_binary(name, srcs = [], deps = [], entry_point = "", **kwargs):
         name = lib_name,
         srcs = srcs,
         deps = deps,
+        data = data,
     )
 
     if entry_point.endswith(".ts"):
@@ -31,15 +32,17 @@ def ts_binary(name, srcs = [], deps = [], entry_point = "", **kwargs):
     )
 
 def ts_library(name, srcs = [], deps = [], **kwargs):
-    # Not sure if there's any harm in adding this to all ts_library, in particular web targets.
-    deps = list(deps)
     if "//:node_modules/@types/node" not in deps:
+        deps = list(deps)
+
+        # Unsure if there's any issues with including the node stdlib types in all binary targets.
+        # We do this because there's no explicit imports for these. People can just use `process`
         deps.append("//:node_modules/@types/node")
 
     ts_project(
         name = name,
         srcs = srcs,
-        deps = deps,
+        deps = deps + ["//:package_json"],
         declaration = True,
         transpiler = partial.make(
             swc,

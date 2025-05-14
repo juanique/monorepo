@@ -6,8 +6,14 @@ import { resolve } from 'path';
 import { pathToFileURL } from 'url';
 
 
-// Laucher that sets NODE_PATH in a way that is bazel-friendly.
-// It also registers a custom loader that can resolve modules from NODE_PATH in ESModules
+
+// HACK: late binding of `process.cwd()` to allow looking up first-party modules from either
+// the runfiles root (when running tests or using `bazel run`) or $EXECROOT/$BINDIR when using
+// `js_run_binary`.
+//
+// We have to do late bindings here because `js_binary` bakes $PWD at the top of its launcher
+// script before it correctly cd into $BINDIR for `js_run_binary`. Therefore, we force "re-evaluate"
+// `NODE_PATH` at the beginning of the process.
 const cwd = getCwd();
 const runfilesRoot = `${env.JS_BINARY__RUNFILES}/_main`;
 

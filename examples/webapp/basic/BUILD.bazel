@@ -1,0 +1,10 @@
+load("//bazel/js:defs.bzl", "vite_webapp")
+
+vite_webapp(
+    name = "webapp",
+    srcs = [
+        "index.html",
+        "style/background.css",
+        "style/style.css",
+    ],
+)

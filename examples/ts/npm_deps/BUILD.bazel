@@ -1,0 +1,11 @@
+load("//bazel/js:defs.bzl", "ts_binary")
+
+ts_binary(
+    name = "npm_deps",
+    srcs = ["main.ts"],
+    deps = [
+        "//:node_modules/@types/figlet",
+        "//:node_modules/chalk",
+        "//:node_modules/figlet",
+    ],
+)

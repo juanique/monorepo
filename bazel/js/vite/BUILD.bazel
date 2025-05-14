@@ -1,8 +1,7 @@
-load("//bazel/js:js.bzl", "vite_webapp_config")
+load("//bazel/js/vite:vite.bzl", "vite_webapp_config")
 
 exports_files(["vite.config.tpl.js"])
-
-# gazelle:exclude ./vite.config.tpl.js
+# gazelle:exclude vite.config.tpl.js
 
 # Example config file for vite
 vite_webapp_config(

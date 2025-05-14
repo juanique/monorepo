@@ -1,5 +1,6 @@
 import React from 'react';
 import { formatNamePretty, NameStyle } from 'examples/ts/ts_library/formatting/formatting';
+import './index.css';
 
 function App(): JSX.Element {
     return (
