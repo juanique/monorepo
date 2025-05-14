@@ -5,7 +5,6 @@ load("//bazel/js:js.bzl", "js_binary")
 
 def ts_binary(name, srcs = [], deps = [], data = [], entry_point = "", **kwargs):
     for src in srcs:
-        print("checking src:", src)
         if src in ["main.ts", "main.tsx", "main.js"]:
             entry_point = src
             break
