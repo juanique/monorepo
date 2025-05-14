@@ -1,0 +1,6 @@
+# gazelle:exclude index.tpl.html
+# gazelle:exclude main.tpl.tsx
+exports_files([
+    "index.tpl.html",
+    "main.tpl.tsx",
+])

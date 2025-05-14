@@ -1,0 +1,7 @@
+{
+    "name": "monorepo",
+    "type": "module",
+    "devDependencies": {
+	"react": "18.2.0"
+    }
+}

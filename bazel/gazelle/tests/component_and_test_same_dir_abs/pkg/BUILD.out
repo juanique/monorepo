@@ -1,0 +1,15 @@
+load("//bazel/js:defs.bzl", "ts_library", "vitest_test")
+
+ts_library(
+    name = "pkg",
+    srcs = ["component.ts"],
+)
+
+vitest_test(
+    name = "pkg_test",
+    srcs = ["component.spec.ts"],
+    deps = [
+        ":pkg",
+        "//:node_modules/vitest",
+    ],
+)

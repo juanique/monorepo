@@ -2,8 +2,13 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "ts",
-    srcs = ["ts.go"],
-    data = ["//:package.json"],
+    srcs = [
+        "configure.go",
+        "language.go",
+        "metadata.go",
+        "resolve.go",
+        "ts.go",
+    ],
     importpath = "github.com/juanique/monorepo/bazel/gazelle/language/ts",
     visibility = ["//visibility:public"],
     deps = [

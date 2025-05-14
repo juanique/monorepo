@@ -1,3 +1,0 @@
-load("//bazel/playwright:defs.bzl", "playwright_test")
-
-# This file intentionally empty - Gazelle should generate the appropriate rule

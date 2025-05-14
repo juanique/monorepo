@@ -1,0 +1,12 @@
+load("//bazel/js:defs.bzl", "ts_library", "vitest_test")
+
+ts_library(
+    name = "pkg",
+    srcs = ["Button.tsx"],
+)
+
+vitest_test(
+    name = "pkg_test",
+    srcs = ["Button.spec.tsx"],
+    dom = True,
+)

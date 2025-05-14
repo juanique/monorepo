@@ -1,0 +1,7 @@
+{
+    "name": "monorepo",
+    "type": "module",
+    "devDependencies": {
+        "@types/node": "20.0.0"
+    }
+}

@@ -1,0 +1,10 @@
+load("//bazel/js:defs.bzl", "playwright_test")
+
+playwright_test(
+    name = "e2e_test",
+    srcs = [
+        "example.pw.spec.js",
+        "example.pw.spec.ts",
+    ],
+    deps = ["//:node_modules/@playwright/test"],
+)

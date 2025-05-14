@@ -1,0 +1,7 @@
+load("//bazel/js:defs.bzl", "ts_library")
+
+ts_library(
+    name = "scoped",
+    srcs = ["scoped.ts"],
+    deps = ["//:node_modules/@mui/system"],
+)

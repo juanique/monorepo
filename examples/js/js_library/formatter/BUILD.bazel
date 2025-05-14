@@ -1,6 +1,6 @@
-load("//bazel/js:js.bzl", "js_library")
+load("//bazel/js:defs.bzl", "js_library")
 
-package(default_visibility = ["//examples/js/js_library:__subpackages__"])
+package(default_visibility = ["//visibility:public"])
 
 js_library(
     name = "formatter",

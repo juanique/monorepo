@@ -1,5 +1,4 @@
-
-import { resolve as pathResolve } from 'path';
+import { resolve as pathResolve, dirname } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 import { readFile } from 'fs/promises';
 import { promises as fs } from 'fs';
@@ -11,6 +10,23 @@ var extensions = ['.js']
 async function resolveWithNodePath(specifier, parentModuleURL) {
     if (specifier.startsWith('file://')) {
         return specifier;
+    }
+
+    if (specifier.startsWith('.')) {
+        const filePath = new URL(parentModuleURL).pathname;
+        const dirPath = dirname(filePath);
+        const resolvedPath = pathResolve(dirPath, specifier);
+
+        for (const ext of extensions) {
+            try {
+                const resolvedPathWithExt = resolvedPath + ext;
+                await fs.access(resolvedPathWithExt);
+                return pathToFileURL(resolvedPathWithExt).href;
+            } catch (error) {
+                // Uncomment for debugging
+                // console.log("Error", error);
+            }
+        }
     }
 
     if (process.env.NODE_PATH) {
@@ -40,12 +56,10 @@ async function resolveWithNodePath(specifier, parentModuleURL) {
 
 // The resolve function that Node.js expects
 export async function resolve(specifier, context, defaultResolve) {
-    // console.log("resolve", specifier, context);
     const { parentURL } = context;
 
     // Use custom resolution logic if needed
     const resolved = await resolveWithNodePath(specifier, parentURL);
-    // console.log("resolved", resolved);
 
     if (resolved) {
         return { url: resolved, shortCircuit: true };

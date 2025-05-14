@@ -1,0 +1,35 @@
+load("//bazel/js:defs.bzl", "js_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# gazelle:exclude ./*
+
+js_library(
+    name = "vitest_config",
+    srcs = [
+        "vitest.config.js",
+    ],
+    deps = [
+        "//:node_modules/vitest",
+    ],
+)
+
+js_library(
+    name = "vitest_component_config",
+    srcs = [
+        "vitest.component.config.js",
+    ],
+    deps = [
+        "//:node_modules/vitest",
+    ],
+)
+
+js_library(
+    name = "vitest_setup",
+    srcs = [
+        "vitest.setup.js",
+    ],
+    deps = [
+        "//:node_modules/vitest",
+    ],
+)

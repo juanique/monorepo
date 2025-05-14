@@ -1,0 +1,12 @@
+load("@npm//:tsconfig-to-swcconfig/package_json.bzl", "bin")
+
+bin.t2s(
+    name = "write_swcrc",
+    srcs = ["//:tsconfig"],
+    args = [
+        "--filename",
+        "$(location //:tsconfig)",
+    ],
+    stdout = ".swcrc",
+    visibility = ["//visibility:public"],
+)

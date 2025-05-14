@@ -5,15 +5,9 @@ package(default_visibility = ["//visibility:public"])
 js_library(
     name = "launcher",
     srcs = ["launcher.mjs"],
-    deps = [":loader"],
 )
 
 js_library(
     name = "loader",
     srcs = ["loader.mjs"],
-)
-
-js_library(
-    name = "js_binary_init",
-    srcs = [":js_binary_init.cjs"],
 )

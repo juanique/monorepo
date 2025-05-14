@@ -1,6 +1,6 @@
-load("//bazel/ts:defs.bzl", "ts_library")
+load("//bazel/js:defs.bzl", "ts_library")
 
-package(default_visibility = ["//examples/webapp:__subpackages__"])
+package(default_visibility = ["//visibility:public"])
 
 ts_library(
     name = "src",

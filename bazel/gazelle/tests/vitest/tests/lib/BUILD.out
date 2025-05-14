@@ -1,0 +1,9 @@
+load("//bazel/js:defs.bzl", "ts_library")
+
+ts_library(
+    name = "lib",
+    srcs = [
+        "component.ts",
+        "utils.ts",
+    ],
+)

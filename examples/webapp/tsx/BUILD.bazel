@@ -1,9 +1,12 @@
-load("//bazel/js:js.bzl", "vite_webapp")
+load("//bazel/js:defs.bzl", "react_app")
 
-vite_webapp(
-    name = "webapp",
-    srcs = [
-        "index.html",
-        "//examples/webapp/tsx/src",
+react_app(
+    name = "tsx",
+    srcs = ["App.tsx"],
+    data = ["index.css"],
+    deps = [
+        "//:node_modules/@types/react",
+        "//:node_modules/react",
+        "//examples/ts/ts_library/formatting",
     ],
 )

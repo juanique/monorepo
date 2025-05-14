@@ -1,0 +1,10 @@
+load("//bazel/js:defs.bzl", "react_app")
+
+react_app(
+    name = "app",
+    srcs = ["App.tsx"],
+    deps = [
+        "//:node_modules/@types/react",
+        "//:node_modules/react",
+    ],
+)
