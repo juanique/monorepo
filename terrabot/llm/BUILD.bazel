@@ -1,6 +1,4 @@
-load("//bazel/ts:defs.bzl", "ts_library")
-
-package(default_visibility = ["//terrabot:__subpackages__"])
+load("//bazel/js:defs.bzl", "ts_library")
 
 ts_library(
     name = "llm",
