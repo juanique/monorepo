@@ -5,9 +5,11 @@ load("//bazel/js:js.bzl", "js_binary")
 
 def ts_binary(name, srcs = [], deps = [], data = [], entry_point = "", **kwargs):
     for src in srcs:
+        print("checking src:", src)
         if src in ["main.ts", "main.tsx", "main.js"]:
             entry_point = src
             break
+
 
     if not entry_point:
         fail("Missing main.ts, main.tsx or main.js in srcs for binary")
@@ -27,7 +29,7 @@ def ts_binary(name, srcs = [], deps = [], data = [], entry_point = "", **kwargs)
 
     js_binary(
         name = name,
-        data = [":" + lib_name],
+        srcs = [":" + lib_name],
         entry_point = entry_point,
     )
 

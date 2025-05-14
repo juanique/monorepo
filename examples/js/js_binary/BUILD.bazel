@@ -1,4 +1,4 @@
-load("//bazel/js:js.bzl", "js_binary")
+load("//bazel/js:defs.bzl", "js_binary")
 
 js_binary(
     name = "js_binary",
