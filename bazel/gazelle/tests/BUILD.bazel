@@ -11,7 +11,7 @@ gazelle_binary(
     name = "gazelle_binary",
     languages = [
         "@bazel_gazelle//language/go",
-        "//engprod/gazelle/ts",
+        "//bazel/gazelle/language/ts",
     ],
 )
 
