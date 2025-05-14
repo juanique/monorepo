@@ -1,4 +1,4 @@
-load("//bazel/ts:defs.bzl", "ts_binary")
+load("//bazel/js:defs.bzl", "ts_binary")
 
 ts_binary(
     name = "cmd",

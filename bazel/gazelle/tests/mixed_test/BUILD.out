@@ -1,9 +1,0 @@
-load("//bazel/ts:defs.bzl", "ts_library")
-
-ts_library(
-    name = "mixed_test",
-    srcs = [
-        "helper.js",
-        "main.ts",
-    ],
-)

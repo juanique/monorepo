@@ -1,0 +1,7 @@
+{
+    "name": "monorepo",
+    "type": "module",
+    "devDependencies": {
+	"@playwright/test": "^1.49.1"
+    }
+}

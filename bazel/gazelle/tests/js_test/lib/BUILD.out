@@ -1,4 +1,4 @@
-load("//bazel/js:js.bzl", "js_library")
+load("//bazel/js:defs.bzl", "js_library")
 
 js_library(
     name = "lib",

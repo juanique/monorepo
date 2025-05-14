@@ -1,0 +1,7 @@
+load("//bazel/js:defs.bzl", "ts_library")
+
+ts_library(
+    name = "builtin",
+    srcs = ["file.ts"],
+    deps = ["//:node_modules/@types/node"],
+)

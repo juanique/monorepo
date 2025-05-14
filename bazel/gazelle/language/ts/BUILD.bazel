@@ -1,13 +1,18 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("//bazel/go:defs.bzl", "go_library")
 
 go_library(
     name = "ts",
-    srcs = ["ts.go"],
-    data = ["//:package.json"],
-    importpath = "github.com/juanique/monorepo/bazel/gazelle/language/ts",
+    srcs = [
+        "configure.go",
+        "language.go",
+        "metadata.go",
+        "resolve.go",
+        "ts.go",
+    ],
+    importpath = "golang.verkada.com/engprod/gazelle/ts",
     visibility = ["//visibility:public"],
     deps = [
-        "//salsa/go/files",
+        "//vcorecommand/go/files",
         "@bazel_gazelle//config:go_default_library",
         "@bazel_gazelle//label:go_default_library",
         "@bazel_gazelle//language:go_default_library",

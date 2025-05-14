@@ -1,0 +1,7 @@
+{
+    "name": "monorepo",
+    "type": "module",
+    "devDependencies": {
+	"vitest": "^0.34.6"
+    }
+}

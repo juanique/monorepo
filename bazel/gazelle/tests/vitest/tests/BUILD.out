@@ -1,0 +1,14 @@
+load("//bazel/js:defs.bzl", "vitest_test")
+
+vitest_test(
+    name = "tests_test",
+    srcs = [
+        "component.spec.ts",
+        "utils.test.ts",
+    ],
+    deps = [
+        "//:node_modules/vitest",
+        "//tests/lib",
+        "//tests/lib/nested",
+    ],
+)

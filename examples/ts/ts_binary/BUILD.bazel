@@ -1,6 +1,0 @@
-load("//bazel/ts:defs.bzl", "ts_binary")
-
-ts_binary(
-    name = "ts_binary",
-    srcs = ["main.ts"],
-)

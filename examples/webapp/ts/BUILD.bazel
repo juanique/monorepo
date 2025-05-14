@@ -1,9 +1,0 @@
-load("//bazel/js:js.bzl", "vite_webapp")
-
-vite_webapp(
-    name = "webapp",
-    srcs = [
-        "index.html",
-        "//examples/webapp/ts/src",
-    ],
-)

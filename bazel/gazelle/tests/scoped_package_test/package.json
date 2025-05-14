@@ -1,0 +1,7 @@
+{
+    "name": "monorepo",
+    "type": "module",
+    "devDependencies": {
+        "@mui/system": "^5.16.13"
+    }
+}

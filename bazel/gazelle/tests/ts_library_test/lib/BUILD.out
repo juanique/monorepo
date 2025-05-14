@@ -1,4 +1,4 @@
-load("//bazel/ts:defs.bzl", "ts_library")
+load("//bazel/js:defs.bzl", "ts_library")
 
 ts_library(
     name = "lib",
