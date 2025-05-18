@@ -1,6 +1,6 @@
 load("//bazel/js/vite:vite.bzl", "vite_webapp_config")
 
-exports_files(["vite.config.tpl.js"])
+exports_files(["vite.config.tpl.js", "tailwind.config.cjs"])
 # gazelle:exclude vite.config.tpl.js
 
 # Example config file for vite
