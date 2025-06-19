@@ -23,20 +23,20 @@ go_repositories()
 
 go_rules_dependencies()
 
-go_register_toolchains(go_version = "1.21.6")
+go_register_toolchains(go_version = "1.23.10")
 
 go_download_sdk(
     name = "go_sdk_amd64",
     goarch = "amd64",
     goos = "linux",
-    version = "1.21.6",
+    version = "1.23.10",
 )
 
 go_download_sdk(
     name = "go_sdk_arm64",
     goarch = "arm64",
     goos = "linux",
-    version = "1.21.6",
+    version = "1.23.10",
 )
 
 ###########
