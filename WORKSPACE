@@ -15,7 +15,7 @@ http_archive(
 )
 
 load("@io_bazel_rules_go//go:deps.bzl", "go_download_sdk", "go_register_toolchains", "go_rules_dependencies")
-load("@bazel_gazelle//:deps.bzl", "go_repository")
+load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
 load("//:deps.bzl", "go_repositories")
 
 # gazelle:repository_macro deps.bzl%go_repositories
@@ -38,6 +38,8 @@ go_download_sdk(
     goos = "linux",
     version = "1.23.10",
 )
+
+gazelle_dependencies(go_sdk = "go_sdk")
 
 ###########
 # Aspect bazel lib

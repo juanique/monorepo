@@ -5,7 +5,7 @@ go_library(
     srcs = ["ruff.go"],
     importpath = "github.com/juanique/monorepo/bazel/workspace/tools/ruff",
     visibility = ["//visibility:private"],
-    deps = ["@@rules_go~//go/runfiles"],
+    deps = ["@io_bazel_rules_go//go/runfiles:go_default_library"],
 )
 
 go_binary(
