@@ -10,8 +10,5 @@ go_library(
 go_test(
     name = "must_test",
     srcs = ["must_test.go"],
-    deps = [
-        ":must",
-        "@com_github_stretchr_testify//suite",
-    ],
+    deps = [":must"],
 )

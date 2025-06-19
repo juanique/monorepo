@@ -1,0 +1,17 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+# gazelle:resolve go github.com/spf13/cobra @com_github_spf13_cobra//:cobra
+
+go_library(
+    name = "cli_example_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/juanique/monorepo/examples/go/cli_example",
+    visibility = ["//visibility:private"],
+    deps = ["@com_github_spf13_cobra//:cobra"],
+)
+
+go_binary(
+    name = "cli_example",
+    embed = [":cli_example_lib"],
+    visibility = ["//visibility:public"],
+)

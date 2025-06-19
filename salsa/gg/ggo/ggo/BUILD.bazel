@@ -18,7 +18,5 @@ go_test(
         ":ggo",
         "//engprod/testfs",
         "//git:git_lib",
-        "@com_github_stretchr_testify//assert",
-        "@com_github_stretchr_testify//require",
     ],
 )
