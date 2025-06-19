@@ -221,28 +221,6 @@ register_toolchains(
 # download URL.
 zig_toolchains()
 
-###############################
-## Buildifier
-http_archive(
-    name = "buildifier_prebuilt",
-    sha256 = "41d57362ee8f351b10d9313239bb4cbc6152fdc04aa86e63007a1b843ad33f4d",
-    strip_prefix = "buildifier-prebuilt-6.1.2.1",
-    urls = [
-        "http://github.com/keith/buildifier-prebuilt/archive/6.1.2.1.tar.gz",
-    ],
-)
-
-load("@buildifier_prebuilt//:deps.bzl", "buildifier_prebuilt_deps")
-
-buildifier_prebuilt_deps()
-
-load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
-
-bazel_skylib_workspace()
-
-load("@buildifier_prebuilt//:defs.bzl", "buildifier_prebuilt_register_toolchains")
-
-buildifier_prebuilt_register_toolchains()
 
 ###################
 ## ruff
