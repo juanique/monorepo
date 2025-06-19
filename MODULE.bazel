@@ -4,11 +4,13 @@ module(
 )
 
 bazel_dep(name = "aspect_rules_js", version = "2.1.0")
-bazel_dep(name = "protobuf", version = "27.3")
+bazel_dep(name = "protobuf", version = "27.3", repo_name = "com_google_protobuf")
 bazel_dep(name = "grpc", version = "1.66.0.bcr.3")
 bazel_dep(name = "aspect_rules_swc", version = "2.0.1")
 bazel_dep(name = "aspect_rules_ts", version = "3.3.1")
 bazel_dep(name = "rules_perl", version = "0.2.4")
+bazel_dep(name = "rules_python", version = "0.39.0")
+bazel_dep(name = "rules_cc", version = "0.0.15")
 
 # NodeJS version is determined by rules_nodejs default
 bazel_dep(name = "rules_nodejs", version = "6.3.0")
@@ -53,3 +55,24 @@ rules_ts_ext.deps(
     ts_version_from = "//:package.json",
 )
 use_repo(rules_ts_ext, "npm_typescript")
+
+### Python toolchain
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(python_version = "3.10")
+
+### Python pip dependencies
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+pip.parse(
+    hub_name = "monorepo_pip_deps",
+    python_version = "3.10",
+    requirements_lock = "//:requirements_lock.txt",
+)
+use_repo(pip, "monorepo_pip_deps")
+
+# MyPy dependencies  
+pip.parse(
+    hub_name = "monorepo_mypy_integration_pip_deps", 
+    python_version = "3.10",
+    requirements_lock = "//bazel/workspace:mypy_version.txt",
+)
+use_repo(pip, "monorepo_mypy_integration_pip_deps")
