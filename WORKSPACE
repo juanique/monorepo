@@ -247,20 +247,6 @@ load("//third_party:repositories.bzl", "third_party_repositories")
 
 third_party_repositories()
 
-############
-# Rules foreign
-
-git_repository(
-    name = "rules_foreign_cc",
-    commit = "7b673547a3b51febb4e67642bf0cc30c3ba09453",
-    remote = "https://github.com/bazelbuild/rules_foreign_cc.git",
-)
-
-load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_dependencies")
-
-# This sets up some common toolchains for building targets. For more details, please see
-# https://bazelbuild.github.io/rules_foreign_cc/0.9.0/flatten.html#rules_foreign_cc_dependencies
-rules_foreign_cc_dependencies()
 
 ###################
 # rules OCI
