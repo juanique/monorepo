@@ -15,9 +15,6 @@ go_library(
         "//salsa/go/must",
         "//salsa/go/random",
         "//salsa/go/tarbuilder",
-        "@com_github_docker_docker//api/types",
-        "@com_github_docker_docker//client",
-        "@com_github_spf13_cobra//:cobra",
     ],
 )
 

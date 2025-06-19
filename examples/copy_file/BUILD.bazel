@@ -1,5 +1,5 @@
-load("//:bazel/python.bzl", "py_binary")
 load("//:bazel/files.bzl", "copy_file")
+load("//:bazel/python.bzl", "py_binary")
 
 copy_file(
     name = "copy",

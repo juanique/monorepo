@@ -6,7 +6,6 @@ go_library(
     name = "git_lib",
     srcs = ["git.go"],
     importpath = "github.com/juanique/monorepo/git",
-    deps = ["@com_github_libgit2_git2go_v33//:git2go"],
 )
 
 go_test(
@@ -16,6 +15,5 @@ go_test(
         ":git_lib",
         "//engprod/testfs",
         "//salsa/go/must",
-        "@com_github_stretchr_testify//suite",
     ],
 )

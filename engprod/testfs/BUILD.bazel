@@ -11,8 +11,5 @@ go_library(
 go_test(
     name = "testfs_test",
     srcs = ["testfs_test.go"],
-    deps = [
-        ":testfs",
-        "@com_github_stretchr_testify//suite",
-    ],
+    deps = [":testfs"],
 )
