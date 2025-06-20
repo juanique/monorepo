@@ -23,7 +23,7 @@ bazel_dep(name = "aspect_rules_swc", version = "2.0.1")
 bazel_dep(name = "aspect_rules_ts", version = "3.3.1")
 bazel_dep(name = "rules_perl", version = "0.4.1")
 bazel_dep(name = "aspect_bazel_lib", version = "2.19.4")
-
+bazel_dep(name = "rules_oci", version = "2.2.6")
 
 version = use_extension("@proto_bazel_features//private:extensions.bzl", "version_extension")
 use_repo(version, "bazel_features_globals", "bazel_features_version")
@@ -34,8 +34,8 @@ bazel_dep(name = "rules_nodejs", version = "6.3.0")
 archive_override(
     module_name = "aspect_rules_js",
     integrity = "sha256-dcJaDxWp5FkrvaRbV6oInkvxf5F2/XNTUejGRE34e1I=",
-    patches = ["//bazel/patches:rules_js.patch"],
     patch_strip = 1,
+    patches = ["//bazel/patches:rules_js.patch"],
     strip_prefix = "rules_js-2.1.0",
     urls = ["https://github.com/aspect-build/rules_js/releases/download/v2.1.0/rules_js-v2.1.0.tar.gz"],
 )
@@ -72,14 +72,13 @@ rules_ts_ext.deps(
 )
 use_repo(rules_ts_ext, "npm_typescript")
 
-
 ### Hermetic CC Toolchain
 zig_toolchains = use_extension("@hermetic_cc_toolchain//toolchain:ext.bzl", "toolchains")
 use_repo(zig_toolchains, "zig_sdk")
 
 register_toolchains(
     "@zig_sdk//toolchain:linux_amd64_gnu.2.28",
-    "@zig_sdk//toolchain:linux_arm64_gnu.2.28", 
+    "@zig_sdk//toolchain:linux_arm64_gnu.2.28",
     "@zig_sdk//toolchain:darwin_amd64",
     "@zig_sdk//toolchain:darwin_arm64",
     "@zig_sdk//toolchain:windows_amd64",
@@ -97,7 +96,7 @@ go_deps.module_override(
 ### Rules Apko
 apko = use_extension("@rules_apko//apko:extensions.bzl", "apko")
 apko.translate_lock(
-    name = "apko_wolfi_base", 
+    name = "apko_wolfi_base",
     lock = "//base_images/apko/wolfi-base:apko.lock.json",
 )
 use_repo(apko, "apko_wolfi_base")
@@ -110,3 +109,36 @@ apt.install(
     manifest = "//base_images/debian:debian12.yaml",
 )
 use_repo(apt, "debian12")
+
+### Rules OCI
+oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
+oci.pull(
+    name = "distroless_base",
+    digest = "sha256:ccaef5ee2f1850270d453fdf700a5392534f8d1a8ca2acda391fbb6a06b81c86",
+    image = "gcr.io/distroless/base",
+    platforms = [
+        "linux/amd64",
+        "linux/arm64",
+    ],
+)
+oci.pull(
+    name = "ubuntu22",
+    digest = "sha256:b492494d8e0113c4ad3fe4528a4b5ff89faa5331f7d52c5c138196f69ce176a6",
+    image = "index.docker.io/library/ubuntu",
+)
+oci.pull(
+    name = "build",
+    digest = "sha256:2a669a950ee7941bf0e308372aa9ab1a38dc5491f75e3d6acf7b5e941a3bc32f",
+    image = "index.docker.io/juanzolotoochin/ubuntu-build",
+)
+oci.pull(
+    name = "postgres",
+    digest = "sha256:cd116dbc6ac97b18f8e1ad07aa94399117863731ec99f06ae1270937a98119bf",
+    image = "index.docker.io/library/postgres",
+)
+oci.pull(
+    name = "ubuntu",
+    digest = "sha256:eea2c875bb135db3a5d5c959a4161eecce3f6a988cf054125d7f4e836e93e020",
+    image = "index.docker.io/juanzolotoochin/ubuntu-base",
+)
+use_repo(oci, "build", "distroless_base", "distroless_base_linux_amd64", "distroless_base_linux_arm64", "postgres", "ubuntu", "ubuntu22")
