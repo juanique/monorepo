@@ -41,8 +41,7 @@ gazelle(
 gazelle_binary(
     name = "gazelle_binary",
     languages = DEFAULT_LANGUAGES + [
-        # Python gazelle to be reenabled after moving rules_python and rules_go to bzlmod.
-        # "@rules_python_gazelle_plugin//python",
+        "@rules_python_gazelle_plugin//python",
         "//bazel/gazelle/language/ts",
     ],
     visibility = ["//visibility:public"],
@@ -55,12 +54,6 @@ gazelle(
         "--to_macro=deps.bzl%go_repositories",
     ],
     command = "update-repos",
-)
-
-compile_pip_requirements(
-    name = "compile_pip",
-    requirements_in = "requirements.txt",
-    requirements_txt = "requirements_lock.txt",
 )
 
 platform(

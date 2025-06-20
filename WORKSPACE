@@ -1,16 +1,6 @@
 workspace(name = "monorepo")
 
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-
-
-
-
-
-
-
-
-
 
 ###################
 ## ruff
@@ -36,11 +26,3 @@ native_binary(
 load("//third_party:repositories.bzl", "third_party_repositories")
 
 third_party_repositories()
-
-
-
-
-
-###############
-
-############
