@@ -189,9 +189,6 @@ third_party_repositories()
 
 
 
-load("//third_party:oci_containers.bzl", "load_oci_images")
-
-load_oci_images()
 
 
 ###############
