@@ -232,31 +232,6 @@ aspect_bazel_lib_dependencies()
 aspect_bazel_lib_register_toolchains()
 
 ###############
-# Rules apko
-
-http_archive(
-    name = "rules_apko",
-    sha256 = "0c1152e23c72ebf9ffac1921e395ad6a5501e72ded4ce505a5e05161e1f0793d",
-    strip_prefix = "rules_apko-1.2.3",
-    url = "https://github.com/chainguard-dev/rules_apko/releases/download/v1.2.3/rules_apko-v1.2.3.tar.gz",
-)
-
-load("@rules_apko//apko:repositories.bzl", "apko_register_toolchains", "rules_apko_dependencies")
-
-rules_apko_dependencies()
-
-apko_register_toolchains(name = "apko")
-
-load("@rules_apko//apko:translate_lock.bzl", "translate_apko_lock")
-
-translate_apko_lock(
-    name = "apko_wolfi_base",
-    lock = "@//base_images/apko/wolfi-base:apko.lock.json",
-)
-
-load("@apko_wolfi_base//:repositories.bzl", "apko_repositories")
-
-apko_repositories()
 
 ############
 # Rules distroless
