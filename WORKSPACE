@@ -122,28 +122,6 @@ go_repository(
 )
 
 
-# mypy integration
-http_archive(
-    name = "mypy_integration",
-    patch_args = ["-p1"],
-    patches = ["//bazel/patches:mypy_integration.patch"],
-    sha256 = "ffb9b0813e03f7147b1e182ab59cdd2e662c9566d91a4f97361e6db39185beaa",
-    strip_prefix = "bazel-mypy-integration-863fde2e91d9b4e3d9ba1c6b3a84d0a1fee2d1b5",
-    url = "https://github.com/bazel-contrib/bazel-mypy-integration/archive/863fde2e91d9b4e3d9ba1c6b3a84d0a1fee2d1b5.zip",
-)
-
-load(
-    "@mypy_integration//repositories:repositories.bzl",
-    mypy_integration_repositories = "repositories",
-)
-
-mypy_integration_repositories()
-
-load("@mypy_integration//:config.bzl", "mypy_configuration")
-
-mypy_configuration(
-    mypy_exclude_list = "//:mypy.ignore",
-)
 
 http_archive(
     name = "io_buildbuddy_buildbuddy_toolchain",
