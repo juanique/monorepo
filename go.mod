@@ -5,6 +5,7 @@ go 1.23
 require (
 	github.com/docker/docker v25.0.2+incompatible
 	github.com/google/go-github/v38 v38.1.0
+	github.com/libgit2/git2go/v33 v33.0.9
 	github.com/spf13/cobra v1.7.0
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/oauth2 v0.11.0
@@ -23,7 +24,6 @@ require (
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/libgit2/git2go/v27 v27.14.7 // indirect
-	github.com/libgit2/git2go/v33 v33.0.9 // indirect
 	github.com/libgit2/git2go/v34 v34.0.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.0.2 // indirect
