@@ -6,7 +6,7 @@ go_library(
     name = "git_lib",
     srcs = ["git.go"],
     importpath = "github.com/juanique/monorepo/git",
-    deps = ["@com_github_libgit2_git2go_v33//:go_default_library"],
+    deps = ["@com_github_libgit2_git2go_v33//:git2go"],
 )
 
 go_test(
