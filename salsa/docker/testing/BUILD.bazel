@@ -1,5 +1,5 @@
-load("//:bazel/python.bzl", "py_library")
 load("@pip_deps//:requirements.bzl", "requirement")
+load("//:bazel/python.bzl", "py_library")
 
 package(default_visibility = [
     "//engprod:__subpackages__",

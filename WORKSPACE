@@ -7,19 +7,10 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 # Golang support
 http_archive(
     name = "io_bazel_rules_go",
-    sha256 = "6734a719993b1ba4ebe9806e853864395a8d3968ad27f9dd759c196b3eb3abe8",
+    sha256 = "c6cf9da6668ac84c470c43cbfccb8fdc844ead2b5a8b918e2816d44f2986f644",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.45.1/rules_go-v0.45.1.zip",
-        "https://github.com/bazelbuild/rules_go/releases/download/v0.45.1/rules_go-v0.45.1.zip",
-    ],
-)
-
-http_archive(
-    name = "bazel_gazelle",
-    sha256 = "32938bda16e6700063035479063d9d24c60eda8d79fd4739563f50d331cb3209",
-    urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.35.0/bazel-gazelle-v0.35.0.tar.gz",
-        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.35.0/bazel-gazelle-v0.35.0.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.55.0/rules_go-v0.55.0.zip",
+        "https://github.com/bazelbuild/rules_go/releases/download/v0.55.0/rules_go-v0.55.0.zip",
     ],
 )
 
@@ -32,20 +23,20 @@ go_repositories()
 
 go_rules_dependencies()
 
-go_register_toolchains(go_version = "1.21.6")
+go_register_toolchains(go_version = "1.23.10")
 
 go_download_sdk(
     name = "go_sdk_amd64",
     goarch = "amd64",
     goos = "linux",
-    version = "1.21.6",
+    version = "1.23.10",
 )
 
 go_download_sdk(
     name = "go_sdk_arm64",
     goarch = "arm64",
     goos = "linux",
-    version = "1.21.6",
+    version = "1.23.10",
 )
 
 gazelle_dependencies(go_sdk = "go_sdk")
@@ -74,19 +65,6 @@ load("@rules_python//python:repositories.bzl", "py_repositories", "python_regist
 
 py_repositories()
 
-http_archive(
-    name = "rules_python_gazelle_plugin",
-    sha256 = "d71d2c67e0bce986e1c5a7731b4693226867c45bfe0b7c5e0067228a536fc580",
-    strip_prefix = "rules_python-0.29.0/gazelle",
-    url = "https://github.com/bazelbuild/rules_python/releases/download/0.29.0/rules_python-0.29.0.tar.gz",
-)
-
-# To compile the rules_python gazelle extension from source,
-# we must fetch some third-party go dependencies that it uses.
-
-load("@rules_python_gazelle_plugin//:deps.bzl", _py_gazelle_deps = "gazelle_deps")
-
-_py_gazelle_deps()
 
 # pip dependencies
 load("@rules_python//python:pip.bzl", "pip_parse")
@@ -218,20 +196,6 @@ load("//third_party:repositories.bzl", "third_party_repositories")
 
 third_party_repositories()
 
-############
-# Rules foreign
-
-git_repository(
-    name = "rules_foreign_cc",
-    commit = "7b673547a3b51febb4e67642bf0cc30c3ba09453",
-    remote = "https://github.com/bazelbuild/rules_foreign_cc.git",
-)
-
-load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_dependencies")
-
-# This sets up some common toolchains for building targets. For more details, please see
-# https://bazelbuild.github.io/rules_foreign_cc/0.9.0/flatten.html#rules_foreign_cc_dependencies
-rules_foreign_cc_dependencies()
 
 ###################
 # rules OCI

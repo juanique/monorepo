@@ -2,8 +2,8 @@ load("//bazel/playwright:defs.bzl", "playwright_test")
 
 playwright_test(
     name = "e2e_test",
-    tags = ["manual"],  # sends network requests, cant run on CI
     srcs = ["example.pw.spec.ts"],
+    tags = ["manual"],  # sends network requests, cant run on CI
     deps = [
         "//:node_modules/@playwright/test",
         "//salsa/testing/playwright",
