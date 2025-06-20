@@ -4,7 +4,7 @@ load("@bazel_gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary
 load("@buildifier_prebuilt//:rules.bzl", "buildifier")
 load("@npm//:defs.bzl", "npm_link_all_packages")
 load("@npm//:vite/package_json.bzl", "bin")
-load("@pip_deps//:requirements.bzl", "all_whl_requirements")
+load("@monorepo_pip_deps//:requirements.bzl", "all_whl_requirements")
 load("@rules_apko//apko:defs.bzl", "apko_bazelrc")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
 load("@rules_python_gazelle_plugin//manifest:defs.bzl", "gazelle_python_manifest")
@@ -94,7 +94,7 @@ buildifier(
 gazelle_python_manifest(
     name = "gazelle_python_manifest",
     modules_mapping = ":modules_map",
-    pip_repository_name = "pip_deps",
+    pip_repository_name = "monorepo_pip_deps",
     # NOTE: We can pass a list just like in `bzlmod_build_file_generation` example
     # but we keep a single target here for regression testing.
     requirements = "//:requirements_lock.txt",
