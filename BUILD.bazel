@@ -41,8 +41,9 @@ gazelle(
 gazelle_binary(
     name = "gazelle_binary",
     languages = DEFAULT_LANGUAGES + [
-        "@rules_python_gazelle_plugin//python",
-        # "//bazel/gazelle/language/ts",
+        # Python gazelle to be reenabled after moving rules_python and rules_go to bzlmod.
+        # "@rules_python_gazelle_plugin//python",
+        "//bazel/gazelle/language/ts",
     ],
     visibility = ["//visibility:public"],
 )

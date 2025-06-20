@@ -82,3 +82,11 @@ register_toolchains(
     "@zig_sdk//toolchain:windows_amd64",
     "@zig_sdk//toolchain:windows_arm64",
 )
+
+# rules_go
+go_deps = use_extension("@bazel_gazelle//:extensions.bzl", "go_deps")
+go_deps.from_file(go_mod = "//:go.mod")
+go_deps.module_override(
+    patches = ["//third_party/com_github_dougthor42_go_tree_sitter:cc_library.patch"],
+    path = "github.com/smacker/go-tree-sitter",
+)
