@@ -34,7 +34,6 @@ packages:
 - coreutils
 - dpkg
 - libstdc++6
-- findutils
 - grep
 - libpango-1.0-0
 - libharfbuzz0b
@@ -42,7 +41,6 @@ packages:
 - libpangocairo-1.0-0
 - libglib2.0-0
 - libglib2.0-dev
-- python3
 - poppler-utils
 - python3-cffi
 - python3-pip
@@ -64,7 +62,6 @@ packages:
 - gawk
 - procps
 - file
-- libstdc++6
 - librocksdb-dev
 - python3-certbot-dns-route53
 - g++
@@ -79,4 +76,3 @@ packages:
 - fuse-overlayfs
 - thin-provisioning-tools
 - iptables
-- gawk

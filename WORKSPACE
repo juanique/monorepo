@@ -234,31 +234,3 @@ aspect_bazel_lib_register_toolchains()
 ###############
 
 ############
-# Rules distroless
-
-http_archive(
-    name = "rules_distroless",
-    patch_args = ["-p1"],
-    patches = ["//bazel/patches:rules_distroless.01.duplicated_deps.patch"],
-    sha256 = "4c5e98aa15e3684b580ea2e2bc8b95bac6e23a26b25ec8747c39e74ced2305da",
-    strip_prefix = "rules_distroless-0.3.4",
-    url = "https://github.com/GoogleContainerTools/rules_distroless/releases/download/v0.3.4/rules_distroless-v0.3.4.tar.gz",
-)
-
-load("@rules_distroless//distroless:dependencies.bzl", "distroless_dependencies")
-
-distroless_dependencies()
-
-########## debian images
-load("@rules_distroless//apt:index.bzl", "deb_index")
-
-# bazel run @debian12//:lock
-deb_index(
-    name = "debian12",
-    lock = "@//base_images/debian:debian12.lock.json",
-    manifest = "//base_images/debian:debian12.yaml",
-)
-
-load("@debian12//:packages.bzl", "debian12_packages")
-
-debian12_packages()
