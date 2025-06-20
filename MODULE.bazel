@@ -22,6 +22,7 @@ bazel_dep(name = "rules_distroless", version = "0.5.1")
 bazel_dep(name = "aspect_rules_swc", version = "2.0.1")
 bazel_dep(name = "aspect_rules_ts", version = "3.3.1")
 bazel_dep(name = "rules_perl", version = "0.4.1")
+bazel_dep(name = "aspect_bazel_lib", version = "2.19.4")
 
 
 version = use_extension("@proto_bazel_features//private:extensions.bzl", "version_extension")

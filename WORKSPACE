@@ -41,15 +41,6 @@ go_download_sdk(
 
 gazelle_dependencies(go_sdk = "go_sdk")
 
-###########
-# Aspect bazel lib
-
-http_archive(
-    name = "aspect_bazel_lib",
-    sha256 = "c780120ab99a4ca9daac69911eb06434b297214743ee7e0a1f1298353ef686db",
-    strip_prefix = "bazel-lib-2.7.9",
-    url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.7.9/bazel-lib-v2.7.9.tar.gz",
-)
 
 #########################
 ## rules_ python
@@ -221,15 +212,6 @@ load("//third_party:oci_containers.bzl", "load_oci_images")
 
 load_oci_images()
 
-load("@aspect_bazel_lib//lib:repositories.bzl", "aspect_bazel_lib_dependencies", "aspect_bazel_lib_register_toolchains")
-
-# Required bazel-lib dependencies
-
-aspect_bazel_lib_dependencies()
-
-# Register bazel-lib toolchains
-
-aspect_bazel_lib_register_toolchains()
 
 ###############
 
