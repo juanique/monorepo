@@ -18,6 +18,7 @@ bazel_dep(name = "gazelle", version = "0.36.0", repo_name = "bazel_gazelle")
 bazel_dep(name = "rules_python_gazelle_plugin", version = "1.5.0-rc1")
 bazel_dep(name = "rules_foreign_cc", version = "0.12.0")
 bazel_dep(name = "rules_apko", version = "1.2.3")
+bazel_dep(name = "rules_distroless", version = "0.5.1")
 bazel_dep(name = "aspect_rules_swc", version = "2.0.1")
 bazel_dep(name = "aspect_rules_ts", version = "3.3.1")
 bazel_dep(name = "rules_perl", version = "0.4.1")
@@ -99,3 +100,12 @@ apko.translate_lock(
     lock = "//base_images/apko/wolfi-base:apko.lock.json",
 )
 use_repo(apko, "apko_wolfi_base")
+
+### Rules Distroless
+apt = use_extension("@rules_distroless//apt:extensions.bzl", "apt")
+apt.install(
+    name = "debian12",
+    lock = "//base_images/debian:debian12.lock.json",
+    manifest = "//base_images/debian:debian12.yaml",
+)
+use_repo(apt, "debian12")
