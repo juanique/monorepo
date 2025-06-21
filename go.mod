@@ -7,8 +7,9 @@ require (
 	github.com/google/go-github/v38 v38.1.0
 	github.com/libgit2/git2go/v33 v33.0.9
 	github.com/spf13/cobra v1.7.0
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	golang.org/x/oauth2 v0.11.0
+	github.com/dougthor42/go-tree-sitter v0.0.6
 )
 
 require (
@@ -25,12 +26,14 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/libgit2/git2go/v27 v27.14.7 // indirect
 	github.com/libgit2/git2go/v34 v34.0.0 // indirect
+	github.com/mattn/go-pointer v0.0.1 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.0.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/smacker/go-tree-sitter v0.0.0-20240827094217-dd81d9e9be82 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/tree-sitter/go-tree-sitter v0.25.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.47.0 // indirect
 	go.opentelemetry.io/otel v1.22.0 // indirect
 	go.opentelemetry.io/otel/metric v1.22.0 // indirect
