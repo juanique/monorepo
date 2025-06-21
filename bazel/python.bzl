@@ -1,4 +1,4 @@
-load("@pip_deps//:requirements.bzl", "requirement")
+load("@monorepo_pip_deps//:requirements.bzl", "requirement")
 
 FIRECRACKER_EXEC_PROPERTIES = {
     # Tell BuildBuddy to run this test using a Firecracker microVM.

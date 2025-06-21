@@ -1,25 +1,28 @@
---- BUILD.bazel
-+++ BUILD.bazel
+diff --git a/BUILD.bazel b/BUILD.bazel
+index d600f4b..ec1809f 100644
+--- a/BUILD.bazel
++++ b/BUILD.bazel
+@@ -46,6 +46,7 @@ go_library(
+         "wasm_store.h",
+     ],
+     cgo = True,
++    cdeps = ["//python:headers"],
+     importpath = "github.com/dougthor42/go-tree-sitter",
+     visibility = ["//visibility:public"],
+ )
+diff --git a/python/BUILD.bazel b/python/BUILD.bazel
+index bc81a0b..c532be6 100644
+--- a/python/BUILD.bazel
++++ b/python/BUILD.bazel
 @@ -1,5 +1,11 @@
  load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
  
 +cc_library(
 +    name = "headers",
-+    hdrs = ["alloc.h", "array.h"],
-+    visibility  = ["//:__subpackages__"],
++    hdrs = ["alloc.h", "array.h", "api.h"],
++    visibility = ["//visibility:public"],
 +)
 +
  go_library(
-     name = "go-tree-sitter",
+     name = "python",
      srcs = [
-
---- python/BUILD.bazel
-+++ python/BUILD.bazel
-@@ -9,6 +9,7 @@
-         "scanner.c",
-     ],
-     cgo = True,
-+    cdeps = ["//:headers"],
-     importpath = "github.com/smacker/go-tree-sitter/python",
-     visibility = ["//visibility:public"],
-     deps = ["//:go-tree-sitter"],

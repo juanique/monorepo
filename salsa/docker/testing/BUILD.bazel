@@ -1,4 +1,4 @@
-load("@pip_deps//:requirements.bzl", "requirement")
+load("@monorepo_pip_deps//:requirements.bzl", "requirement")
 load("//:bazel/python.bzl", "py_library")
 
 package(default_visibility = [
@@ -13,6 +13,6 @@ py_library(
     visibility = ["//:__subpackages__"],
     deps = [
         "@bazel_tools//tools/python/runfiles",
-        "@pip_deps//docker",
+        "@monorepo_pip_deps//docker",
     ],
 )
