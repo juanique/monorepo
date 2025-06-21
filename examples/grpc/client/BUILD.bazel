@@ -7,9 +7,9 @@ py_library(
     deps = [
         "//examples/grpc/protos:helloworld_py_grpc",
         "//examples/grpc/protos:helloworld_py_proto",
-        "@pip_deps//grpcio",
-        "@pip_deps//grpclib",  # keep
-        "@pip_deps//protobuf",  # keep
+        "@monorepo_pip_deps//grpcio",
+        "@monorepo_pip_deps//grpclib",  # keep
+        "@monorepo_pip_deps//protobuf",  # keep
     ],
 )
 
@@ -30,6 +30,6 @@ py_test(
     deps = [
         ":greeter_client",
         "//salsa/docker/testing:docker_service",
-        "@pip_deps//docker",
+        "@monorepo_pip_deps//docker",
     ],
 )
