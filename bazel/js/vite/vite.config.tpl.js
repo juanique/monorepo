@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import fs from 'fs/promises';
 import fsSync from "fs"
 import path from 'path';
+import tailwindcss from '@tailwindcss/vite'
 
 function changeExtensionToJS(filename) {
     var parts = filename.split("/")
@@ -98,6 +99,7 @@ export default defineConfig(({ mode }) => {
         },
 
         plugins: [
+            tailwindcss(),
             react(),
             {
                 name: 'redirect-root',
