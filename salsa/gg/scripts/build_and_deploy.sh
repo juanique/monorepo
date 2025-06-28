@@ -4,7 +4,10 @@ then
     exit 1
 fi
 
-bazel build //salsa/gg:gg_executable
+bazel build //salsa/gg:gg_cli --build_runfile_links
 
-rm -f ~/bin/gg_dev
-cp bazel-bin/salsa/gg/gg_executable ~/bin/gg_dev
+rm -f ~/bin/gg
+rm -f ~/bin/gg.runfiles
+
+cp bazel-bin/salsa/gg/gg_cli ~/bin/gg
+cp -rL bazel-bin/salsa/gg/gg_cli.runfiles ~/bin/gg.runfiles
