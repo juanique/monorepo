@@ -1,4 +1,6 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+load("@tar.bzl//:tar.bzl", "mutate", "tar")
+
 
 go_library(
     name = "helloworld_lib",
@@ -18,4 +20,12 @@ go_library(
     srcs = ["helloworld.go"],
     importpath = "github.com/juanique/monorepo/examples/go",
     visibility = ["//visibility:private"],
+)
+
+tar(
+    name = "pkg",
+    srcs = [":go"],
+    mutate = mutate(
+        package_dir = "/usr/bin",
+    )
 )
