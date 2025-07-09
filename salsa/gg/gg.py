@@ -915,9 +915,30 @@ class GitGud:
         self._copy_branch_state(snapshot_hash, self.head().id)
         self.amend(f"Restore snapshot {snapshot.hash} - {snapshot.description}")
 
-    def _copy_branch_state(self, source_branch: str, dest_branch: str) -> None:
+    def _delete_branch(self, branch_name: str) -> None:
+        try:
+            run_git_command_with_retries(self.repo.git.branch, "-D", branch_name)
+        except Exception as e:
+            if "not found" in str(e):
+                # nothing to do
+                return
+            raise e
+
+    def _copy_branch_state(self, source_branch: str, dest_branch: str, attempts = 0) -> None:
         temp_branch_name = "temp_" + dest_branch
-        run_git_command_with_retries(self.repo.git.switch, "-c", temp_branch_name, source_branch)
+        try:
+            run_git_command_with_retries(self.repo.git.switch, "-c", temp_branch_name, source_branch)
+        except Exception as e:
+            if attempts > 3:
+                raise e
+
+            if "already exists" in str(e) or 'HEAD.lock' in str(e):
+                logging.info("Branch %s may already exists, deleting and retrying", temp_branch_name)
+                self._delete_branch(temp_branch_name)
+                self._copy_branch_state(source_branch, dest_branch, attempts + 1)
+            else:
+                raise e
+
         run_git_command_with_retries(self.repo.git.reset, "--soft", dest_branch)
         run_git_command_with_retries(self.repo.git.branch, "-M", dest_branch)
 

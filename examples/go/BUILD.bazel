@@ -26,6 +26,6 @@ tar(
     name = "pkg",
     srcs = [":go"],
     mutate = mutate(
-        package_dir = "/usr/bin",
+        package_dir = "usr/bin",
     )
 )
