@@ -5,7 +5,7 @@ import './index.css';
 function App(): JSX.Element {
     return (
         <div className="App">
-            <h1>Hello Vite + React + Bazel!</h1>
+            <h1 className='text-3xl font-bold underline'>Hello Vite + React + Bazel!</h1>
             <p>Formatted Name: {formatNamePretty("Juan Munoz", NameStyle.Fancy)}</p>
             <p>Edit <code>App.tsx</code> and save to test HMR updates.</p>
         </div>

@@ -1,4 +1,5 @@
 load("@aspect_rules_js//js:defs.bzl", "js_library", "js_run_binary", "js_run_devserver")
+load("//:bazel/files.bzl", "copy_file")
 
 def _vite_webapp_config_impl(ctx):
     package_name = ctx.label.package
@@ -15,22 +16,34 @@ def _vite_webapp_config_impl(ctx):
 _vite_webapp_config = rule(
     implementation = _vite_webapp_config_impl,
     attrs = {
-        "srcs": attr.label_list(allow_files = True),
         "_config_tpl": attr.label(allow_single_file = True, default = "//bazel/js/vite:vite.config.tpl.js"),
     },
 )
+
 
 def vite_webapp_config(name):
     _vite_webapp_config(
         name = "vite.config.js",
     )
 
+    copy_file(
+       name ="tailwind_config",
+       src = "//bazel/js/vite:tailwind.config.cjs",
+       to = "tailwind.config.js",
+    )
+
     js_library(
         name = name,
-        srcs = ["vite.config.js"],
+        srcs = [
+            "vite.config.js",
+        ],
+        data = [
+            "tailwind.config.js",
+        ],
         deps = [
             "//:node_modules/vite",
             "//:node_modules/@vitejs/plugin-react",
+            "//:node_modules/@tailwindcss/vite",
         ],
     )
 
