@@ -71,6 +71,7 @@ load("@python3_10//:defs.bzl", "interpreter")
 
 pip_parse(
     name = "pip_deps",
+    download_only = True,
     python_interpreter_target = interpreter,
     requirements_lock = "//:requirements_lock.txt",
 )
@@ -90,7 +91,11 @@ install_mypy_deps()
 load("@pip_deps//:requirements.bzl", "install_deps")
 
 # Call it to define repos for your requirements.
-install_deps()
+install_deps(
+    whl_patches = {
+        "//bazel/patches:rich.patch": '{"whls": ["rich-10.12.0-py3-none-any.whl"],"patch_strip": 1}',
+    },
+)
 
 go_repository(
     name = "org_golang_google_genproto_googleapis_rpc",
