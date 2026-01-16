@@ -10,12 +10,12 @@ py_library(
     visibility = ["//:__subpackages__"],
     deps = [
         "//salsa/os:environ_ctx",
-        "@pip_deps//gitpython",
-        "@pip_deps//humanize",
-        "@pip_deps//pydantic",
-        "@pip_deps//pygithub",
-        "@pip_deps//rich",
-        "@pip_deps//unidecode",
+        "@monorepo_pip_deps//gitpython",
+        "@monorepo_pip_deps//humanize",
+        "@monorepo_pip_deps//pydantic",
+        "@monorepo_pip_deps//pygithub",
+        "@monorepo_pip_deps//rich",
+        "@monorepo_pip_deps//unidecode",
     ],
 )
 
@@ -25,7 +25,7 @@ py_test(
     deps = [
         ":gg",
         "//salsa/util:subsets",
-        "@pip_deps//gitpython",
+        "@monorepo_pip_deps//gitpython",
     ],
 )
 
@@ -37,9 +37,9 @@ py_binary(
     visibility = ["//:__subpackages__"],
     deps = [
         ":gg",
-        "@pip_deps//click",
-        "@pip_deps//gitpython",
-        "@pip_deps//rich",
+        "@monorepo_pip_deps//click",
+        "@monorepo_pip_deps//gitpython",
+        "@monorepo_pip_deps//rich",
     ],
 )
 
@@ -49,7 +49,7 @@ py_binary(
     visibility = ["//:__subpackages__"],
     deps = [
         ":gg",
-        "@pip_deps//gitpython",
+        "@monorepo_pip_deps//gitpython",
     ],
 )
 

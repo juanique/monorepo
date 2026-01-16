@@ -1,4 +1,4 @@
-load("@pip_deps//:requirements.bzl", "requirement")
+load("@monorepo_pip_deps//:requirements.bzl", "requirement")
 load("//:bazel/python.bzl", "py_binary", "pytest_test")
 
 # gazelle:map_kind py_test pytest_test //:bazel/python.bzl
@@ -16,7 +16,7 @@ py_binary(
     srcs = ["tree.py"],
     visibility = ["//:__subpackages__"],
     deps = [
-        "@pip_deps//rich",
+        "@monorepo_pip_deps//rich",
     ],
 )
 
@@ -25,12 +25,12 @@ py_binary(
     srcs = ["github_example.py"],
     visibility = ["//:__subpackages__"],
     deps = [
-        "@pip_deps//pygithub",
+        "@monorepo_pip_deps//pygithub",
     ],
 )
 
 pytest_test(
     name = "test_pytest",
     srcs = ["test_pytest.py"],
-    deps = ["@pip_deps//pytest"],
+    deps = ["@monorepo_pip_deps//pytest"],
 )
